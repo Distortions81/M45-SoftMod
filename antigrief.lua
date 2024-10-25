@@ -17,7 +17,7 @@ end
 -- Build stuff -- activity
 function on_built_entity(event)
     local player = game.players[event.player_index]
-    local obj = event.created_entity
+    local obj = event.entity
 
     if player and player.valid then
         if obj and obj.valid then
