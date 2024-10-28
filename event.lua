@@ -386,7 +386,7 @@ script.on_event(
         elseif event.name == defines.events.on_train_schedule_changed then
             on_train_schedule_changed(event)
         elseif event.name == defines.events.on_entity_died then
-            //on_entity_died(event)
+            on_entity_died(event)
         elseif event.name == defines.events.on_picked_up_item then
             on_picked_up_item(event)
         elseif event.name == defines.events.on_player_dropped_item then

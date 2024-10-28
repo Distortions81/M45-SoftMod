@@ -111,7 +111,7 @@ function on_entity_died(event)
         if event.entity.name == "character" then
             return
         end
-        message_all(event.entity.name .. " died at" .. make_gps_str(event.entity))
+        console_print(event.entity.name .. " died at" .. make_gps_str(event.entity))
     end
 end
 
