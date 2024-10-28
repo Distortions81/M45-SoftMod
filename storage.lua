@@ -55,11 +55,11 @@ function create_mystorage()
     if not storage.last_speaker_warning then
         storage.last_speaker_warning = 1
     end
-    if not storage.last_decon_warning then
-        storage.last_decon_warning = 1
+    if not storage.last_warning then
+        storage.last_warning = 1
     end
     if not storage.last_ghost_log then
-        storage.last_decon_warning = 1
+        storage.last_warning = 1
     end
 
     make_banish_storage()

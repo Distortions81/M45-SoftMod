@@ -291,17 +291,17 @@ end
 script.on_event(
     {
         defines.events.on_player_created, defines.events.on_pre_player_died, defines.events.on_player_respawned,
-        defines.events.on_player_joined_game, defines.events.on_player_left_game,
+        defines.events.on_player_joined_game, defines.events.on_player_left_game,  defines.events.on_player_main_inventory_changed,
         defines.events.on_player_changed_position, defines.events.on_console_chat, defines.events
         .on_player_repaired_entity,
-        defines.events.on_gui_click, defines.events.on_gui_text_changed,
+        defines.events.on_gui_click, defines.events.on_gui_text_changed, defines.events.on_player_fast_transferred,
         defines.events.on_console_command, defines.events.on_chart_tag_removed, defines.events.on_chart_tag_modified,
-        defines.events.on_chart_tag_added, defines.events.on_research_finished,
+        defines.events.on_chart_tag_added, defines.events.on_research_finished,  defines.events.on_train_created,
         defines.events.on_redo_applied, defines.events.on_undo_applied, defines.events.on_train_schedule_changed,
         defines.events.on_entity_died, defines.events.on_cancelled_upgrade, defines.events.on_picked_up_item, defines.events.on_player_dropped_item,
-        defines.events.on_player_deconstructed_area, defines.events.on_marked_for_upgrade,
+        defines.events.on_player_deconstructed_area, defines.events.on_marked_for_upgrade, defines.events.on_rocket_launch_ordered,
         defines.events.on_cancelled_upgrade, defines.events.on_marked_for_deconstruction, defines.events
-        .on_cancelled_deconstruction, defines.events.on_player_flushed_fluid,
+        .on_cancelled_deconstruction, defines.events.on_player_flushed_fluid, defines.events.on_player_driving_changed_state,
         defines.events.on_player_banned, defines.events.on_player_rotated_entity,defines.events.on_player_flipped_entity,
         defines.events.on_pre_player_mined_item, defines.events.on_built_entity }, function(event)
         -- If no event, or event is a tick
@@ -401,6 +401,16 @@ script.on_event(
             on_cancelled_deconstruction(event)
         elseif event.name == defines.events.on_player_flushed_fluid then
             on_player_flushed_fluid(event)
+        elseif event.name == defines.events.on_player_driving_changed_state then
+            on_player_driving_changed_state(event)
+        elseif event.name == defines.events.on_rocket_launch_ordered then
+            on_rocket_launch_ordered(event)
+        elseif event.name == defines.events.on_train_created then
+            on_train_created(event)
+        elseif event.name == defines.events.on_player_fast_transferred then
+            on_player_fast_transferred(event)
+        elseif event.name == defines.events.on_player_main_inventory_changed then
+            on_player_main_inventory_changed(event)
         end
 
         -- To-Do--

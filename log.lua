@@ -174,8 +174,8 @@ function on_player_deconstructed_area(event)
 
                     if is_new(player) or is_member(player) then -- Dont bother with regulars/moderators
                         if not is_banished(player) then         -- Don't let bansihed players use this to spam
-                            if (storage.last_decon_warning and game.tick - storage.last_decon_warning >= 15) then
-                                storage.last_decon_warning = game.tick
+                            if (storage.last_warning and game.tick - storage.last_warning >= 15) then
+                                storage.last_warning = game.tick
                                 message_all(msg)
                             end
                         end
@@ -202,8 +202,8 @@ function on_marked_for_upgrade(event)
 
             if is_new(player) or is_member(player) then -- Dont bother with regulars/moderators
                 if not is_banished(player) then         -- Don't let bansihed players use this to spam
-                    if (storage.last_decon_warning and game.tick - storage.last_decon_warning >= 15) then
-                        storage.last_decon_warning = game.tick
+                    if (storage.last_warning and game.tick - storage.last_warning >= 15) then
+                        storage.last_warning = game.tick
                         message_all(msg)
                     end
                 end
@@ -228,8 +228,8 @@ function on_cancelled_upgrade(event)
 
             if is_new(player) or is_member(player) then -- Dont bother with regulars/moderators
                 if not is_banished(player) then         -- Don't let bansihed players use this to spam
-                    if (storage.last_decon_warning and game.tick - storage.last_decon_warning >= 15) then
-                        storage.last_decon_warning = game.tick
+                    if (storage.last_warning and game.tick - storage.last_warning >= 15) then
+                        storage.last_warning = game.tick
                         message_all(msg)
                     end
                 end
@@ -254,8 +254,8 @@ function on_marked_for_deconstruction(event)
 
             if is_new(player) or is_member(player) then -- Dont bother with regulars/moderators
                 if not is_banished(player) then         -- Don't let bansihed players use this to spam
-                    if (storage.last_decon_warning and game.tick - storage.last_decon_warning >= 15) then
-                        storage.last_decon_warning = game.tick
+                    if (storage.last_warning and game.tick - storage.last_warning >= 15) then
+                        storage.last_warning = game.tick
                         message_all(msg)
                     end
                 end
@@ -280,8 +280,8 @@ function on_cancelled_deconstruction(event)
 
             if is_new(player) or is_member(player) then -- Dont bother with regulars/moderators
                 if not is_banished(player) then         -- Don't let bansihed players use this to spam
-                    if (storage.last_decon_warning and game.tick - storage.last_decon_warning >= 15) then
-                        storage.last_decon_warning = game.tick
+                    if (storage.last_warning and game.tick - storage.last_warning >= 15) then
+                        storage.last_warning = game.tick
                         message_all(msg)
                     end
                 end
@@ -299,9 +299,9 @@ function on_player_flushed_fluid(event)
 
         if player then
             local msg = "[ACT] " ..
-            player.name ..
-            " flushed " ..
-            obj.name .. " of " .. event.amount .. " " .. event.fluid .. " at" .. make_gps_str_obj(player, obj)
+                player.name ..
+                " flushed " ..
+                obj.name .. " of " .. event.amount .. " " .. event.fluid .. " at" .. make_gps_str_obj(player, obj)
 
             if player.surface and player.surface.index ~= 1 then
                 msg = msg .. " (" .. player.surface.name .. ")"
@@ -309,14 +309,95 @@ function on_player_flushed_fluid(event)
 
             if is_new(player) or is_member(player) then -- Dont bother with regulars/moderators
                 if not is_banished(player) then         -- Don't let bansihed players use this to spam
-                    if (storage.last_decon_warning and game.tick - storage.last_decon_warning >= 15) then
-                        storage.last_decon_warning = game.tick
+                    if (storage.last_warning and game.tick - storage.last_warning >= 15) then
+                        storage.last_warning = game.tick
                         message_all(msg)
                     end
                 end
             end
 
             console_print(msg)
+        end
+    end
+end
+
+function on_player_driving_changed_state(event)
+    if event.player_index and event.entity then
+        local player = game.players[event.player_index]
+
+        if player then
+            local msg = ""
+            if player.vehicle then
+                msg = "[ACT] " ..
+                    player.name ..
+                    " got in of a " ..
+                    event.entity.name .. " at" .. make_gps_str_obj(player, event.entity)
+            else
+                msg = "[ACT] " ..
+                    player.name ..
+                    " got out of a " ..
+                    event.entity.name .. " at" .. make_gps_str_obj(player, event.entity)
+            end
+
+            if player.surface and player.surface.index ~= 1 then
+                msg = msg .. " (" .. player.surface.name .. ")"
+            end
+
+            if is_new(player) or is_member(player) then -- Dont bother with regulars/moderators
+                if not is_banished(player) then         -- Don't let bansihed players use this to spam
+                    if (storage.last_warning and game.tick - storage.last_warning >= 15) then
+                        storage.last_warning = game.tick
+                        message_all(msg)
+                    end
+                end
+            end
+
+            console_print(msg)
+        end
+    end
+end
+
+function on_rocket_launch_ordered(event)
+    if event.player_index and event.rocket_silo then
+        local msg = "[ACT] " ..
+            player.name .. " ordered a rocket launch at" .. make_gps_str_obj(player, event.rocket_silo)
+        console_print(msg)
+        message_all(msg)
+    end
+end
+
+function on_train_created(event)
+    if event.train then
+        local rails = event.train.get_rails()
+        if rails then
+            console_print("[ACT] train created " .. make_gps_str(rails))
+        end
+    end
+end
+
+function on_player_fast_transferred(event)
+    if event and event.player_index and event.entity then
+        local player = game.players[event.player_index]
+        local obj = event.entity
+
+        if player and obj then
+            if event.from_player then
+                console_print("[ACT] " ..
+                player.name .. " fast-transfered items to " .. obj.name .. " at" .. make_gps_str_obj(player, obj))
+            else
+                console_print("[ACT] " ..
+                player.name .. " fast-transfered items from " .. obj.name .. " at" .. make_gps_str_obj(player, obj))
+            end
+        end
+    end
+end
+
+function on_player_main_inventory_changed(event)
+    if event and event.player_index then
+        local player = game.players[event.player_index]
+
+        if player then
+            console_print("[ACT] " .. player.name .. " transfered some items at" .. make_gps_str(player))
         end
     end
 end
