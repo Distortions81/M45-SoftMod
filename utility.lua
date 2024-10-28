@@ -276,7 +276,7 @@ function send_to_default_spawn(victim)
             if pforce then
                 spawnpos = pforce.get_spawn_position(nsurf)
             else
-                console_print("send_to_default_spawn: victim does not have a valid force.")
+                console_print("[ERROR] send_to_default_spawn: victim does not have a valid force.")
             end
             local newpos = nsurf.find_non_colliding_position("character", spawnpos, 4096, 1, false)
             if newpos then
@@ -285,10 +285,10 @@ function send_to_default_spawn(victim)
                 victim.teleport({0, 0}, nsurf)
             end
         else
-            console_print("send_to_default_spawn: The surface nauvis does not exist, could not teleport victim.")
+            console_print("[ERROR] send_to_default_spawn: The surface nauvis does not exist, could not teleport victim.")
         end
     else
-        console_print("send_to_default_spawn: victim invalid or dead")
+        console_print("[ERROR] send_to_default_spawn: victim invalid or dead")
     end
 end
 
@@ -301,7 +301,7 @@ function send_to_surface_spawn(victim)
             if pforce then
                 spawnpos = pforce.get_spawn_position(nsurf)
             else
-                console_print("send_to_surface_spawn: victim force invalid")
+                console_print("[ERROR] send_to_surface_spawn: victim force invalid")
             end
             local newpos = nsurf.find_non_colliding_position("character", spawnpos, 4096, 1, false)
             if newpos then
@@ -310,10 +310,10 @@ function send_to_surface_spawn(victim)
                 victim.teleport({0, 0}, nsurf)
             end
         else
-            console_print("send_to_surface_spawn: The surface does not exist, could not teleport victim.")
+            console_print("[ERROR] send_to_surface_spawn: The surface does not exist, could not teleport victim.")
         end
     else
-        console_print("send_to_surface_spawn: victim invalid or dead")
+        console_print("[ERROR] send_to_surface_spawn: victim invalid or dead")
     end
 end
 
@@ -325,11 +325,11 @@ function get_default_spawn()
             local spawnpos = pforce.get_spawn_position(nsurf)
             return spawnpos
         else
-            console_print("get_default_spawn: Couldn't find force 'player'")
+            console_print("[ERROR] get_default_spawn: Couldn't find force 'player'")
             return {0, 0}
         end
     else
-        console_print("get_default_spawn: Couldn't find default surface nauvis.")
+        console_print("[ERROR] get_default_spawn: Couldn't find default surface nauvis.")
         return {0, 0}
     end
 end

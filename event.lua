@@ -277,7 +277,8 @@ function on_pre_player_died(event)
         -- Log to discord
         if event.cause and event.cause.valid then
             cause = event.cause.name
-            message_alld( player.name .. " was killed by " .. cause .. " at [gps=" .. math.floor(player.position.x) .. "," ..
+            message_alld(player.name ..
+                " was killed by " .. cause .. " at [gps=" .. math.floor(player.position.x) .. "," ..
                 math.floor(player.position.y) .. "]")
         else
             message_alld(player.name .. " was killed at [gps=" .. math.floor(player.position.x) .. "," ..
@@ -288,20 +289,21 @@ end
 
 -- Main event handler
 script.on_event(
-    {                                                                                                        -- Player join/leave respawn
+    {                                                                                                            -- Player join/leave respawn
         defines.events.on_player_created, defines.events.on_pre_player_died, defines.events.on_player_respawned, --
-        defines.events.on_player_joined_game, defines.events.on_player_left_game,                            -- activity
+        defines.events.on_player_joined_game, defines.events.on_player_left_game,                                -- activity
         defines.events.on_player_changed_position, defines.events.on_console_chat, defines.events
         .on_player_repaired_entity,
         -- gui
-        defines.events.on_gui_click, defines.events.on_gui_text_changed,    -- log
+        defines.events.on_gui_click, defines.events.on_gui_text_changed,        -- log
         defines.events.on_console_command, defines.events.on_chart_tag_removed, defines.events.on_chart_tag_modified,
         defines.events.on_chart_tag_added, defines.events.on_research_finished, -- clean up corpse tags
         defines.events.on_redo_applied, defines.events.on_undo_applied, defines.events
         .on_train_schedule_changed,
         defines.events.on_entity_died, defines.events.on_cancelled_upgrade, defines.events.on_picked_up_item, -- anti-grief
-        defines.events.on_player_deconstructed_area, defines.events.on_player_banned, defines.events
-        .on_player_rotated_entity,
+        defines.events.on_player_deconstructed_area, defines.events.on_marked_for_upgrade, defines.events
+        .on_cancelled_upgrade, defines.events.on_marked_for_deconstruction,defines.events.on_cancelled_deconstruction ,
+        defines.events.on_player_banned, defines.events.on_player_rotated_entity,
         defines.events.on_pre_player_mined_item, defines.events.on_built_entity }, function(event)
         -- If no event, or event is a tick
         if not event or (event and event.name == defines.events.on_tick) then
@@ -386,6 +388,14 @@ script.on_event(
             on_entity_died(event)
         elseif event.name == defines.events.on_picked_up_item then
             on_picked_up_item(event)
+        elseif event.name == defines.events.on_marked_for_upgrade then
+            on_marked_for_upgrade(event)
+        elseif event.name == defines.events.on_cancelled_upgrade then
+            on_cancelled_upgrade(event)
+        elseif event.name == defines.events.on_marked_for_deconstruction then
+            on_marked_for_deconstruction(event)
+        elseif event.name == defines.events.on_cancelled_deconstruction then
+            on_cancelled_deconstruction(event)
         end
 
         -- To-Do--
@@ -409,7 +419,7 @@ function clear_corpse_tag(event)
                     if victim.name ~= player.name then
                         gsysmsg(buf)
                     else
-                        message_all( buf)
+                        message_all(buf)
                     end
                 end
             end

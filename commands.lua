@@ -988,7 +988,7 @@ end)
                             smart_print(player, "*Poof!*")
                         else
                             smart_print(player, "Area appears to be full.")
-                            console_print("error: tto: unable to find non_colliding_position.")
+                            console_print("[ERROR] tto: unable to find non_colliding_position.")
                         end
                         return
                     end
@@ -1035,7 +1035,7 @@ end)
                             return
                         else
                             player.teleport(position, surface)
-                            console_print("error: tp: unable to find non_colliding_position.")
+                            console_print("[ERROR] tp: unable to find non_colliding_position.")
                         end
                     end
 
@@ -1058,7 +1058,7 @@ end)
                                     smart_print(player, "*Poof!*")
                                 else
                                     smart_print(player, "Area appears to be full.")
-                                    console_print("error: tp: unable to find non_colliding_position.")
+                                    console_print("[ERROR] tp: unable to find non_colliding_position.")
                                 end
                             else
                                 smart_print(player, "Invalid location.")
@@ -1101,7 +1101,7 @@ end)
                             smart_print(player, "*Poof!*")
                         else
                             smart_print(player, "Area appears to be full.")
-                            console_print("error: tfrom: unable to find non_colliding_position.")
+                            console_print("[ERROR] tfrom: unable to find non_colliding_position.")
                         end
                     else
                         smart_print(player, "Who do you want to teleport to you?")

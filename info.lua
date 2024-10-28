@@ -1005,7 +1005,7 @@ function on_gui_click(event)
 
         if player and player.valid then
             -- debug
-            console_print("GUI_CLICK: " .. player.name .. ": " .. event.element.name)
+            console_print("[ACT] GUI_CLICK: " .. player.name .. ": " .. event.element.name)
 
             -- Info window close
             if event.element.name == "m45_info_close_button" and player.gui and player.gui.center and

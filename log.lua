@@ -10,7 +10,7 @@ function on_chart_tag_added(event)
         local player = game.players[event.player_index]
 
         if player and player.valid and event.tag then
-            message_all( player.name .. " add-tag" .. make_gps_str_obj(player, event.tag) .. event.tag.text)
+            message_all(player.name .. " add-tag" .. make_gps_str_obj(player, event.tag) .. event.tag.text)
         end
     end
 end
@@ -32,7 +32,7 @@ function on_chart_tag_removed(event)
 
         -- Because factorio will hand us an nil event... nice.
         if player and player.valid and event.tag then
-            message_all( player.name .. " del-tag" .. make_gps_str_obj(player, event.tag) .. event.tag.text)
+            message_all(player.name .. " del-tag" .. make_gps_str_obj(player, event.tag) .. event.tag.text)
         end
     end
 end
@@ -95,9 +95,14 @@ function on_train_schedule_changed(event)
     if event and event.player_index and event.train then
         local player = game.players[event.player_index]
 
-        message_all(
-            player.name ..
-            " changed schedule on train id#" .. event.train.id .. " at" .. make_gps_str_obj(player, event.train))
+        local msg = player.name ..
+            " changed schedule on train ID " .. event.train.id .. " at" .. make_gps_str(player, event.train.get_rails())
+
+        if is_regular(player) or is_veteran(player) or player.admin then
+            console_print("[ACT] " .. msg)
+        else
+            message_all(msg)
+        end
     end
 end
 
@@ -106,10 +111,9 @@ function on_entity_died(event)
         if event.entity.name == "character" then
             return
         end
-            message_all( event.entity.name .. " died at" .. make_gps_str(event.entity))
+        message_all(event.entity.name .. " died at" .. make_gps_str(event.entity))
     end
 end
-
 
 function on_picked_up_item(event)
     if event and event.player_index and event.item_stack then
@@ -175,6 +179,112 @@ function on_player_deconstructed_area(event)
         end
     end
 end
+
+function on_marked_for_upgrade(event)
+    if event and event.player_index and event.entity then
+        local player = game.players[event.player_index]
+        local obj = event.entity
+
+        if player then
+                local msg = "[ACT] " .. player.name .. " marked for upgrade " .. obj.name
+
+                if player.surface and player.surface.index ~= 1 then
+                    msg = msg .. " (" .. player.surface.name .. ")"
+                end
+
+                if is_new(player) or is_member(player) then     -- Dont bother with regulars/moderators
+                    if not is_banished(player) then             -- Don't let bansihed players use this to spam
+                        if (storage.last_decon_warning and game.tick - storage.last_decon_warning >= 15) then
+                            storage.last_decon_warning = game.tick
+                            message_all(msg)
+                        end
+                    end
+                end
+
+                console_print(msg)
+        end
+    end
+end
+
+function on_cancelled_upgrade(event)
+    if event and event.player_index and event.entity then
+        local player = game.players[event.player_index]
+        local obj = event.entity
+
+        if player then
+                local msg = "[ACT] " .. player.name .. " cancelled upgrade " .. obj.name
+
+                if player.surface and player.surface.index ~= 1 then
+                    msg = msg .. " (" .. player.surface.name .. ")"
+                end
+
+                if is_new(player) or is_member(player) then     -- Dont bother with regulars/moderators
+                    if not is_banished(player) then             -- Don't let bansihed players use this to spam
+                        if (storage.last_decon_warning and game.tick - storage.last_decon_warning >= 15) then
+                            storage.last_decon_warning = game.tick
+                            message_all(msg)
+                        end
+                    end
+                end
+
+                console_print(msg)
+        end
+    end
+end
+
+
+function on_marked_for_deconstruction(event)
+    if event and event.player_index and event.entity then
+        local player = game.players[event.player_index]
+        local obj = event.entity
+
+        if player then
+                local msg = "[ACT] " .. player.name .. " marked for deconstruction " .. obj.name
+
+                if player.surface and player.surface.index ~= 1 then
+                    msg = msg .. " (" .. player.surface.name .. ")"
+                end
+
+                if is_new(player) or is_member(player) then     -- Dont bother with regulars/moderators
+                    if not is_banished(player) then             -- Don't let bansihed players use this to spam
+                        if (storage.last_decon_warning and game.tick - storage.last_decon_warning >= 15) then
+                            storage.last_decon_warning = game.tick
+                            message_all(msg)
+                        end
+                    end
+                end
+
+                console_print(msg)
+        end
+    end
+end
+
+function on_cancelled_deconstruction(event)
+    if event and event.player_index and event.entity then
+        local player = game.players[event.player_index]
+        local obj = event.entity
+
+        if player then
+                local msg = "[ACT] " .. player.name .. " cancelled deconstruction " .. obj.name
+
+                if player.surface and player.surface.index ~= 1 then
+                    msg = msg .. " (" .. player.surface.name .. ")"
+                end
+
+                if is_new(player) or is_member(player) then     -- Dont bother with regulars/moderators
+                    if not is_banished(player) then             -- Don't let bansihed players use this to spam
+                        if (storage.last_decon_warning and game.tick - storage.last_decon_warning >= 15) then
+                            storage.last_decon_warning = game.tick
+                            message_all(msg)
+                        end
+                    end
+                end
+
+                console_print(msg)
+        end
+    end
+end
+
 
 -- EVENTS--
 -- Command logging

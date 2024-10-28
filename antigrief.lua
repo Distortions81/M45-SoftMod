@@ -72,10 +72,10 @@ function on_built_entity(event)
                 end
             end
         else
-            console_print("on_built_entity: invalid obj")
+            console_print("[ERROR] on_built_entity: invalid obj")
         end
     else
-        console_print("on_built_entity: invalid player")
+        console_print("[ERROR] on_built_entity: invalid player")
     end
 end
 
@@ -107,7 +107,7 @@ function on_pre_player_mined_item(event)
                 clear_corpse_tag(event)
             end
         else
-            console_print("pre_player_mined_item: invalid obj")
+            console_print("[ERROR] pre_player_mined_item: invalid obj")
         end
     end
 end
@@ -132,10 +132,10 @@ function on_player_rotated_entity(event)
                     end
                 end
             else
-                console_print("on_player_rotated_entity: invalid obj")
+                console_print("[ERROR] on_player_rotated_entity: invalid obj")
             end
         else
-            console_print("on_player_rotated_entity: invalid player")
+            console_print("[ERROR] on_player_rotated_entity: invalid player")
         end
     end
 end

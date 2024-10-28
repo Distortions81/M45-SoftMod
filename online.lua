@@ -804,7 +804,7 @@ function online_on_gui_click(event)
                         smart_print(player, "(SYSTEM) That player does not exist.")
                     end
                 else
-                    console_print("send_whisper: text-box not found")
+                    console_print("[ERROR] send_whisper: text-box not found")
                 end
             elseif event.element.name == "banish_player" then
                 ----------------------------------------------------------------
@@ -827,7 +827,7 @@ function online_on_gui_click(event)
                         smart_print(player, "(SYSTEM) That player does not exist.")
                     end
                 else
-                    console_print("send_whisper: text-box not found")
+                    console_print("[ERROR] send_whisper: text-box not found")
                 end
             elseif event.element.name == "report_player" then
                 ----------------------------------------------------------------
@@ -848,7 +848,7 @@ function online_on_gui_click(event)
                         smart_print(player, "(SYSTEM) That player does not exist.")
                     end
                 else
-                    console_print("send_whisper: text-box not found")
+                    console_print("[ERROR] send_whisper: text-box not found")
                 end
             elseif event.element.name == "find_on_map" then
                 ----------------------------------------------------------------
