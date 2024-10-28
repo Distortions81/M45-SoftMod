@@ -10,7 +10,7 @@ function on_chart_tag_added(event)
         local player = game.players[event.player_index]
 
         if player and player.valid and event.tag then
-            console_print("[ACT] " .. player.name .. " add-tag" .. make_gps_str_obj(player, event.tag) .. event.tag.text)
+            message_all( player.name .. " add-tag" .. make_gps_str_obj(player, event.tag) .. event.tag.text)
         end
     end
 end
@@ -20,7 +20,7 @@ function on_chart_tag_modified(event)
     if event and event.player_index then
         local player = game.players[event.player_index]
         if player and player.valid and event.tag then
-            console_print("[ACT] " .. player.name .. " mod-tag" .. make_gps_str_obj(player, event.tag) .. event.tag.text)
+            message_all(player.name .. " mod-tag" .. make_gps_str_obj(player, event.tag) .. event.tag.text)
         end
     end
 end
@@ -32,26 +32,7 @@ function on_chart_tag_removed(event)
 
         -- Because factorio will hand us an nil event... nice.
         if player and player.valid and event.tag then
-            console_print("[ACT] " .. player.name .. " del-tag" .. make_gps_str_obj(player, event.tag) .. event.tag.text)
-
-            -- Delete corpse map tag and corpse_lamp
-            for i, ctag in pairs(storage.corpselist) do
-                if ctag.tag and ctag.tag.valid then
-                    if event.tag.text == ctag.tag.text and ctag.pos.x == event.tag.position.x and ctag.pos.y ==
-                        event.tag.position.y then
-                        -- Destroy corpse lamp
-                        ctag.corpse_lamp.destroy()
-
-                        index = i
-                        break
-                    end
-                end
-            end
-
-            -- Properly remove items
-            if storage.corpselist and index then
-                table.remove(storage.corpselist, index)
-            end
+            message_all( player.name .. " del-tag" .. make_gps_str_obj(player, event.tag) .. event.tag.text)
         end
     end
 end
@@ -86,7 +67,10 @@ function on_redo_applied(event)
 
         local buf = ""
         for _, act in pairs(event.actions) do
-            buf = buf .. act.type .. ", "
+            if buf ~= "" then
+                buf = buf .. ", "
+            end
+            buf = buf .. act.type
         end
         console_print("[ACT] " .. player.name .. " redo " .. buf .. make_gps_str_player(player))
     end
@@ -98,7 +82,10 @@ function on_undo_applied(event)
 
         local buf = ""
         for _, act in pairs(event.actions) do
-            buf = buf .. act.type .. ", "
+            if buf ~= "" then
+                buf = buf .. ", "
+            end
+            buf = buf .. act.type
         end
         console_print("[ACT] " .. player.name .. " undo " .. buf .. make_gps_str_player(player))
     end
@@ -108,18 +95,38 @@ function on_train_schedule_changed(event)
     if event and event.player_index and event.train then
         local player = game.players[event.player_index]
 
-        console_print("[ACT] " ..
-        player.name ..
-        " changed schedule on train id#" .. event.train.id .. " at " .. make_gps_str_obj(player, event.train))
+        message_all(
+            player.name ..
+            " changed schedule on train id#" .. event.train.id .. " at" .. make_gps_str_obj(player, event.train))
     end
 end
 
 function on_entity_died(event)
     if event and event.entity then
-        if event.entity.surface then
-            console_print("[ACT] " .. event.entity.name .. " died on " .. event.entity.surface.name .. " at " .. make_gps_str(event.entity))
-        else
-            console_print("[ACT] " .. event.entity.name .. " died at " .. make_gps_str(event.entity))
+        if event.entity.name == "character" then
+            return
+        end
+            message_all( event.entity.name .. " died at" .. make_gps_str(event.entity))
+    end
+end
+
+
+function on_picked_up_item(event)
+    if event and event.player_index and event.item_stack then
+        local player = game.players[event.player_index]
+
+        local buf = ""
+        for _, item in pairs(event.item_stack) do
+            if buf ~= "" then
+                buf = buf .. " "
+            end
+            if item then
+                buf = buf .. item
+            end
+        end
+
+        if buf ~= "" then
+            console_print("[ACT] " .. player.name .. " picked up " .. buf .. " at" .. make_gps_str(player))
         end
     end
 end

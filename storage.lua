@@ -62,9 +62,6 @@ function create_mystorage()
         storage.last_decon_warning = 1
     end
 
-    if not storage.corpselist then
-        storage.corpselist = {}
-    end
     make_banish_storage()
 
     if not storage.info_shown then
