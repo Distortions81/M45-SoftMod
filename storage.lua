@@ -4,7 +4,7 @@
 -- License: MPL 2.0
 -- Create storage, if needed
 function create_mystorage()
-    storage.svers = "621-10.22.2024-0647p"
+    storage.svers = "622-10.27.2024-1114p"
 
     -- Adjust look
     game.surfaces[1].show_clouds = false
