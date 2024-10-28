@@ -389,7 +389,8 @@ defines.events.on_player_changed_position, defines.events.on_console_chat, defin
 defines.events.on_gui_click, defines.events.on_gui_text_changed, -- log
 defines.events.on_console_command, defines.events.on_chart_tag_removed, defines.events.on_chart_tag_modified,
 defines.events.on_chart_tag_added, defines.events.on_research_finished, -- clean up corpse tags
-defines.events.on_gui_opened, -- anti-grief
+defines.events.on_gui_opened, defines.events.on_redo_applied, defines.events.on_undo_applied, defines.events.on_train_schedule_changed,
+defines.events.on_entity_died,-- anti-grief
 defines.events.on_player_deconstructed_area, defines.events.on_player_banned, defines.events.on_player_rotated_entity,
 defines.events.on_pre_player_mined_item, defines.events.on_built_entity}, function(event)
     -- If no event, or event is a tick
@@ -468,6 +469,14 @@ defines.events.on_pre_player_mined_item, defines.events.on_built_entity}, functi
         on_pre_player_mined_item(event)
     elseif event.name == defines.events.on_built_entity then
         on_built_entity(event)
+    elseif event.name == defines.events.on_redo_applied then
+        on_redo_applied(event)
+    elseif event.name == defines.events.on_undo_applied then
+        on_undo_applied(event)
+    elseif event.name == defines.events.on_train_schedule_changed then
+        on_train_schedule_changed(event)
+    elseif event.name == defines.events.on_entity_died then
+        on_entity_died(event)
     end
 
     -- To-Do--

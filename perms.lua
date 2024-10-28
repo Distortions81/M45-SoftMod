@@ -102,6 +102,9 @@ function set_perms()
         storage.defaultgroup.set_allows_action(defines.input_action.reassign_blueprint, option)
         storage.defaultgroup.set_allows_action(defines.input_action.cancel_deconstruct, option)
         storage.defaultgroup.set_allows_action(defines.input_action.send_spidertron, option)
+
+        -- Wube removed this, great.
+        -- storage.defaultgroup.set_allows_action(defines.input_action.activate_cut, false)
     end
 end
 
