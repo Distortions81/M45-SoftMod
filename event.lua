@@ -289,21 +289,20 @@ end
 
 -- Main event handler
 script.on_event(
-    {                                                                                                            -- Player join/leave respawn
-        defines.events.on_player_created, defines.events.on_pre_player_died, defines.events.on_player_respawned, --
-        defines.events.on_player_joined_game, defines.events.on_player_left_game,                                -- activity
+    {
+        defines.events.on_player_created, defines.events.on_pre_player_died, defines.events.on_player_respawned,
+        defines.events.on_player_joined_game, defines.events.on_player_left_game,
         defines.events.on_player_changed_position, defines.events.on_console_chat, defines.events
         .on_player_repaired_entity,
-        -- gui
-        defines.events.on_gui_click, defines.events.on_gui_text_changed,        -- log
+        defines.events.on_gui_click, defines.events.on_gui_text_changed,
         defines.events.on_console_command, defines.events.on_chart_tag_removed, defines.events.on_chart_tag_modified,
-        defines.events.on_chart_tag_added, defines.events.on_research_finished, -- clean up corpse tags
-        defines.events.on_redo_applied, defines.events.on_undo_applied, defines.events
-        .on_train_schedule_changed,
-        defines.events.on_entity_died, defines.events.on_cancelled_upgrade, defines.events.on_picked_up_item, -- anti-grief
-        defines.events.on_player_deconstructed_area, defines.events.on_marked_for_upgrade, defines.events
-        .on_cancelled_upgrade, defines.events.on_marked_for_deconstruction,defines.events.on_cancelled_deconstruction ,
-        defines.events.on_player_banned, defines.events.on_player_rotated_entity,
+        defines.events.on_chart_tag_added, defines.events.on_research_finished,
+        defines.events.on_redo_applied, defines.events.on_undo_applied, defines.events.on_train_schedule_changed,
+        defines.events.on_entity_died, defines.events.on_cancelled_upgrade, defines.events.on_picked_up_item, defines.events.on_player_dropped_item,
+        defines.events.on_player_deconstructed_area, defines.events.on_marked_for_upgrade,
+        defines.events.on_cancelled_upgrade, defines.events.on_marked_for_deconstruction, defines.events
+        .on_cancelled_deconstruction, defines.events.on_player_flushed_fluid,
+        defines.events.on_player_banned, defines.events.on_player_rotated_entity,defines.events.on_player_flipped_entity,
         defines.events.on_pre_player_mined_item, defines.events.on_built_entity }, function(event)
         -- If no event, or event is a tick
         if not event or (event and event.name == defines.events.on_tick) then
@@ -374,6 +373,8 @@ script.on_event(
             on_player_banned(event)
         elseif event.name == defines.events.on_player_rotated_entity then
             on_player_rotated_entity(event)
+        elseif event.name == defines.events.on_player_flipped_entity then
+            on_player_flipped_entity(event)
         elseif event.name == defines.events.on_pre_player_mined_item then
             on_pre_player_mined_item(event)
         elseif event.name == defines.events.on_built_entity then
@@ -388,6 +389,8 @@ script.on_event(
             on_entity_died(event)
         elseif event.name == defines.events.on_picked_up_item then
             on_picked_up_item(event)
+        elseif event.name == defines.events.on_player_dropped_item then
+            on_player_dropped_item(event)
         elseif event.name == defines.events.on_marked_for_upgrade then
             on_marked_for_upgrade(event)
         elseif event.name == defines.events.on_cancelled_upgrade then
@@ -396,6 +399,8 @@ script.on_event(
             on_marked_for_deconstruction(event)
         elseif event.name == defines.events.on_cancelled_deconstruction then
             on_cancelled_deconstruction(event)
+        elseif event.name == defines.events.on_player_flushed_fluid then
+            on_player_flushed_fluid(event)
         end
 
         -- To-Do--

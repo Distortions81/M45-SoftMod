@@ -140,6 +140,32 @@ function on_player_rotated_entity(event)
     end
 end
 
+function on_player_flipped_entity(event)
+    if event and event.player_index then
+        local player = game.players[event.player_index]
+        local obj = event.entity
+        
+        -- If player and object are valid
+        if player and player.valid then
+            if obj and obj.valid then
+                if obj.name ~= "tile-ghost" and obj.name ~= "tile" then
+                    if obj.name ~= "entity-ghost" then
+                        console_print("[ACT] " .. player.name .. " flipped " .. obj.name .. make_gps_str_obj(player, obj))
+                    else
+                        console_print("[ACT] " ..
+                            player.name .. " flipped ghost " .. obj.name .. make_gps_str_obj(player, obj) ..
+                            obj.ghost_name)
+                    end
+                end
+            else
+                console_print("[ERROR] on_player_flipped_entity: invalid obj")
+            end
+        else
+            console_print("[ERROR] on_player_flipped_entity: invalid player")
+        end
+    end
+end
+
 -- Banned -- kill player to return items
 function on_player_banned(event)
     if event and event.player_index then
