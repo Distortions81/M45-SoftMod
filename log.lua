@@ -366,15 +366,6 @@ function on_rocket_launch_ordered(event)
     end
 end
 
-function on_train_created(event)
-    if event.train then
-        local rails = event.train.get_rails()
-        if rails then
-            console_print("[ACT] train created " .. make_gps_str(rails))
-        end
-    end
-end
-
 function on_player_fast_transferred(event)
     if event and event.player_index and event.entity then
         local player = game.players[event.player_index]
