@@ -7,8 +7,7 @@ require "utility"
 -- Shamelessly stole most of this function from RedMew.
 -- I also had no idea inventory-size could be set from create_entity.
 -- https://github.com/Refactorio/RedMew/blob/develop/features/dump_offline_inventories.lua
-function dumpPlayerInventory(player)
-
+function dumpPlayerInventory(player, force)
     if not player then
         return false
     end
@@ -16,9 +15,11 @@ function dumpPlayerInventory(player)
         return false
     end
 
-    if storage.cleaned_players[player.index] then
-        if storage.cleaned_players[player.index] == true then
-            return false
+    if not force then
+        if storage.cleaned_players[player.index] then
+            if storage.cleaned_players[player.index] == true then
+                return false
+            end
         end
     end
 
@@ -60,18 +61,10 @@ function dumpPlayerInventory(player)
     local inv_corpse = corpse.get_inventory(defines.inventory.character_corpse)
 
     for _, item in pairs(inv_main_contents) do
-        inv_corpse.insert({
-            name = item.name,
-            count = item.count,
-            quality = item.quality
-        })
+        inv_corpse.insert(item)
     end
     for _, item in pairs(inv_trash_contents) do
-        inv_corpse.insert({
-            name = item.name,
-            count = item.count,
-            quality = item.quality
-        })
+        inv_corpse.insert(item)
     end
 
     if inv_main_contents then
@@ -94,12 +87,11 @@ function check_character_abandoned()
 
     for _, player in pairs(game.players) do
         if not player.connected and is_new(player) then
-
             if storage.last_playtime[player.index] then
                 if game.tick - storage.last_playtime[player.index] > 1 * 60 * 60 * 60 then
-                    if dumpPlayerInventory(player) then
+                    if dumpPlayerInventory(player,false) then
                         gsysmsg("[color=orange] * New player '" .. player.name ..
-                                    "' was not active long enough to become a member, and have been offline for some time. Their items are now considered abandoned, and have been placed at spawn (expires in 15m) *[/color]")
+                            "' was not active long enough to become a member, and have been offline for some time. Their items are now considered abandoned, and have been placed at spawn (expires in 15m) *[/color]")
                     end
                 end
             end
@@ -118,7 +110,7 @@ function make_info_button(player)
             sprite = "file/img/buttons/m45-64.png",
             tooltip = "Opens the server-info window"
         }
-        m45_32.style.size = {64, 64}
+        m45_32.style.size = { 64, 64 }
     end
 end
 
@@ -376,10 +368,10 @@ function make_m45_info_window(player)
                 caption = "v" .. storage.svers
             }
 
-            local tab1_cframe = {tab1_main_frame.add {
+            local tab1_cframe = { tab1_main_frame.add {
                 type = "flow",
                 direction = "vertical"
-            }}
+            } }
             tab1_rframe.style.horizontal_align = "right"
             tab1_rframe.style.vertical_align = "bottom"
             tab1_rframe.style.padding = 4
@@ -1025,14 +1017,14 @@ function on_gui_click(event)
                         --Since wube nerfed the damage red flash...
                         rendering.draw_rectangle {
                             surface = player.surface,
-                            left_top = {-8192, -8192},
-                            right_bottom = {8192, 8192},
-                            color = {1, 0, 0},
+                            left_top = { -8192, -8192 },
+                            right_bottom = { 8192, 8192 },
+                            color = { 1, 0, 0 },
                             filled = true,
-                            players = {player},
+                            players = { player },
                             time_to_live = 8
                         }
-                        
+
                         player.character.damage(10, "enemy") -- Grab attention
                         smart_print(player,
                             "[color=red](SYSTEM) *** PLEASE READ THE INFO WINDOW BEFORE CLOSING IT!!! ***[/color]")
@@ -1066,7 +1058,6 @@ function on_gui_click(event)
             elseif event.element.name == "reset_clock" then
                 -- reset-clock-close
                 if player.gui and player.gui.top and player.gui.top.reset_clock then
-
                     if storage.hide_clock then
                         if storage.hide_clock[player.index] and storage.hide_clock[player.index] == true and
                             storage.resetdur ~= "" then
@@ -1079,7 +1070,6 @@ function on_gui_click(event)
                                 player.gui.top.reset_clock.caption = ">"
                             end
                         end
-
                     end
                 end
             end

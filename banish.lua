@@ -169,7 +169,7 @@ function update_banished_votes()
                 send_to_default_spawn(victim)
                 victim.character.die("player")
             else
-                dumpPlayerInventory(victim)
+                dumpPlayerInventory(victim, true)
             end
 
             gsysmsg(victim.name .. "'s items have been dumped at spawn so they can be recovered.")
