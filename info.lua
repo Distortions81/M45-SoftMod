@@ -11,7 +11,7 @@ function dumpPlayerInventory(player, force)
     if not player then
         return false
     end
-    if not player.index then
+    if not player.valid then
         return false
     end
 
@@ -56,23 +56,37 @@ function dumpPlayerInventory(player, force)
         inventory_size = inv_corpse_size,
         player_index = player_index
     }
+    if not corpse then
+        return false
+    end
+
     corpse.active = true
 
     local inv_corpse = corpse.get_inventory(defines.inventory.character_corpse)
 
-    for _, item in pairs(inv_main_contents) do
-        inv_corpse.insert(item)
-    end
-    for _, item in pairs(inv_trash_contents) do
-        inv_corpse.insert(item)
+    if not inv_corpse then
+        return false
     end
 
     if inv_main_contents then
-        inv_main.clear()
+        for _, item in pairs(inv_main_contents) do
+            inv_corpse.insert(item)
+        end
+
+        if inv_main_contents then
+            inv_main.clear()
+        end
     end
     if inv_trash_contents then
-        inv_trash.clear()
+        for _, item in pairs(inv_trash_contents) do
+            inv_corpse.insert(item)
+        end
+
+        if inv_trash_contents then
+            inv_trash.clear()
+        end
     end
+
 
     -- Mark as cleaned up.
     storage.cleaned_players[player.index] = true
@@ -89,7 +103,7 @@ function check_character_abandoned()
         if not player.connected and is_new(player) then
             if storage.last_playtime[player.index] then
                 if game.tick - storage.last_playtime[player.index] > 1 * 60 * 60 * 60 then
-                    if dumpPlayerInventory(player,false) then
+                    if dumpPlayerInventory(player, false) then
                         gsysmsg("[color=orange] * New player '" .. player.name ..
                             "' was not active long enough to become a member, and have been offline for some time. Their items are now considered abandoned, and have been placed at spawn (expires in 15m) *[/color]")
                     end
