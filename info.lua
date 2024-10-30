@@ -427,10 +427,17 @@ function make_m45_info_window(player)
                 type = "label",
                 caption = "[recipe=combat-shotgun] [font=default-large]Friendly fire is OFF, for players and buildings.[/font]"
             }
-            tab1_info_top.add {
-                type = "label",
-                caption = "[color=red][font=default-large]THIS SERVER IS PERMA-DEATH. YOU HAVE ONE LIFE TO LIVE PER MAP![/font][/color]"
-            }
+            if storage.oneLifeMode then
+                tab1_info_top.add {
+                    type = "label",
+                    caption = "[color=red][font=default-large]THIS SERVER IS PERMA-DEATH. YOU HAVE ONE LIFE TO LIVE PER MAP![/font][/color]"
+                }
+            else
+                tab1_info_top.add {
+                    type = "label",
+                    caption = ""
+                }
+            end
             tab1_info_top.add {
                 type = "label",
                 caption = "[font=default-large]Click the '[item=automation-science-pack] FREE-MEMBERSHIP' tab to learn more.[/font]"

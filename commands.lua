@@ -8,7 +8,6 @@ require "logo"
 
 -- Custom commands
 script.on_load(function()
-
     -- Only add if no commands yet
     if (not commands.commands.server_interface) then
         add_banish_commands()
@@ -54,7 +53,6 @@ script.on_load(function()
                     end
                 end
             end
-
         end)
 
         -- Reset interval message
@@ -77,7 +75,6 @@ script.on_load(function()
             end
             create_groups()
             storage.resetint = input
-
         end)
 
         -- Enable / disable friendly fire
@@ -191,7 +188,7 @@ script.on_load(function()
         end)
 
         -- Enable / disable cheat mode
-        commands.add_command("onelife", "Turn on onelife mode, can't be undone.", function(param)
+        commands.add_command("onelife", "One life mode on/off", function(param)
             local player
             local victim
 
@@ -204,8 +201,19 @@ script.on_load(function()
                 end
             end
 
-            storage.oneLifeMode = true
-
+            if param and param.parameter then
+                if param.parameter == "on" and not storage.oneLifeMode then
+                    message_allp("One-life mode enabled.")
+                    for _, victim in pairs(game.players) do
+                        make_onelife_button(player)
+                    end
+                elseif param.parameter == "off" and storage.oneLifeMode then
+                    message_allp("One-life mode disabled.")
+                    for _, victim in pairs(game.players) do
+                        make_onelife_button(player)
+                    end
+                end
+            end
         end)
 
         -- adjust run speed
@@ -407,12 +415,10 @@ script.on_load(function()
             else
                 print("[SVERSION] " .. storage.svers)
             end
-
         end)
 
         -- Server name
         commands.add_command("cname", "server use only", function(param)
-
             -- Moderators only
             if param and param.player_index then
                 local player = game.players[param.player_index]
@@ -545,37 +551,37 @@ script.on_load(function()
             smart_print(player, "Player not found.")
         end)
 
--- Set player to veteran
-commands.add_command("veteran", "<player> -- (Makes the player a veteran)", function(param)
-    local player
+        -- Set player to veteran
+        commands.add_command("veteran", "<player> -- (Makes the player a veteran)", function(param)
+            local player
 
-    -- Moderators only
-    if param and param.player_index then
-        player = game.players[param.player_index]
-        if player and player.admin == false then
-            smart_print(player, "Moderators only.")
-            return
-        end
-    end
-
-    -- Argument required
-    if param.parameter then
-        local victim = game.players[param.parameter]
-
-        if (victim) then
-            if victim and victim.valid and storage.veteransgroup then
-                if player then
-                    smart_print(player, "Player given veterans status.")
-                    message_all(victim.name .. " is now a veteran!")
+            -- Moderators only
+            if param and param.player_index then
+                player = game.players[param.player_index]
+                if player and player.admin == false then
+                    smart_print(player, "Moderators only.")
+                    return
                 end
-                storage.veteransgroup.add_player(victim)
-                update_player_list() -- online.lua
-                return
             end
-        end
-    end
-    smart_print(player, "Player not found.")
-end)
+
+            -- Argument required
+            if param.parameter then
+                local victim = game.players[param.parameter]
+
+                if (victim) then
+                    if victim and victim.valid and storage.veteransgroup then
+                        if player then
+                            smart_print(player, "Player given veterans status.")
+                            message_all(victim.name .. " is now a veteran!")
+                        end
+                        storage.veteransgroup.add_player(victim)
+                        update_player_list() -- online.lua
+                        return
+                    end
+                end
+            end
+            smart_print(player, "Player not found.")
+        end)
 
         -- Set player to regular
         commands.add_command("regular", "<player> -- (Makes the player a regular)", function(param)
@@ -761,7 +767,7 @@ end)
 
                 -- Set new spawn spot
                 if pforce and psurface and new_pos_x and new_pos_y then
-                    pforce.set_spawn_position({new_pos_x, new_pos_y}, psurface)
+                    pforce.set_spawn_position({ new_pos_x, new_pos_y }, psurface)
                     smart_print(victim, string.format("New spawn point set: %d,%d", math.floor(new_pos_x),
                         math.floor(new_pos_y)))
                     smart_print(victim, string.format("Force: %s", pforce.name))

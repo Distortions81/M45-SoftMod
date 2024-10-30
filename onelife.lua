@@ -1,8 +1,8 @@
 function doOnelife(event)
-    if not global.oneLifeMode then
+    if not storage.oneLifeMode then
         return
     end
-    
+
     if not event or not event.player_index then
         return
     end
@@ -42,11 +42,10 @@ function doOnelife(event)
         repairing = false,
         position = character.position
     }
-
 end
 
 function onelife_clickhandler(event)
-    if not global.oneLifeMode then
+    if not storage.oneLifeMode then
         return
     end
 
@@ -62,7 +61,6 @@ function onelife_clickhandler(event)
         return
     end
     if event.element and event.element.valid and event.element.name == "spec_button" then
-
         -- Init storage if needed
         if not storage.spec_confirm then
             storage.spec_confirm = {}
@@ -73,7 +71,6 @@ function onelife_clickhandler(event)
         end
         -- Otherwise confirm
         if storage.spec_confirm and player.index and storage.spec_confirm[player.index] then
-
             if storage.spec_confirm[player.index] >= 2 then
                 storage.spec_confirm[player.index] = nil
                 player.character.die("player")
@@ -82,13 +79,13 @@ function onelife_clickhandler(event)
             elseif storage.spec_confirm[player.index] < 2 then
                 smart_print(player,
                     "[color=red](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.spec_confirm[player.index] ..
-                        " more times to confirm.[/color]")
+                    " more times to confirm.[/color]")
                 smart_print(player,
                     "[color=white](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.spec_confirm[player.index] ..
-                        " more times to confirm.[/color]")
+                    " more times to confirm.[/color]")
                 smart_print(player,
                     "[color=black](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.spec_confirm[player.index] ..
-                        " more times to confirm.[/color]")
+                    " more times to confirm.[/color]")
             end
 
             storage.spec_confirm[player.index] = storage.spec_confirm[player.index] + 1
@@ -97,12 +94,19 @@ function onelife_clickhandler(event)
 end
 
 function make_onelife_button(player)
-    if not global.oneLifeMode then
-        return
-    end
-
     if player.gui.top.spec_button then
         player.gui.top.spec_button.destroy()
+    end
+
+    if not storage.oneLifeMode then
+        if player.controller_type == defines.controllers.spectator then
+            player.set_controller {
+                type = defines.controllers.character
+            }
+            smart_print(player, "You have been revived!")
+            update_player_list()
+        end
+        return
     end
     if not player.gui.top.spec_button then
         local m45_32 = player.gui.top.add {
@@ -111,6 +115,6 @@ function make_onelife_button(player)
             sprite = "file/img/buttons/spectate.png",
             tooltip = "Kills you forever to become spectator (NO UNDO)"
         }
-        m45_32.style.size = {64, 64}
+        m45_32.style.size = { 64, 64 }
     end
 end
