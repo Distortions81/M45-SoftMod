@@ -104,7 +104,8 @@ function make_onelife_button(player)
     if not storage.oneLifeMode then
         if player.controller_type == defines.controllers.spectator then
             player.set_controller {
-                type = defines.controllers.character
+                type = defines.controllers.character,
+                character = game.surfaces[1].create_entity({name = "character", position = game.surfaces[1].find_non_colliding_position("character", {0,0}, 10000, 1), force = game.forces.player})
             }
             smart_print(player, "You have been revived!")
             update_player_list()
