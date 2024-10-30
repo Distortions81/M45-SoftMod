@@ -102,7 +102,9 @@ function set_perms()
         storage.defaultgroup.set_allows_action(defines.input_action.cancel_deconstruct, option)
         storage.defaultgroup.set_allows_action(defines.input_action.send_spidertron, option)
 
+        -- Added 10-2024
         storage.defaultgroup.set_allows_action(defines.input_action.deconstruct, false)
+        storage.defaultgroup.set_allows_action(defines.input_action.activate_paste, false)
 
 
         -- Wube removed this, great.
