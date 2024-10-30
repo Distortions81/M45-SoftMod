@@ -206,13 +206,13 @@ script.on_load(function()
                     storage.oneLifeMode = true
                     message_allp("One-life mode enabled.")
                     for _, victim in pairs(game.players) do
-                        make_onelife_button(player)
+                        make_onelife_button(victim)
                     end
                 elseif param.parameter == "off" and storage.oneLifeMode then
                     storage.oneLifeMode = false
                     message_allp("One-life mode disabled.")
                     for _, victim in pairs(game.players) do
-                        make_onelife_button(player)
+                        make_onelife_button(victim)
                     end
                 end
             end
