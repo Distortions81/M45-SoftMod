@@ -315,8 +315,13 @@ script.on_load(function()
 
             if player then
                 smart_print(player, "Game tick: " .. game.tick)
+                return
             else
                 print("[GT] " .. game.tick)
+            end
+
+            if param.parameter == "debug" then
+                print(die.debug)
             end
         end)
 
