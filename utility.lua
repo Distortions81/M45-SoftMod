@@ -195,8 +195,7 @@ function is_veteran(victim)
     if victim and victim.valid and not victim.admin then
         -- If in group
         if victim.permission_group and storage.veteransgroup then
-            if victim.permission_group.name == storage.veteransgroup.name or victim.permission_group.name ==
-                storage.veteransgroup.name .. "_satellite" then
+            if victim.permission_group.name == storage.veteransgroup.name then
                 return true
             end
         end
@@ -211,8 +210,7 @@ function is_regular(victim)
     if victim and victim.valid and not victim.admin then
         -- If in group
         if victim.permission_group and storage.regularsgroup then
-            if victim.permission_group.name == storage.regularsgroup.name or victim.permission_group.name ==
-                storage.regularsgroup.name .. "_satellite" then
+            if victim.permission_group.name == storage.regularsgroup.name then
                 return true
             end
         end
@@ -226,8 +224,7 @@ function is_member(victim)
     if victim and victim.valid and not victim.admin then
         -- If in group
         if victim.permission_group and storage.membersgroup then
-            if victim.permission_group.name == storage.membersgroup.name or victim.permission_group.name ==
-                storage.membersgroup.name .. "_satellite" then
+            if victim.permission_group.name == storage.membersgroup.name then
                 return true
             end
         end

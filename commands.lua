@@ -131,14 +131,20 @@ script.on_load(function()
 
                 if pforce then
                     if string.lower(param.parameter) == "off" then
+                        storage.noBlueprints = false
                         set_blueprints_enabled(storage.defaultgroup, false)
                         set_blueprints_enabled(storage.membersgroup, false)
                         set_blueprints_enabled(storage.regularsgroup, false)
+                        set_blueprints_enabled(storage.veteransgroup, false)
+                        set_blueprints_enabled(storage.modsgroup, false)
                         smart_print(player, "blueprints disabled...")
                     elseif string.lower(param.parameter) == "on" then
+                        storage.noBlueprints = true
                         set_blueprints_enabled(storage.defaultgroup, true)
                         set_blueprints_enabled(storage.membersgroup, true)
                         set_blueprints_enabled(storage.regularsgroup, true)
+                        set_blueprints_enabled(storage.modsgroup, true)
+                        set_blueprints_enabled(storage.veteransgroup, true)
                         smart_print(player, "blueprints enabled...")
                     end
                 end

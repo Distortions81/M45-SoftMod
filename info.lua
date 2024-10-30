@@ -432,6 +432,16 @@ function make_m45_info_window(player)
                     type = "label",
                     caption = "[color=red][font=default-large]THIS SERVER IS PERMA-DEATH. YOU HAVE ONE LIFE TO LIVE PER MAP![/font][/color]"
                 }
+            elseif storage.noBlueprints then
+                tab1_info_top.add {
+                    type = "label",
+                    caption = "[color=cyan][font=default-large]BLUEPRINTS ARE DISABLED! BUILD STUFF ON YOUR OWN![/font][/color]"
+                }
+            elseif storage.cheatson then
+                tab1_info_top.add {
+                    type = "label",
+                    caption = "[color=red][font=default-large]CHEATS ARE ENABLED![/font][/color]"
+                }
             else
                 tab1_info_top.add {
                     type = "label",
