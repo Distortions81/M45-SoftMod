@@ -204,15 +204,35 @@ script.on_load(function()
             if param and param.parameter then
                 if param.parameter == "on" and not storage.oneLifeMode then
                     storage.oneLifeMode = true
-                    message_allp("One-life mode enabled.")
+                    smart_print(player,"One-life mode enabled.")
+                    message_all("One-life mode enabled.")
                     for _, victim in pairs(game.players) do
                         make_onelife_button(victim)
                     end
                 elseif param.parameter == "off" and storage.oneLifeMode then
                     storage.oneLifeMode = false
-                    message_allp("One-life mode disabled.")
+                    smart_print(player,"One-life mode disabled.")
+                    message_all("One-life mode disabled.")
                     for _, victim in pairs(game.players) do
                         make_onelife_button(victim)
+                    end
+                elseif storage.oneLifeMode then
+                    local victim = game.players[param.parameter]
+
+                    if victim then
+                        if victim.controller_type == defines.controllers.spectator then
+                            storage.oneLifeMode = false
+                            make_onelife_button(victim)
+                            storage.oneLifeMode = true
+                            make_onelife_button(victim)
+
+                            message_all(victim.name .. " was revived!")
+                            smart_print(player, victim.name .. " was revived!")
+                        else
+                            smart_print(player, victim.name .. " is already alive!!!")
+                        end
+                    else
+                        smart_print(player, "I don't see a player by that name.")
                     end
                 end
             end
