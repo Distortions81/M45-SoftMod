@@ -188,7 +188,7 @@ script.on_load(function()
         end)
 
         -- Enable / disable cheat mode
-        commands.add_command("onelife", "One life mode on/off", function(param)
+        commands.add_command("onelife", "One life mode on/off or <playerName>", function(param)
             local player
             local victim
 
