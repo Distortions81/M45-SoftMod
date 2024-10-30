@@ -5,12 +5,31 @@
 require "utility"
 
 function make_gps_str_obj(player, obj)
-    if player.surface and player.surface.index ~= 1 then
-        return " [gps=" .. math.floor(obj.position.x) .. "," ..
-        math.floor(obj.position.y) .. "," .. player.surface.name .. "] "
+    if obj then
+        if player and player.surface and player.surface.index ~= 1 then
+            return " [gps=" .. math.floor(obj.position.x) .. "," ..
+                math.floor(obj.position.y) .. "," .. player.surface.name .. "] "
+        else
+            return " [gps=" .. math.floor(obj.position.x) .. ","
+                .. math.floor(obj.position.y) .. "] "
+        end
+    end
+end
+
+function make_gps_str_player(player)
+    if player and player.surface and player.surface.index ~= 1 then
+        return " [gps=" .. math.floor(player.position.x) .. "," ..
+            math.floor(player.position.y) .. "," .. player.surface.name .. "] "
     else
-        return " [gps=" .. math.floor(obj.position.x) .. ","
-        .. math.floor(obj.position.y) .. "] "
+        return " [gps=" .. math.floor(player.position.x) .. ","
+            .. math.floor(player.position.y) .. "] "
+    end
+end
+
+function make_gps_str(item)
+    if item and item.position then
+        return " [gps=" .. math.floor(item.position.x) .. ","
+            .. math.floor(item.position.y) .. "] "
     end
 end
 
@@ -29,7 +48,7 @@ function on_built_entity(event)
                 (obj.name == "entity-ghost" and obj.ghost_name == "programmable-speaker") then
                 if (storage.last_speaker_warning and game.tick - storage.last_speaker_warning >= 5) then
                     if player.admin == false then -- Don't bother with mods
-                            gsysmsg(player.name .. " placed a speaker at" .. make_gps_str_obj(player, obj))
+                        gsysmsg(player.name .. " placed a speaker at" .. make_gps_str_obj(player, obj))
                         storage.last_speaker_warning = game.tick
                     end
                 end
@@ -37,25 +56,26 @@ function on_built_entity(event)
 
             if obj.name ~= "tile-ghost" and obj.name ~= "tile" then
                 if obj.name ~= "entity-ghost" then
-                    console_print("[ACT] " .. player.name .. " placed " .. obj.name  .. make_gps_str_obj(player, obj))
+                    console_print("[ACT] " .. player.name .. " placed " .. obj.name .. make_gps_str_obj(player, obj))
                 else
                     if not storage.last_ghost_log then
                         storage.last_ghost_log = {}
                     end
                     if storage.last_ghost_log[player.index] then
                         if game.tick - storage.last_ghost_log[player.index] > (60 * 2) then
-                            console_print("[ACT] " .. player.name .. " placed-ghost " .. obj.name .. make_gps_str_obj(player, obj) ..
-                                              obj.ghost_name)
+                            console_print("[ACT] " ..
+                                player.name .. " placed-ghost " .. obj.name .. make_gps_str_obj(player, obj) ..
+                                obj.ghost_name)
                         end
                     end
                     storage.last_ghost_log[player.index] = game.tick
                 end
             end
         else
-            console_print("on_built_entity: invalid obj")
+            console_print("[ERROR] on_built_entity: invalid obj")
         end
     else
-        console_print("on_built_entity: invalid player")
+        console_print("[ERROR] on_built_entity: invalid player")
     end
 end
 
@@ -78,15 +98,16 @@ function on_pre_player_mined_item(event)
                             storage.cleaned_players[player.index] = false
                         end
                     else
-                        console_print("[ACT] " .. player.name .. " mined-ghost " .. obj.name .. make_gps_str_obj(player, obj) ..
-                                          obj.ghost_name)
+                        console_print("[ACT] " ..
+                            player.name .. " mined-ghost " .. obj.name .. make_gps_str_obj(player, obj) ..
+                            obj.ghost_name)
                     end
                 end
             else
                 clear_corpse_tag(event)
             end
         else
-            console_print("pre_player_mined_item: invalid obj")
+            console_print("[ERROR] pre_player_mined_item: invalid obj")
         end
     end
 end
@@ -105,15 +126,42 @@ function on_player_rotated_entity(event)
                     if obj.name ~= "entity-ghost" then
                         console_print("[ACT] " .. player.name .. " rotated " .. obj.name .. make_gps_str_obj(player, obj))
                     else
-                        console_print("[ACT] " .. player.name .. " rotated ghost " .. obj.name .. make_gps_str_obj(player, obj) ..
-                                          obj.ghost_name)
+                        console_print("[ACT] " ..
+                            player.name .. " rotated ghost " .. obj.name .. make_gps_str_obj(player, obj) ..
+                            obj.ghost_name)
                     end
                 end
             else
-                console_print("on_player_rotated_entity: invalid obj")
+                console_print("[ERROR] on_player_rotated_entity: invalid obj")
             end
         else
-            console_print("on_player_rotated_entity: invalid player")
+            console_print("[ERROR] on_player_rotated_entity: invalid player")
+        end
+    end
+end
+
+function on_player_flipped_entity(event)
+    if event and event.player_index then
+        local player = game.players[event.player_index]
+        local obj = event.entity
+        
+        -- If player and object are valid
+        if player and player.valid then
+            if obj and obj.valid then
+                if obj.name ~= "tile-ghost" and obj.name ~= "tile" then
+                    if obj.name ~= "entity-ghost" then
+                        console_print("[ACT] " .. player.name .. " flipped " .. obj.name .. make_gps_str_obj(player, obj))
+                    else
+                        console_print("[ACT] " ..
+                            player.name .. " flipped ghost " .. obj.name .. make_gps_str_obj(player, obj) ..
+                            obj.ghost_name)
+                    end
+                end
+            else
+                console_print("[ERROR] on_player_flipped_entity: invalid obj")
+            end
+        else
+            console_print("[ERROR] on_player_flipped_entity: invalid player")
         end
     end
 end
@@ -123,7 +171,7 @@ function on_player_banned(event)
     if event and event.player_index then
         local player = game.players[event.player_index]
         if player then
-            dumpPlayerInventory(player)
+            dumpPlayerInventory(player, true)
             gsysmsg(player.name .. "'s items have been left at spawn, so they can be recovered.")
         end
     end

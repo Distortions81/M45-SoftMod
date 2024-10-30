@@ -31,7 +31,7 @@ function dodrawlogo()
                 if pforce then
                     pforce.set_spawn_position(cpos, msurf)
                 else
-                    console_print("dodrawlogo: Player force not found.")
+                    console_print("[ERROR] dodrawlogo: Player force not found.")
                 end
             end
 

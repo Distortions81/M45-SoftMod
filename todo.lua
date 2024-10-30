@@ -24,7 +24,7 @@ local function todo_id_to_index(id)
             end
         end
     end
-    console_print("todo_id_to_index: could not find note id: " .. id)
+    console_print("[ERROR] todo_id_to_index: could not find note id: " .. id)
     return -1
 end
 
@@ -689,7 +689,7 @@ local function on_gui_click(event)
                         storage.todo_player_editing_id[player.index] = storage.todo_list[i].id
                         make_m45_todo_submenu(player, i, true)
                     else
-                        local error = "ERROR: m45_todo_submenu_edit: Unable to find item: " .. i
+                        local error = "[ERROR] m45_todo_submenu_edit: Unable to find item: " .. i
                         smart_print(player, error)
                         console_print(error)
                     end

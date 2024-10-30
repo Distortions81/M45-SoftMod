@@ -7,18 +7,19 @@ require "utility"
 -- Shamelessly stole most of this function from RedMew.
 -- I also had no idea inventory-size could be set from create_entity.
 -- https://github.com/Refactorio/RedMew/blob/develop/features/dump_offline_inventories.lua
-function dumpPlayerInventory(player)
-
+function dumpPlayerInventory(player, force)
     if not player then
         return false
     end
-    if not player.index then
+    if not player.valid then
         return false
     end
 
-    if storage.cleaned_players[player.index] then
-        if storage.cleaned_players[player.index] == true then
-            return false
+    if not force then
+        if storage.cleaned_players[player.index] then
+            if storage.cleaned_players[player.index] == true then
+                return false
+            end
         end
     end
 
@@ -55,23 +56,37 @@ function dumpPlayerInventory(player)
         inventory_size = inv_corpse_size,
         player_index = player_index
     }
+    if not corpse then
+        return false
+    end
+
     corpse.active = true
 
     local inv_corpse = corpse.get_inventory(defines.inventory.character_corpse)
 
-    for item in inv_main_contents do
-        inv_corpse.insert(item)
-    end
-    for item in inv_trash_contents do
-        inv_corpse.insert(item)
+    if not inv_corpse then
+        return false
     end
 
     if inv_main_contents then
-        inv_main.clear()
+        for _, item in pairs(inv_main_contents) do
+            inv_corpse.insert(item)
+        end
+
+        if inv_main_contents then
+            inv_main.clear()
+        end
     end
     if inv_trash_contents then
-        inv_trash.clear()
+        for _, item in pairs(inv_trash_contents) do
+            inv_corpse.insert(item)
+        end
+
+        if inv_trash_contents then
+            inv_trash.clear()
+        end
     end
+
 
     -- Mark as cleaned up.
     storage.cleaned_players[player.index] = true
@@ -86,12 +101,11 @@ function check_character_abandoned()
 
     for _, player in pairs(game.players) do
         if not player.connected and is_new(player) then
-
             if storage.last_playtime[player.index] then
                 if game.tick - storage.last_playtime[player.index] > 1 * 60 * 60 * 60 then
-                    if dumpPlayerInventory(player) then
+                    if dumpPlayerInventory(player, false) then
                         gsysmsg("[color=orange] * New player '" .. player.name ..
-                                    "' was not active long enough to become a member, and have been offline for some time. Their items are now considered abandoned, and have been placed at spawn (expires in 15m) *[/color]")
+                            "' was not active long enough to become a member, and have been offline for some time. Their items are now considered abandoned, and have been placed at spawn (expires in 15m) *[/color]")
                     end
                 end
             end
@@ -110,7 +124,7 @@ function make_info_button(player)
             sprite = "file/img/buttons/m45-64.png",
             tooltip = "Opens the server-info window"
         }
-        m45_32.style.size = {64, 64}
+        m45_32.style.size = { 64, 64 }
     end
 end
 
@@ -368,10 +382,10 @@ function make_m45_info_window(player)
                 caption = "v" .. storage.svers
             }
 
-            local tab1_cframe = {tab1_main_frame.add {
+            local tab1_cframe = { tab1_main_frame.add {
                 type = "flow",
                 direction = "vertical"
-            }}
+            } }
             tab1_rframe.style.horizontal_align = "right"
             tab1_rframe.style.vertical_align = "bottom"
             tab1_rframe.style.padding = 4
@@ -997,7 +1011,7 @@ function on_gui_click(event)
 
         if player and player.valid then
             -- debug
-            console_print("GUI_CLICK: " .. player.name .. ": " .. event.element.name)
+            console_print("[ACT] GUI_CLICK: " .. player.name .. ": " .. event.element.name)
 
             -- Info window close
             if event.element.name == "m45_info_close_button" and player.gui and player.gui.center and
@@ -1017,14 +1031,14 @@ function on_gui_click(event)
                         --Since wube nerfed the damage red flash...
                         rendering.draw_rectangle {
                             surface = player.surface,
-                            left_top = {-8192, -8192},
-                            right_bottom = {8192, 8192},
-                            color = {1, 0, 0},
+                            left_top = { -8192, -8192 },
+                            right_bottom = { 8192, 8192 },
+                            color = { 1, 0, 0 },
                             filled = true,
-                            players = {player},
+                            players = { player },
                             time_to_live = 8
                         }
-                        
+
                         player.character.damage(10, "enemy") -- Grab attention
                         smart_print(player,
                             "[color=red](SYSTEM) *** PLEASE READ THE INFO WINDOW BEFORE CLOSING IT!!! ***[/color]")
@@ -1058,7 +1072,6 @@ function on_gui_click(event)
             elseif event.element.name == "reset_clock" then
                 -- reset-clock-close
                 if player.gui and player.gui.top and player.gui.top.reset_clock then
-
                     if storage.hide_clock then
                         if storage.hide_clock[player.index] and storage.hide_clock[player.index] == true and
                             storage.resetdur ~= "" then
@@ -1071,7 +1084,6 @@ function on_gui_click(event)
                                 player.gui.top.reset_clock.caption = ">"
                             end
                         end
-
                     end
                 end
             end

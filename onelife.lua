@@ -1,4 +1,8 @@
 function doOnelife(event)
+    if not global.oneLifeMode then
+        return
+    end
+    
     if not event or not event.player_index then
         return
     end
@@ -42,6 +46,10 @@ function doOnelife(event)
 end
 
 function onelife_clickhandler(event)
+    if not global.oneLifeMode then
+        return
+    end
+
     if not event or not event.player_index then
         return
     end
@@ -89,6 +97,10 @@ function onelife_clickhandler(event)
 end
 
 function make_onelife_button(player)
+    if not global.oneLifeMode then
+        return
+    end
+
     if player.gui.top.spec_button then
         player.gui.top.spec_button.destroy()
     end

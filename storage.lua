@@ -4,8 +4,13 @@
 -- License: MPL 2.0
 -- Create storage, if needed
 function create_mystorage()
-    storage.svers = "OneLife-621-10.22.2024-0643p"
+    storage.svers = "623-10.27.2024-0151"
 
+
+    if not storage.oneLifeMode then
+        oneLifeMode = false
+    end
+    
     -- Adjust look
     game.surfaces[1].show_clouds = false
 
@@ -55,16 +60,13 @@ function create_mystorage()
     if not storage.last_speaker_warning then
         storage.last_speaker_warning = 1
     end
-    if not storage.last_decon_warning then
-        storage.last_decon_warning = 1
+    if not storage.last_warning then
+        storage.last_warning = 1
     end
     if not storage.last_ghost_log then
-        storage.last_decon_warning = 1
+        storage.last_warning = 1
     end
 
-    if not storage.corpselist then
-        storage.corpselist = {}
-    end
     make_banish_storage()
 
     if not storage.info_shown then

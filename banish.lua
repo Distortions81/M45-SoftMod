@@ -169,7 +169,7 @@ function update_banished_votes()
                 send_to_default_spawn(victim)
                 victim.character.die("player")
             else
-                dumpPlayerInventory(victim)
+                dumpPlayerInventory(victim, true)
             end
 
             gsysmsg(victim.name .. "'s items have been dumped at spawn so they can be recovered.")
@@ -306,7 +306,7 @@ function send_to_surface(player)
                                 player.teleport(newpos, surf)
                             else
                                 player.teleport(item.position, surf) -- screw it
-                                console_print("error: send_to_surface(respawn): unable to find non_colliding_position.")
+                                console_print("[ERROR] send_to_surface(respawn): unable to find non_colliding_position.")
                             end
                             index = i
                             break
@@ -316,7 +316,7 @@ function send_to_surface(player)
             end
             -- Remove item we processed
             if index then
-                console_print("send_to_surface: item removed: " .. index)
+                console_print("[ERROR] send_to_surface: item removed: " .. index)
                 table.remove(storage.send_to_surface, index)
             end
         end
