@@ -359,8 +359,9 @@ end
 
 function on_rocket_launch_ordered(event)
     if event.player_index and event.rocket_silo then
-        local msg = "[ACT] " ..
-            player.name .. " ordered a rocket launch at" .. make_gps_str_obj(player, event.rocket_silo)
+        local player = game.players[event.player_index]
+
+        local msg = "[ACT] " .. player.name .. " ordered a rocket launch at" .. make_gps_str_obj(player, event.rocket_silo)
         console_print(msg)
         message_all(msg)
     end
