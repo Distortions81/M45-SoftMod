@@ -94,6 +94,9 @@ function onelife_clickhandler(event)
 end
 
 function make_onelife_button(player)
+    if not player then
+        return
+    end
     if player.gui.top.spec_button then
         player.gui.top.spec_button.destroy()
     end
