@@ -46,9 +46,9 @@ function on_built_entity(event)
 
             if obj.name == "programmable-speaker" or
                 (obj.name == "entity-ghost" and obj.ghost_name == "programmable-speaker") then
-                if (storage.last_speaker_warning and game.tick - storage.last_speaker_warning >= 5) then
+                if (storage.last_speaker_warning and game.tick - storage.last_speaker_warning >= 120) then
                     if player.admin == false then -- Don't bother with mods
-                        gsysmsg(player.name .. " placed a speaker at" .. make_gps_str_obj(player, obj))
+                        message_all(player.name .. " placed a speaker at" .. make_gps_str_obj(player, obj))
                         storage.last_speaker_warning = game.tick
                     end
                 end
