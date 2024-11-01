@@ -426,6 +426,9 @@ function clear_corpse_tag(event)
 
         if ent and ent.type and ent.type == "character-corpse" then
             if ent and ent.character_corpse_player_index and event.player_index then
+                if event.character_corpse_player_index == event.player_index then
+                    return -- Dont warn if it is ours
+                end
                 player = game.players[event.player_index]
                 victim = game.players[ent.character_corpse_player_index]
 
