@@ -174,7 +174,7 @@ function on_player_deconstructed_area(event)
 
                     if is_new(player) or is_member(player) then -- Dont bother with regulars/moderators
                         if not is_banished(player) then         -- Don't let bansihed players use this to spam
-                            if (storage.last_warning and game.tick - storage.last_warning >= 15) then
+                            if (storage.last_warning and game.tick - storage.last_warning >= 120) then
                                 storage.last_warning = game.tick
                                 message_all(msg)
                             end
@@ -202,7 +202,7 @@ function on_marked_for_upgrade(event)
 
             if is_new(player) or is_member(player) then -- Dont bother with regulars/moderators
                 if not is_banished(player) then         -- Don't let bansihed players use this to spam
-                    if (storage.last_warning and game.tick - storage.last_warning >= 15) then
+                    if (storage.last_warning and game.tick - storage.last_warning >= 120) then
                         storage.last_warning = game.tick
                         message_all(msg)
                     end
@@ -228,7 +228,7 @@ function on_cancelled_upgrade(event)
 
             if is_new(player) or is_member(player) then -- Dont bother with regulars/moderators
                 if not is_banished(player) then         -- Don't let bansihed players use this to spam
-                    if (storage.last_warning and game.tick - storage.last_warning >= 15) then
+                    if (storage.last_warning and game.tick - storage.last_warning >= 120) then
                         storage.last_warning = game.tick
                         message_all(msg)
                     end
@@ -254,7 +254,7 @@ function on_marked_for_deconstruction(event)
 
             if is_new(player) or is_member(player) then -- Dont bother with regulars/moderators
                 if not is_banished(player) then         -- Don't let bansihed players use this to spam
-                    if (storage.last_warning and game.tick - storage.last_warning >= 15) then
+                    if (storage.last_warning and game.tick - storage.last_warning >= 120) then
                         storage.last_warning = game.tick
                         message_all(msg)
                     end
@@ -280,7 +280,7 @@ function on_cancelled_deconstruction(event)
 
             if is_new(player) or is_member(player) then -- Dont bother with regulars/moderators
                 if not is_banished(player) then         -- Don't let bansihed players use this to spam
-                    if (storage.last_warning and game.tick - storage.last_warning >= 15) then
+                    if (storage.last_warning and game.tick - storage.last_warning >= 120) then
                         storage.last_warning = game.tick
                         message_all(msg)
                     end
@@ -297,11 +297,11 @@ function on_player_flushed_fluid(event)
         local player = game.players[event.player_index]
         local obj = event.entity
 
-        if player then
+        if player and event.amount and event.fluid and event.amount >= 1 then
             local msg = "[ACT] " ..
                 player.name ..
                 " flushed " ..
-                obj.name .. " of " .. event.amount .. " " .. event.fluid .. " at" .. make_gps_str_obj(player, obj)
+                obj.name .. " of " .. math.floor(event.amount) .. " " .. event.fluid .. " at" .. make_gps_str_obj(player, obj)
 
             if player.surface and player.surface.index ~= 1 then
                 msg = msg .. " (" .. player.surface.name .. ")"
@@ -309,7 +309,7 @@ function on_player_flushed_fluid(event)
 
             if is_new(player) or is_member(player) then -- Dont bother with regulars/moderators
                 if not is_banished(player) then         -- Don't let bansihed players use this to spam
-                    if (storage.last_warning and game.tick - storage.last_warning >= 15) then
+                    if (storage.last_warning and game.tick - storage.last_warning >= 120) then
                         storage.last_warning = game.tick
                         message_all(msg)
                     end
@@ -345,7 +345,7 @@ function on_player_driving_changed_state(event)
 
             if is_new(player) or is_member(player) then -- Dont bother with regulars/moderators
                 if not is_banished(player) then         -- Don't let bansihed players use this to spam
-                    if (storage.last_warning and game.tick - storage.last_warning >= 15) then
+                    if (storage.last_warning and game.tick - storage.last_warning >= 120) then
                         storage.last_warning = game.tick
                         message_all(msg)
                     end
