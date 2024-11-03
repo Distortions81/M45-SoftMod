@@ -436,8 +436,6 @@ function clear_corpse_tag(event)
                     local buf = player.name ..
                         " looted the body of " .. victim.name .. " at" .. make_gps_str_obj(player, victim)
                     if victim.name ~= player.name then
-                        gsysmsg(buf)
-                    else
                         message_all(buf)
                     end
                 end

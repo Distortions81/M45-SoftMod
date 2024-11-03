@@ -29,7 +29,7 @@ function message_all(message)
 end
 
 -- System messages (game/discord)
-function gsysmsg(message)
+function message_all_sys(message)
     if message then
         game.print("[color=orange](SYSTEM)[/color] [color=red]" .. message .. "[/color]")
         print("[MSG] " .. message)

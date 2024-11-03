@@ -172,7 +172,7 @@ function on_player_banned(event)
         local player = game.players[event.player_index]
         if player then
             dumpPlayerInventory(player, true)
-            gsysmsg(player.name .. "'s items have been left at spawn, so they can be recovered.")
+            message_all_sys(player.name .. "'s items have been left at spawn, so they can be recovered.")
         end
     end
 end

@@ -117,7 +117,7 @@ function update_banished_votes()
         if is_banished(victim) == false and prevstate == true then
             local msg = victim.name .. " is no longer banished."
             print("[REPORT] SYSTEM " .. msg)
-            gsysmsg(msg)
+            message_all_sys(msg)
 
             -- Kill them, so items are left behind
             if victim.character and victim.character.valid then
@@ -135,7 +135,7 @@ function update_banished_votes()
         elseif is_banished(victim) == true and prevstate == false then
             -- Was not banished, but is now.
             local msg = victim.name .. " has been banished."
-            gsysmsg(msg)
+            message_all_sys(msg)
             print("[REPORT] SYSTEM " .. msg)
             showBanishedInform(false, victim)
 
@@ -172,7 +172,7 @@ function update_banished_votes()
                 dumpPlayerInventory(victim, true)
             end
 
-            gsysmsg(victim.name .. "'s items have been dumped at spawn so they can be recovered.")
+            message_all_sys(victim.name .. "'s items have been dumped at spawn so they can be recovered.")
 
             if not storage.send_to_surface then
                 storage.send_to_surface = {}
@@ -237,7 +237,7 @@ function g_banish(player, victim, reason)
 
                                 -- Send report to discord and add to vote list
                                 local message = player.name .. " voted to banish: " .. victim.name .. " for: " .. reason
-                                gsysmsg(message)
+                                message_all_sys(message)
                                 print("[REPORT] " .. message)
                                 smart_print(player, "(SYSTEM): Your vote has been added, and posted on Discord!")
                                 smart_print(player, "/unbanish <player> to withdraw your vote.")
@@ -544,7 +544,7 @@ function add_banish_commands()
                                             -- Send report to discord and withdraw vote
                                             local message = player.name .. " WITHDREW their vote to banish: " ..
                                                                 victim.name
-                                            gsysmsg(message)
+                                            message_all_sys(message)
                                             print("[REPORT] " .. message)
                                             smart_print(player, "Your vote has been withdrawn, and posted on Discord.")
                                             vote.withdrawn = true
