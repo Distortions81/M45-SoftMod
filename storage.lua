@@ -4,7 +4,7 @@
 -- License: MPL 2.0
 -- Create storage, if needed
 function create_mystorage()
-    storage.svers = "624-11.01.2024-1232"
+    storage.svers = "624-11.02.2024-1043p"
 
 
     if not storage.oneLifeMode then
