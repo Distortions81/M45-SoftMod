@@ -32,7 +32,6 @@ script.on_load(function()
                 input = param.parameter
             end
 
-            PERMS_MakeUserGroups()
             for _, target in pairs(game.connected_players) do
                 if target.valid and target.gui and target.gui.top and target.gui.top.reset_clock then
                     if storage.PData and storage.PData[target.index].hideClock == true or input == "" then
@@ -73,7 +72,6 @@ script.on_load(function()
             if param.parameter then
                 input = param.parameter
             end
-            PERMS_MakeUserGroups()
             storage.SM_Store.resetDate = input
         end)
 
@@ -91,7 +89,6 @@ script.on_load(function()
                 end
             end
 
-            PERMS_MakeUserGroups()
 
             if param and param.parameter then
                 local pforce = game.forces["player"]
@@ -124,7 +121,6 @@ script.on_load(function()
                 end
             end
 
-            PERMS_MakeUserGroups()
 
             if param and param.parameter then
                 local pforce = game.forces["player"]
@@ -167,7 +163,6 @@ script.on_load(function()
                 end
             end
 
-            PERMS_MakeUserGroups()
 
             if param and param.parameter then
                 local pforce = game.forces["player"]
@@ -339,7 +334,6 @@ script.on_load(function()
                 end
             end
 
-            PERMS_MakeUserGroups()
 
             -- Process argument
             if not param.parameter then
@@ -424,8 +418,6 @@ script.on_load(function()
         commands.add_command("sversion", "server use only", function(param)
             local player
 
-            RunSetup()
-
             if param and param.player_index then
                 player = game.players[param.player_index]
             end
@@ -448,7 +440,6 @@ script.on_load(function()
                 end
             end
 
-            PERMS_MakeUserGroups()
 
             if param.parameter then
                 storage.SM_Store.serverName = param.parameter
@@ -516,17 +507,15 @@ script.on_load(function()
                 local victim = game.players[param.parameter]
 
                 if victim and victim.valid then
-                    if storage.active_playtime and storage.active_playtime[victim.index] then
-                        storage.active_playtime[victim.index] = 0
-                        if victim and victim.valid and storage.defaultgroup then
-                            storage.defaultgroup.add_player(victim)
-                        end
-                        if player then
-                            UTIL_SmartPrint(player, "Player set to 0.")
-                            UTIL_MsgAll(victim.name .. " is now reset!")
-                        end
-                        return
+                    storage.PData[victim.index].playScore = 0
+                    if victim and victim.valid and storage.SM_Store.defGroup then
+                        storage.SM_Store.defGroup.add_player(victim)
                     end
+                    if player then
+                        UTIL_SmartPrint(player, "Player set to 0.")
+                        UTIL_MsgAll(victim.name .. " is now reset!")
+                    end
+                    return
                 end
             end
             UTIL_SmartPrint(player, "Player not found.")

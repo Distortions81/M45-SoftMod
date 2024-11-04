@@ -4,21 +4,6 @@
 -- License: MPL 2.0
 require "utility"
 
-function ONLINE_Init()
-    if not storage.m45_online_submenu_target then
-        storage.m45_online_submenu_target = {}
-    end
-    if not storage.online_brief then
-        storage.online_brief = {}
-    end
-    if not storage.online_brief then
-        storage.online_brief = {}
-    end
-    if not storage.show_offline_state then
-        storage.show_offline_state = {}
-    end
-end
-
 function ONLINE_MakeOnlineButton(player)
     -- Online button--
     if player.gui.top.online_button then
@@ -91,9 +76,8 @@ function ONLINE_UpdatePlayerList()
         -- Show last online in minutes
         local isafk = "   "
 
-        if victim and storage.last_playtime then
-            if storage.last_playtime and storage.last_playtime[victim.index] then
-                local time = ((game.tick - storage.last_playtime[victim.index]) / 60)
+            if storage.PData[victim.index].lastOnline then
+                local time = ((game.tick - storage.PData[victim.index].lastOnline) / 60)
                 local days = math.floor(time / 60 / 60 / 24)
                 local hours = math.floor(time / 60 / 60)
                 local minutes = math.floor(time / 60)
@@ -106,12 +90,11 @@ function ONLINE_UpdatePlayerList()
                     isafk = minutes .. "m"
                 end
             end
-        end
 
-        if storage.active_playtime[victim.index] then
+        if storage.PData[victim.index].score then
             table.insert(results, {
                 victim = victim,
-                score = storage.active_playtime[victim.index],
+                score = storage.PData[victim.index].score,
                 time = victim.online_time,
                 type = utag,
                 afk = isafk
@@ -142,15 +125,15 @@ function ONLINE_UpdatePlayerList()
             item.victim.gui.top.online_button.number = count
         end
     end
-    storage.player_count = count
-    storage.tplayer_count = tcount
-    storage.player_list = results
+    storage.SM_Store.pcount = count
+    storage.SM_Store.tcount = tcount
+    storage.SM_Store.playerList = results
 
-    local tmp_online = storage.onlinePlayersCache
+    local tmp_online = storage.onlineCache
     UTIL_SendPlayers(nil)
 
     -- Refresh open player-online windows
-    if tmp_online ~= storage.onlinePlayersCache then
+    if tmp_online ~= storage.SM_Store.onlineCache then
         for _, victim in pairs(game.connected_players) do
             if victim and victim.valid and victim.gui and victim.gui.left and victim.gui.left.m45_online then
                 victim.gui.left.m45_online.destroy()

@@ -32,7 +32,6 @@ function RunSetup()
 
         STORAGE_CreateGlobal()
         TODO_Init()
-        ONELIFE_Init()
         LOGO_DrawLogo(true)
 
         PERMS_MakeUserGroups()

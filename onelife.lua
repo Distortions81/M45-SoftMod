@@ -1,5 +1,5 @@
 function ONELIFE_Main(event)
-    if not storage.oneLifeMode then
+    if not storage.SM_Store.oneLifeMode then
         return
     end
 
@@ -45,7 +45,7 @@ function ONELIFE_Main(event)
 end
 
 function ONELIFE_Clicks(event)
-    if not storage.oneLifeMode then
+    if not storage.SM_Store.oneLifeMode then
         return
     end
 
@@ -61,24 +61,20 @@ function ONELIFE_Clicks(event)
         return
     end
     if event.element and event.element.valid and event.element.name == "spec_button" then
-        -- Create player entry if needed
-        if not storage.spec_confirm[player.index] then
-            storage.spec_confirm[player.index] = 0
-        end
         -- Otherwise confirm
-        if storage.spec_confirm and player.index and storage.spec_confirm[player.index] then
-            if storage.spec_confirm[player.index] >= 2 then
-                storage.spec_confirm[player.index] = nil
+        if storage.PData[player.index].permDeath then
+            if storage.PData[player.index].permDeath  >= 2 then
+                storage.PData[player.index].permDeath = nil
                 player.character.die("player")
                 ONELIFE_Main(event)
                 return
-            elseif storage.spec_confirm[player.index] < 2 then
+            elseif storage.PData[player.index].permDeath  < 2 then
                 UTIL_SmartPrintColor(player,
-                    "[color=red](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.spec_confirm[player.index] ..
+                    "[color=red](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.PData[player.index].permDeath  ..
                     " more times to confirm.[/color]")
             end
 
-            storage.spec_confirm[player.index] = storage.spec_confirm[player.index] + 1
+            storage.PData[player.index].permDeath  = storage.PData[player.index].permDeath  + 1
         end
     end
 end
@@ -91,7 +87,7 @@ function ONELIFE_MakeButton(player)
         player.gui.top.spec_button.destroy()
     end
 
-    if not storage.oneLifeMode then
+    if not storage.SM_Store.oneLifeMode then
         if player.controller_type == defines.controllers.spectator then
             player.set_controller {
                 type = defines.controllers.character,
@@ -110,11 +106,5 @@ function ONELIFE_MakeButton(player)
             tooltip = "Kills you forever to become spectator (NO UNDO)"
         }
         m45_32.style.size = { 64, 64 }
-    end
-end
-
-function ONELIFE_Init()
-    if not storage.spec_confirm then
-        storage.spec_confirm = {}
     end
 end

@@ -39,10 +39,9 @@ end
 -- Refresh players online window
 
 script.on_nth_tick(599, function(event)
+
     -- Tick divider, one minute
-    if not storage.SM_Store.tickDiv then
-        storage.SM_Store.tickDiv = 0
-    end
+    RunSetup()
     storage.SM_Store.tickDiv = storage.SM_Store.tickDiv + 1
 
     if storage.SM_Store.tickDiv >= 6 then
@@ -140,7 +139,7 @@ function EVENT_PlayerInit(player)
     ONLINE_UpdatePlayerList()
 
     if storage.PData then
-        storage.PData[event.player_index].lastOnline = game.tick
+        storage.PData[player.index].lastOnline = game.tick
     end
     if storage.cheatson then
         player.cheat_mode = true
@@ -156,13 +155,13 @@ function EVENT_Joined(event)
     end
     local player = game.players[event.player_index]
 
+    STORAGE_MakePlayerStorage(player)
     EVENT_PlayerInit(player)
     BANISH_SendToSurface(player)
 end
 
 -- New player created, insert items set perms, show players online, welcome to map.
 function EVENT_PlayerCreated(event)
-    RunSetup()
     UTIL_SendPlayers(nil)
 
     if not event or not event.player_index then
@@ -261,7 +260,7 @@ script.on_event(
         -- Mark player active
         if event.player_index then
             local player = game.players[event.player_index]
-            if player and player.valid then
+            if player and player.valid and player.connected and storage.PData and storage.PData[event.player_index] then
                 -- Only mark active on movement if walking
                 if event.name == defines.events.on_player_changed_position then
                     if player.walking_state then

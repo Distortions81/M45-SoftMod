@@ -39,6 +39,9 @@ function STORAGE_CreateGlobal()
 
             --Players Online
             onlineCache = "",
+            pcount = 0,
+            tcount = 0,
+            playerList = "",
 
             --Spawn Logo
             redrawLogo = true,
@@ -57,19 +60,31 @@ end
 function STORAGE_MakePlayerStorage(player)
     if not storage.PData[player.index] then
         storage.PData[player.index] = {
+            --score
             active = false,
             moving = false,
             score = 0,
             banished = 0,
-            hideClock = false,
             lastOnline = game.tick,
+
+            --prefs
+            hideClock = false,
+
+            --state
             cleaned = false,
             patreon = false,
             nitro = false,
+
+            --throttle
             regAttempts = 0,
             lastWarned = 0,
             reports = 0,
-            permDeath = false
+            permDeath = 0,
+
+            --online menu
+            online_submenu_target = nil,
+            online_brief = false,
+            online_show_offline = false
         }
     end
 end

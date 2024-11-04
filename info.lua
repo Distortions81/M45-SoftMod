@@ -261,14 +261,14 @@ function INFO_InfoWin(player)
             }
 
             -- PATREON
-            if storage.SM_Store.patreonCredits[1] ~= nil then
+            if storage.SM_Store.patreonCredits[1] then
                 tab1_lframe.add {
                     type = "label",
                     caption = "[color=purple]SUPPORTERS:[/color]"
                 }
                 local i = 1
-                while storage.SM_Store.patreonCredits[i] ~= nil do
-                    if storage.SM_Store.patreonCredits[i + 1] ~= nil then
+                while storage.SM_Store.patreonCredits[i]  do
+                    if storage.SM_Store.patreonCredits[i + 1]  then
                         tab1_lframe.add {
                             type = "label",
                             caption = "[color=purple]" .. storage.SM_Store.patreonCredits[i] .. ", " .. storage.SM_Store.patreonCredits[i+1] ..
@@ -291,14 +291,14 @@ function INFO_InfoWin(player)
             }
 
             -- NITRO
-            if storage.SM_Store.nitroCredits[1] ~= nil then
+            if storage.SM_Store.nitroCredits[1]then
                 tab1_lframe.add {
                     type = "label",
                     caption = "[color=cyan]DISCORD NITRO:[/color]"
                 }
                 local i = 1
-                while storage.SM_Store.nitroCredits[i] ~= nil do
-                    if storage.SM_Store.nitroCredits[i + 1] ~= nil then
+                while storage.SM_Store.nitroCredits[i] do
+                    if storage.SM_Store.nitroCredits[i + 1] then
                         tab1_lframe.add {
                             type = "label",
                             caption = "[color=cyan]" .. storage.SM_Store.nitroCredits[i] .. ", " .. storage.SM_Store.nitroCredits[i + 1] ..

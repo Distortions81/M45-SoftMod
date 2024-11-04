@@ -6,41 +6,41 @@ require "utility"
 
 -- Create player groups if they don't exist, and create storage links to them
 function PERMS_MakeUserGroups()
-    storage.defaultgroup = game.permissions.get_group("Default")
-    storage.membersgroup = game.permissions.get_group("Members")
-    storage.regularsgroup = game.permissions.get_group("Regulars")
-    storage.veteransgroup = game.permissions.get_group("Veterans")
-    storage.modsgroup = game.permissions.get_group("Moderators")
+    storage.SM_Store.defGroup = game.permissions.get_group("Default")
+    storage.SM_Store.memGroup = game.permissions.get_group("Members")
+    storage.SM_Store.regGroup = game.permissions.get_group("Regulars")
+    storage.SM_Store.vetGroup = game.permissions.get_group("Veterans")
+    storage.SM_Store.modGroup = game.permissions.get_group("Moderators")
 
-    if (not storage.defaultgroup) then
+    if (not storage.SM_Store.defGroup) then
         game.permissions.create_group("Default")
     end
 
-    if (not storage.membersgroup) then
+    if (not storage.SM_Store.memGroup) then
         game.permissions.create_group("Members")
     end
 
-    if (not storage.regularsgroup) then
+    if (not storage.SM_Store.regGroup) then
         game.permissions.create_group("Regulars")
     end
 
-    if (not storage.veteransgroup) then
+    if (not storage.SM_Store.vetGroup) then
         game.permissions.create_group("Veterans")
     end
 
-    if (not storage.modsgroup) then
+    if (not storage.SM_Store.modGroup) then
         game.permissions.create_group("Moderators")
     end
 
-    storage.defaultgroup = game.permissions.get_group("Default")
-    storage.membersgroup = game.permissions.get_group("Members")
-    storage.regularsgroup = game.permissions.get_group("Regulars")
-    storage.veteransgroup = game.permissions.get_group("Veterans")
-    storage.modsgroup = game.permissions.get_group("Moderators")
+    storage.SM_Store.defGroup  = game.permissions.get_group("Default")
+    storage.SM_Store.memGroup = game.permissions.get_group("Members")
+    storage.SM_Store.regGroup  = game.permissions.get_group("Regulars")
+    storage.SM_Store.vetGroup = game.permissions.get_group("Veterans")
+    storage.SM_Store.modGroup = game.permissions.get_group("Moderators")
 end
 
 function PERMS_SetBlueprintsAllowed(group, option)
-    if group ~= nil then
+    if group then
         group.set_allows_action(defines.input_action.alt_select_blueprint_entities, option)
         group.set_allows_action(defines.input_action.cancel_new_blueprint, option)
         group.set_allows_action(defines.input_action.copy_opened_blueprint, option)
@@ -71,7 +71,7 @@ end
 function PERMS_SetPermissions()
     -- Auto set default group permissions
 
-    if storage.defaultgroup then
+    if storage.SM_Store.defGroup then
         -- If new user restrictions are on, then disable all permissions
         -- Otherwise undo
         local option = true
@@ -79,48 +79,46 @@ function PERMS_SetPermissions()
             option = false
         end
 
-        storage.defaultgroup.set_allows_action(defines.input_action.change_programmable_speaker_alert_parameters, option)
-        storage.defaultgroup.set_allows_action(defines.input_action.change_programmable_speaker_circuit_parameters,
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.change_programmable_speaker_alert_parameters, option)
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.change_programmable_speaker_circuit_parameters,
             option)
-        storage.defaultgroup.set_allows_action(defines.input_action.change_programmable_speaker_parameters, option)
-        storage.defaultgroup.set_allows_action(defines.input_action.launch_rocket, option)
-        storage.defaultgroup.set_allows_action(defines.input_action.cancel_research, option)
-        storage.defaultgroup.set_allows_action(defines.input_action.cancel_upgrade, option)
-        storage.defaultgroup.set_allows_action(defines.input_action.upgrade, option)
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.change_programmable_speaker_parameters, option)
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.launch_rocket, option)
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.cancel_research, option)
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.cancel_upgrade, option)
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.upgrade, option)
 
         -- Added 1-2022
-        storage.defaultgroup.set_allows_action(defines.input_action.delete_blueprint_library, option)
-        storage.defaultgroup.set_allows_action(defines.input_action.drop_blueprint_record, option)
-        storage.defaultgroup.set_allows_action(defines.input_action.import_blueprint, option)
-        storage.defaultgroup.set_allows_action(defines.input_action.import_blueprint_string, option)
-        storage.defaultgroup.set_allows_action(defines.input_action.import_blueprints_filtered, option)
-        storage.defaultgroup.set_allows_action(defines.input_action.reassign_blueprint, option)
-        storage.defaultgroup.set_allows_action(defines.input_action.cancel_deconstruct, option)
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.delete_blueprint_library, option)
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.drop_blueprint_record, option)
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.import_blueprint, option)
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.import_blueprint_string, option)
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.import_blueprints_filtered, option)
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.reassign_blueprint, option)
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.cancel_deconstruct, option)
 
         -- Added 10-2024
-        storage.defaultgroup.set_allows_action(defines.input_action.deconstruct, false)
-        storage.defaultgroup.set_allows_action(defines.input_action.activate_paste, false)
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.deconstruct, false)
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.activate_paste, false)
     end
 end
 
 -- Flag player as currently moving
 function PERMS_SetPlayerMoving(player)
-    if (player and player.valid and player.connected and player.character and player.character.valid and
-            storage.playermoving) then
+    if (player and player.connected ) then
         -- banished players don't get move score
         if UTIL_Is_Banished(player) == false then
-            storage.playermoving[player.index] = true
+            storage.PData[player.index].moving = true
         end
     end
 end
 
 -- Flag player as currently active
 function PERMS_SetPlayerActive(player)
-    if (player and player.valid and player.connected and player.character and player.character.valid and
-            storage.playeractive) then
+    if (player and player.connected) then
         -- banished players don't get activity score
         if UTIL_Is_Banished(player) == false then
-            storage.playeractive[player.index] = true
+            storage.PData[player.index].active = true
         end
     end
 end

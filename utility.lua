@@ -218,30 +218,20 @@ end
 
 -- Check if player is flagged patreon
 function UTIL_Is_Patreon(victim)
-    if victim and victim.valid then
-        if storage.patreons and storage.patreons[victim.index] then
-            return storage.patreons[victim.index]
+        if storage.PData[victim.index].patreon then
+            return storage.PData[victim.index].patreon
         else
-            storage.patreons[victim.index] = false
             return false
         end
-    end
-
-    return false
 end
 
 -- Check if player is flagged nitro
 function UTIL_Is_Nitro(victim)
-    if victim and victim.valid then
-        if storage.nitros and storage.nitros[victim.index] then
-            return storage.nitros[victim.index]
-        else
-            storage.nitros[victim.index] = false
-            return false
-        end
+    if storage.PData[victim.index].nitro then
+        return storage.PData[victim.index].nitro
+    else
+        return false
     end
-
-    return false
 end
 
 -- permissions system
