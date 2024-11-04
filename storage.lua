@@ -6,21 +6,9 @@
 function STORAGE_CreateGlobal()
     storage.svers = "624-11.02.2024-1043p"
 
-
-    if not storage.oneLifeMode then
-        oneLifeMode = false
+    if not storage.access_count then
+        storage.access_count = {}
     end
-    
-    -- Adjust look
-    game.surfaces[1].show_clouds = false
-
-    -- This mod complely screws player permissions
-    if script.active_mods["RemoteConfiguration"] then
-        storage.disableperms = true
-    else
-        storage.disableperms = false
-    end
-
     if not storage.resetdur then
         storage.resetdur = ""
     end
@@ -42,21 +30,18 @@ function STORAGE_CreateGlobal()
     if not storage.last_playtime then
         storage.last_playtime = {}
     end
-
     if not storage.patreons then
         storage.patreons = {}
     end
     if not storage.nitros then
         storage.nitros = {}
     end
-
     if not storage.patreonlist then
         storage.patreonlist = {}
     end
     if not storage.nitrolist then
         storage.nitrolist = {}
     end
-
     if not storage.last_speaker_warning then
         storage.last_speaker_warning = 1
     end
@@ -66,21 +51,12 @@ function STORAGE_CreateGlobal()
     if not storage.last_ghost_log then
         storage.last_warning = 1
     end
-
-    make_banish_storage()
-
-    if not storage.info_shown then
-        storage.info_shown = {}
-    end
-
     if not storage.hide_clock then
         storage.hide_clock = {}
     end
-
     if not storage.lastonlinestring then
         storage.lastonlinestring = ""
     end
-
     if not storage.cleaned_players then
         storage.cleaned_players = {}
     end
@@ -96,27 +72,21 @@ function STORAGE_MakePlayerStorage(player)
             if not storage.playermoving[player.index] then
                 storage.playermoving[player.index] = false
             end
-
             if not storage.active_playtime[player.index] then
                 storage.active_playtime[player.index] = 0
             end
-
             if not storage.thebanished[player.index] then
                 storage.thebanished[player.index] = 0
             end
-
             if not storage.hide_clock[player.index] then
                 storage.hide_clock[player.index] = false
             end
-
             if not storage.last_playtime[player.index] then
                 storage.last_playtime[player.index] = false
             end
-
             if not storage.cleaned_players[player.index] then
                 storage.cleaned_players[player.index] = true
             end
-
         end
     end
 end

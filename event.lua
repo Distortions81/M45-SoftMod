@@ -7,6 +7,7 @@ require "info"
 require "log"
 require "todo"
 require "onelife"
+
 local function InsWeapons(player, ammo_amount)
     if player.force.technologies["military"].researched then
         player.insert {
@@ -47,46 +48,11 @@ script.on_nth_tick(599, function(event)
 
     if storage.tickdiv >= 6 then
         storage.tickdiv = 0
-
-        -- Set logo to be redrawn
-        storage.drawlogo = false
-        LOGO_DrawLogo()
-
         ONLINE_UpdatePlayerList() -- online.lua
+        UTIL_MapPin()             -- fix map pin if edit/delete
+        INFO_CheckAbandoned()
     end
 
-    -- Server tag
-    if (storage.servertag and not storage.servertag.valid) then
-        storage.servertag = nil
-    end
-    if (storage.servertag and storage.servertag.valid) then
-        storage.servertag.destroy()
-        storage.servertag = nil
-    end
-    if (not storage.servertag) then
-        local label = "Spawn Area"
-        local xpos = 0
-        local ypos = 0
-
-        if storage.servname and storage.servname ~= "" then
-            label = storage.servname
-        end
-
-        local chartTag = {
-            position = UTIL_GetDefaultSpawn(),
-            icon = {
-                type = "item",
-                name = "heavy-armor"
-            },
-            text = label
-        }
-        local pforce = game.forces["player"]
-        local psurface = game.surfaces[1]
-
-        if pforce and psurface then
-            storage.servertag = pforce.add_chart_tag(psurface, chartTag)
-        end
-    end
 
     -- Add time to connected players
     if storage.active_playtime then
@@ -141,170 +107,152 @@ script.on_nth_tick(599, function(event)
     end
 
     PERMS_AutoPromotePlayer() -- See if player qualifies now
-
-    if not storage.disableperms then
-        INFO_CheckAbandoned()
-    end
 end)
 
 
 -- Handle killing, and teleporting users to other surfaces
 function EVENT_Respawn(event)
-    if event and event.player_index then
-        local player = game.players[event.player_index]
-        BANISH_SendToSurface(player) -- banish.lua
+    if not event or not event.player_index then
+        return
+    end
 
-        -- Cutoff-point, just becomes annoying.
-        if not player.force.technologies["military-science-pack"].researched then
-            InsWeapons(player, 10)
-        end
+    local player = game.players[event.player_index]
+    BANISH_SendToSurface(player) -- banish.lua
+
+    -- Cutoff-point, just becomes annoying.
+    if not player.force.technologies["military-science-pack"].researched then
+        InsWeapons(player, 10)
+    end
+end
+
+local function makeUI(player)
+    if player.gui and player.gui.top then
+        INFO_MakeButton(player)
+        ONLINE_MakeOnlineButton(player)
+        RESET_MakeClock(player)
+        ONELIFE_MakeButton(player)
+    end
+end
+
+function EVENT_PlayerInit(player)
+    STORAGE_MakePlayerStorage(player)
+    PERMS_PromotePlayer(player)
+    makeUI(player)
+    ONLINE_UpdatePlayerList()
+
+    if storage.last_playtime then
+        storage.last_playtime[event.player_index] = game.tick
+    end
+    if storage.cheatson then
+        player.cheat_mode = true
     end
 end
 
 -- Player connected, make variables, draw UI, set permissions, and game settings
 function EVENT_Joined(event)
-    if event and event.player_index then
-        local player = game.players[event.player_index]
-        BANISH_SendToSurface(player)
+    UTIL_SendPlayers(nil)
+
+    if not event or not event.player_index then
+        return
     end
+    local player = game.players[event.player_index]
 
-    -- Set clock as NOT MINIMIZED on login
-    if event and event.player_index then
-        if storage.hide_clock and storage.hide_clock[event.player_index] then
-            storage.hide_clock[event.player_index] = false
-        end
-    end
-
-    if storage.cheatson then
-        if event and event.player_index then
-            local player = game.players[event.player_index]
-            if player and player.valid then
-                player.cheat_mode = true
-            end
-        end
-    end
-
-    -- Gui stuff
-    if event and event.player_index then
-        local player = game.players[event.player_index]
-        if player then
-            STORAGE_CreateGlobal()
-            STORAGE_MakePlayerStorage(player)
-            PERMS_MakeUserGroups()
-            PERMS_SetGameSettings(player)
-            PERMS_AutoPromotePlayer()
-
-            LOGO_DrawLogo() -- logo.lua
-
-            if player.gui and player.gui.top then
-                INFO_MakeButton(player)   -- info.lua
-                ONLINE_MakeOnlineButton(player) -- online.lua
-                CLOCK_MakeClock(player)   -- clock.lua
-                ONLINE_MakeButton(player) --onelife.lua
-            end
-
-            if storage.last_playtime then
-                storage.last_playtime[event.player_index] = game.tick
-            end
-            ONLINE_UpdatePlayerList() -- online.lua
-
-            -- Always show to new players, everyone else at least once per map
-            if UTIL_Is_New(player) or not storage.info_shown[player.index] then
-                storage.info_shown[player.index] = true
-                ONLINE_MakeWindow(player) -- online.lua
-                INFO_MemberWelcome(player)   -- info.lua
-                -- make_m45_todo_window(player) --todo.lua
-            end
-        end
-    end
+    EVENT_PlayerInit(player)
+    BANISH_SendToSurface(player)
 end
 
 -- New player created, insert items set perms, show players online, welcome to map.
 function EVENT_PlayerCreated(event)
-    if event and event.player_index then
-        local player = game.players[event.player_index]
+    RunSetup()
+    UTIL_SendPlayers(nil)
 
-        if player and player.valid then
-            storage.drawlogo = false      -- set logo to be redrawn
-            PERMS_MakeUserGroups()
-            LOGO_DrawLogo()                  -- redraw logo
-            PERMS_SetPermissions()
-            UTIL_SendToDefaultSpawn(player) -- incase spawn moved
-            PERMS_SetGameSettings(player)
-
-            -- Cutoff-point, just becomes annoying.
-            if not player.force.technologies["military-2"].researched then
-                player.insert {
-                    name = "iron-plate",
-                    count = 50
-                }
-                player.insert {
-                    name = "copper-plate",
-                    count = 50
-                }
-                player.insert {
-                    name = "wood",
-                    count = 50
-                }
-                player.insert {
-                    name = "burner-mining-drill",
-                    count = 2
-                }
-                player.insert {
-                    name = "stone-furnace",
-                    count = 2
-                }
-                player.insert {
-                    name = "iron-chest",
-                    count = 1
-                }
-            end
-            player.insert {
-                name = "light-armor",
-                count = 1
-            }
-
-            InsWeapons(player, 50) -- research-based
-
-            UTIL_SendPlayers(player)
-            UTIL_MsgAll("[color=green](SYSTEM) Welcome " .. player.name .. " to the map![/color]")
-        end
+    if not event or not event.player_index then
+        return
     end
+    local player = game.players[event.player_index]
+
+    EVENT_PlayerInit(player)
+    UTIL_SendToDefaultSpawn(player)
+    ONLINE_Window(player)
+
+    -- Cutoff-point, just becomes annoying.
+    if not player.force.technologies["military-2"].researched then
+        player.insert {
+            name = "iron-plate",
+            count = 50
+        }
+        player.insert {
+            name = "copper-plate",
+            count = 50
+        }
+        player.insert {
+            name = "wood",
+            count = 50
+        }
+        player.insert {
+            name = "burner-mining-drill",
+            count = 2
+        }
+        player.insert {
+            name = "stone-furnace",
+            count = 2
+        }
+        player.insert {
+            name = "iron-chest",
+            count = 1
+        }
+    end
+    player.insert {
+        name = "light-armor",
+        count = 1
+    }
+
+    InsWeapons(player, 50) -- research-based
+
+    UTIL_MsgAll("[color=green](SYSTEM) Welcome " .. player.name .. " to the map![/color]")
 end
 
 function EVENT_PlayerDied(event)
-    if event and event.player_index then
-        local player = game.players[event.player_index]
-        -- Log to discord
-        if event.cause and event.cause.valid then
-            cause = event.cause.name
-            UTIL_MsgDiscord(player.name ..
-                " was killed by " .. cause .. " at [gps=" .. math.floor(player.position.x) .. "," ..
-                math.floor(player.position.y) .. "]")
-        else
-            UTIL_MsgDiscord(player.name .. " was killed at [gps=" .. math.floor(player.position.x) .. "," ..
-                math.floor(player.position.y) .. "]")
-        end
-        ONELIFE_Init(event)
+    if not event or not event.player_index then
+        return
     end
+
+    local player = game.players[event.player_index]
+
+    -- Log to discord
+    if event.cause and event.cause.valid then
+        cause = event.cause.name
+        UTIL_MsgDiscord(player.name ..
+            " was killed by " .. cause .. " at [gps=" .. math.floor(player.position.x) .. "," ..
+            math.floor(player.position.y) .. "]")
+    else
+        UTIL_MsgDiscord(player.name .. " was killed at [gps=" .. math.floor(player.position.x) .. "," ..
+            math.floor(player.position.y) .. "]")
+    end
+    ONELIFE_Main(event)
 end
 
 -- Main event handler
 script.on_event(
     {
         defines.events.on_player_created, defines.events.on_pre_player_died, defines.events.on_player_respawned,
-        defines.events.on_player_joined_game, defines.events.on_player_left_game,  defines.events.on_player_main_inventory_changed,
+        defines.events.on_player_joined_game, defines.events.on_player_left_game, defines.events
+        .on_player_main_inventory_changed,
         defines.events.on_player_changed_position, defines.events.on_console_chat, defines.events
         .on_player_repaired_entity,
         defines.events.on_gui_click, defines.events.on_gui_text_changed, defines.events.on_player_fast_transferred,
         defines.events.on_console_command, defines.events.on_chart_tag_removed, defines.events.on_chart_tag_modified,
         defines.events.on_chart_tag_added, defines.events.on_research_finished,
         defines.events.on_redo_applied, defines.events.on_undo_applied, defines.events.on_train_schedule_changed,
-        defines.events.on_entity_died, defines.events.on_cancelled_upgrade, defines.events.on_picked_up_item, defines.events.on_player_dropped_item,
-        defines.events.on_player_deconstructed_area, defines.events.on_marked_for_upgrade, defines.events.on_rocket_launch_ordered,
+        defines.events.on_entity_died, defines.events.on_cancelled_upgrade, defines.events.on_picked_up_item, defines
+        .events.on_player_dropped_item,
+        defines.events.on_player_deconstructed_area, defines.events.on_marked_for_upgrade, defines.events
+        .on_rocket_launch_ordered,
         defines.events.on_cancelled_upgrade, defines.events.on_marked_for_deconstruction, defines.events
-        .on_cancelled_deconstruction, defines.events.on_player_flushed_fluid, defines.events.on_player_driving_changed_state,
-        defines.events.on_player_banned, defines.events.on_player_rotated_entity,defines.events.on_player_flipped_entity,
+        .on_cancelled_deconstruction, defines.events.on_player_flushed_fluid, defines.events
+        .on_player_driving_changed_state,
+        defines.events.on_player_banned, defines.events.on_player_rotated_entity, defines.events
+        .on_player_flipped_entity,
         defines.events.on_pre_player_mined_item, defines.events.on_built_entity }, function(event)
         -- If no event, or event is a tick
         if not event or (event and event.name == defines.events.on_tick) then
@@ -354,8 +302,8 @@ script.on_event(
             LOG_PlayerLeft(event)
         elseif event.name == defines.events.on_gui_click then
             INFO_Click(event)
-            ONLINE_Clicks(event) -- online.lua
-            ONLINE_ClickHandle(event) --onelife.lua
+            ONLINE_Clicks(event)       -- online.lua
+            ONELIFE_Clicks(event) --onelife.lua
         elseif event.name == defines.events.on_gui_text_changed then
             -- log
             INFO_TextChanged(event)

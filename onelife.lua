@@ -1,4 +1,4 @@
-function ONELIFE_Init(event)
+function ONELIFE_Main(event)
     if not storage.oneLifeMode then
         return
     end
@@ -44,7 +44,7 @@ function ONELIFE_Init(event)
     }
 end
 
-function ONLINE_ClickHandle(event)
+function ONELIFE_Clicks(event)
     if not storage.oneLifeMode then
         return
     end
@@ -61,10 +61,6 @@ function ONLINE_ClickHandle(event)
         return
     end
     if event.element and event.element.valid and event.element.name == "spec_button" then
-        -- Init storage if needed
-        if not storage.spec_confirm then
-            storage.spec_confirm = {}
-        end
         -- Create player entry if needed
         if not storage.spec_confirm[player.index] then
             storage.spec_confirm[player.index] = 0
@@ -74,7 +70,7 @@ function ONLINE_ClickHandle(event)
             if storage.spec_confirm[player.index] >= 2 then
                 storage.spec_confirm[player.index] = nil
                 player.character.die("player")
-                ONELIFE_Init(event)
+                ONELIFE_Main(event)
                 return
             elseif storage.spec_confirm[player.index] < 2 then
                 UTIL_SmartPrint(player,
@@ -93,7 +89,7 @@ function ONLINE_ClickHandle(event)
     end
 end
 
-function ONLINE_MakeButton(player)
+function ONELIFE_MakeButton(player)
     if not player then
         return
     end
@@ -120,5 +116,11 @@ function ONLINE_MakeButton(player)
             tooltip = "Kills you forever to become spectator (NO UNDO)"
         }
         m45_32.style.size = { 64, 64 }
+    end
+end
+
+function ONELIFE_Init()
+    if not storage.spec_confirm then
+        storage.spec_confirm = {}
     end
 end

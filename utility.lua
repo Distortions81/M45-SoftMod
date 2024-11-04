@@ -4,6 +4,36 @@
 -- License: MPL 2.0
 -- Safe console print
 
+function UTIL_MapPin()
+    -- Server tag
+    if (storage.servertag and not storage.servertag.valid) then
+        storage.servertag = nil
+    end
+    if (storage.servertag and storage.servertag.valid) then
+        storage.servertag.destroy()
+        storage.servertag = nil
+    end
+    if (not storage.servertag) then
+        local label = "https://discord.gg/rQANzBheVh"
+
+        local chartTag = {
+            position = UTIL_GetDefaultSpawn(),
+            icon = {
+                type = "item",
+                name = "heavy-armor"
+            },
+            text = label
+        }
+        local pforce = game.forces["player"]
+        local psurface = game.surfaces[1]
+
+        if pforce and psurface then
+            storage.servertag = pforce.add_chart_tag(psurface, chartTag)
+        end
+    end
+
+end
+
 function UTIL_GPSObj(player, obj)
     if obj then
         if player and player.surface and player.surface.index ~= 1 then
@@ -187,9 +217,6 @@ end
 -- Check if player is flagged patreon
 function UTIL_Is_Patreon(victim)
     if victim and victim.valid then
-        if not storage.patreons then
-            storage.patreons = {}
-        end
         if storage.patreons and storage.patreons[victim.index] then
             return storage.patreons[victim.index]
         else
@@ -204,9 +231,6 @@ end
 -- Check if player is flagged nitro
 function UTIL_Is_Nitro(victim)
     if victim and victim.valid then
-        if not storage.nitros then
-            storage.nitros = {}
-        end
         if storage.nitros and storage.nitros[victim.index] then
             return storage.nitros[victim.index]
         else
@@ -312,7 +336,7 @@ function UTIL_SendToDefaultSpawn(victim)
                 victim.teleport({0, 0}, nsurf)
             end
         else
-            UTIL_ConsolePrint("[ERROR] send_to_default_spawn: The surface nauvis does not exist, could not teleport victim.")
+            UTIL_ConsolePrint("[ERROR] send_to_default_spawn: The surface 1 does not exist, could not teleport victim.")
         end
     else
         UTIL_ConsolePrint("[ERROR] send_to_default_spawn: victim invalid or dead")
@@ -345,7 +369,7 @@ function UTIL_SendToSpawn(victim)
 end
 
 function UTIL_GetDefaultSpawn()
-    local nsurf = game.surfaces["nauvis"]
+    local nsurf = game.surfaces[1]
     if nsurf then
         local pforce = game.forces["player"]
         if pforce then
@@ -356,7 +380,7 @@ function UTIL_GetDefaultSpawn()
             return {0, 0}
         end
     else
-        UTIL_ConsolePrint("[ERROR] get_default_spawn: Couldn't find default surface nauvis.")
+        UTIL_ConsolePrint("[ERROR] get_default_spawn: Couldn't find default surface 1.")
         return {0, 0}
     end
 end

@@ -4,7 +4,7 @@
 -- License: MPL 2.0
 -- Add M45 Logo to spawn area
 function LOGO_DrawLogo()
-    local msurf = game.surfaces["nauvis"]
+    local msurf = game.surfaces[1]
     if msurf then
         -- Only draw if needed
         if not storage.drawlogo then
@@ -68,4 +68,9 @@ function LOGO_DrawLogo()
             }
         end
     end
+end
+
+function LOGO_Init()
+    storage.drawlogo = false
+    LOGO_DrawLogo()
 end

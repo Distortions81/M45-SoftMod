@@ -7,6 +7,7 @@ require "utility"
 -- Shamelessly stole most of this function from RedMew.
 -- I also had no idea inventory-size could be set from create_entity.
 -- https://github.com/Refactorio/RedMew/blob/develop/features/dump_offline_inventories.lua
+
 function INFO_DumpInv(player, force)
     if not player then
         return false
@@ -129,7 +130,7 @@ function INFO_MakeButton(player)
 end
 
 -- M45 Info/Welcome window
-function INFO_MemberWelcome(player)
+function INFO_InfoWin(player)
     -- M45 Welcome--
 
     -- Auto close membership welcome window--
@@ -152,13 +153,6 @@ function INFO_MemberWelcome(player)
             player.gui.screen.m45_info_window.destroy()
         end
         if not player.gui.screen.m45_info_window then
-            if not storage.info_window_timer then
-                storage.info_window_timer = {}
-            end
-            if not storage.info_window_timer[player.index] then
-                storage.info_window_timer[player.index] = game.tick
-            end
-
             local main_flow = player.gui.screen.add {
                 type = "frame",
                 name = "m45_info_window",
@@ -1032,46 +1026,11 @@ function INFO_Click(event)
 
             -- Info window close
             if event.element.name == "m45_info_close_button" and player.gui and player.gui.center and
+                --Info Window
                 player.gui.screen.m45_info_window then
-                if not storage.info_window_timer then
-                    storage.info_window_timer = {}
-                end
-                if not storage.info_window_timer[player.index] then
-                    storage.info_window_timer[player.index] = game.tick
-                end
-                ----------------------------------------------------------------
-                if UTIL_Is_Member(player) or UTIL_Is_Regular(player) or UTIL_Is_Veteran(player) or player.admin or
-                    (UTIL_Is_New(player) and game.tick - storage.info_window_timer[player.index] > (60 * 10)) then
-                    player.gui.screen.m45_info_window.destroy()
-                else
-                    if player and player.character then
-                        --Since wube nerfed the damage red flash...
-                        rendering.draw_rectangle {
-                            surface = player.surface,
-                            left_top = { -8192, -8192 },
-                            right_bottom = { 8192, 8192 },
-                            color = { 1, 0, 0 },
-                            filled = true,
-                            players = { player },
-                            time_to_live = 8
-                        }
-
-                        player.character.damage(10, "enemy") -- Grab attention
-                        UTIL_SmartPrint(player,
-                            "[color=red](SYSTEM) *** PLEASE READ THE INFO WINDOW BEFORE CLOSING IT!!! ***[/color]")
-                        UTIL_SmartPrint(player,
-                            "[color=green](SYSTEM) **** PLEASE READ THE INFO WINDOW BEFORE CLOSING IT!!! ****[/color]")
-                        UTIL_SmartPrint(player,
-                            "[color=blue](SYSTEM) ***** PLEASE READ THE INFO WINDOW BEFORE CLOSING IT!!! *****[/color]")
-                        UTIL_SmartPrint(player,
-                            "[color=white](SYSTEM) ****** PLEASE READ THE INFO WINDOW BEFORE CLOSING IT!!! ******[/color]")
-                        UTIL_SmartPrint(player,
-                            "[color=black](SYSTEM) ******* PLEASE READ THE INFO WINDOW BEFORE CLOSING IT!!! ********[/color]")
-                    end
-                end
+                player.gui.screen.m45_info_window.destroy()
             elseif event.element.name == "patreon_button" and player.gui and player.gui.center and
                 player.gui.screen.m45_info_window then
-                ----------------------------------------------------------------
                 -- QR changetab button (info window)
                 player.gui.screen.m45_info_window.m45_info_window_tabs.selected_tab_index = 6
             elseif event.element.name == "qr_button" and player.gui and player.gui.center and
@@ -1079,12 +1038,11 @@ function INFO_Click(event)
                 -- QR Discord button
                 player.gui.screen.m45_info_window.m45_info_window_tabs.selected_tab_index = 5
             elseif event.element.name == "m45_button" then
-                ----------------------------------------------------------------
                 -- Online window toggle
                 if player.gui and player.gui.center and player.gui.screen.m45_info_window then
                     player.gui.screen.m45_info_window.destroy()
                 else
-                    INFO_MemberWelcome(player)
+                    INFO_InfoWin(player)
                 end
             elseif event.element.name == "reset_clock" then
                 -- reset-clock-close

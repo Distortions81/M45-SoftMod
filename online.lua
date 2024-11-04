@@ -4,6 +4,21 @@
 -- License: MPL 2.0
 require "utility"
 
+function ONLINE_Init()
+    if not storage.m45_online_submenu_target then
+        storage.m45_online_submenu_target = {}
+    end
+    if not storage.online_brief then
+        storage.online_brief = {}
+    end
+    if not storage.online_brief then
+        storage.online_brief = {}
+    end
+    if not storage.show_offline_state then
+        storage.show_offline_state = {}
+    end
+end
+
 function ONLINE_MakeOnlineButton(player)
     -- Online button--
     if player.gui.top.online_button then
@@ -28,10 +43,6 @@ function ONLINE_UpdatePlayerList()
     local count = 0
     local tcount = 0
 
-    -- Init if needed
-    if not storage.active_playtime then
-        storage.active_playtime = {}
-    end
 
     -- Make a table with active time, handle missing data
     for i, victim in pairs(game.players) do
@@ -143,7 +154,7 @@ function ONLINE_UpdatePlayerList()
         for _, victim in pairs(game.connected_players) do
             if victim and victim.valid and victim.gui and victim.gui.left and victim.gui.left.m45_online then
                 victim.gui.left.m45_online.destroy()
-                ONLINE_MakeWindow(victim) -- online.lua
+                ONLINE_Window(victim) -- online.lua
             end
         end
     end
@@ -326,11 +337,6 @@ local function DestroyM45OnlineSub(player)
 end
 
 local function handle_m45_online_submenu(player, target_name)
-    -- init if needed
-    if not storage.m45_online_submenu_target then
-        storage.m45_online_submenu_target = {}
-    end
-
     if player and player.valid and target_name then
         storage.m45_online_submenu_target[player.index] = target_name
         DestroyM45OnlineSub(player)
@@ -339,7 +345,7 @@ local function handle_m45_online_submenu(player, target_name)
 end
 
 -- M45 Online Players Window
-function ONLINE_MakeWindow(player)
+function ONLINE_Window(player)
     -- Auto close membership welcome window--
     if player then
         if player.gui.screen then
@@ -384,10 +390,6 @@ function ONLINE_MakeWindow(player)
                 ONLINE_UpdatePlayerList()
             end
 
-            if not storage.online_brief then
-                storage.online_brief = {}
-            end
-
             local bcheckstate = false
             if storage.online_brief[player.index] then
                 if storage.online_brief[player.index] == true then
@@ -420,9 +422,6 @@ function ONLINE_MakeWindow(player)
                 type = "flow",
                 direction = "horizontal"
             }
-            if not storage.show_offline_state then
-                storage.show_offline_state = {}
-            end
 
             local checkstate = false
             if storage.show_offline_state[player.index] then
@@ -871,7 +870,7 @@ function ONLINE_Clicks(event)
                 if player.gui and player.gui.left and player.gui.left.m45_online then
                     player.gui.left.m45_online.destroy()
                 else
-                    ONLINE_MakeWindow(player)
+                    ONLINE_Window(player)
                 end
             elseif event.element.name == "m45_online_close_button" then
                 ----------------------------------------------------------------
@@ -880,19 +879,13 @@ function ONLINE_Clicks(event)
                     player.gui.left.m45_online.destroy()
                 end
             elseif event.element.name == "m45_online_show_offline" then
-                if not storage.show_offline_state then
-                    storage.show_offline_state = {}
-                end
                 storage.show_offline_state[player.index] = event.element.state
-                ONLINE_MakeWindow(player)
+                ONLINE_Window(player)
             elseif event.element.name == "m45_online_brief" then
-                if not storage.online_brief then
-                    storage.online_brief = {}
-                end
                 storage.online_brief[player.index] = event.element.state
-                ONLINE_MakeWindow(player)
+                ONLINE_Window(player)
             elseif event.element.name == "m45_member_welcome_close" then
-                PERMS_WelcomeNewMember(player)
+                PERMS_WelcomeMember(player)
             elseif event.element.name == "banished_inform_close" then
                 BANISH_InformBanished(true,player)
             end

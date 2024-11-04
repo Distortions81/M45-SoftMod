@@ -49,7 +49,7 @@ script.on_load(function()
                 for _, victim in pairs(game.connected_players) do
                     if victim and victim.valid and victim.gui and victim.gui.screen and
                         victim.gui.screen.m45_info_window then
-                        INFO_MemberWelcome(victim)
+                        INFO_InfoWin(victim)
                     end
                 end
             end
@@ -213,14 +213,14 @@ script.on_load(function()
                     UTIL_SmartPrint(player,"One-life mode enabled.")
                     UTIL_MsgAll("One-life mode enabled.")
                     for _, victim in pairs(game.players) do
-                        ONLINE_MakeButton(victim)
+                        ONELIFE_MakeButton(victim)
                     end
                 elseif param.parameter == "off" and storage.oneLifeMode then
                     storage.oneLifeMode = false
                     UTIL_SmartPrint(player,"One-life mode disabled.")
                     UTIL_MsgAll("One-life mode disabled.")
                     for _, victim in pairs(game.players) do
-                        ONLINE_MakeButton(victim)
+                        ONELIFE_MakeButton(victim)
                     end
                 elseif storage.oneLifeMode then
                     local victim = game.players[param.parameter]
@@ -228,9 +228,9 @@ script.on_load(function()
                     if victim then
                         if victim.controller_type == defines.controllers.spectator then
                             storage.oneLifeMode = false
-                            ONLINE_MakeButton(victim)
+                            ONELIFE_MakeButton(victim)
                             storage.oneLifeMode = true
-                            ONLINE_MakeButton(victim)
+                            ONELIFE_MakeButton(victim)
 
                             UTIL_MsgAll(victim.name .. " was revived!")
                             UTIL_SmartPrint(player, victim.name .. " was revived!")
@@ -387,10 +387,6 @@ script.on_load(function()
 
                 -- Only if arguments
                 if param.parameter and player and player.valid then
-                    -- Init storage if needed
-                    if not storage.access_count then
-                        storage.access_count = {}
-                    end
 
                     -- Init player if needed, else add to
                     if not storage.access_count[player.index] then
@@ -432,7 +428,7 @@ script.on_load(function()
         commands.add_command("sversion", "server use only", function(param)
             local player
 
-            STORAGE_CreateGlobal()
+            RunSetup()
 
             if param and param.player_index then
                 player = game.players[param.player_index]
@@ -644,16 +640,12 @@ script.on_load(function()
         end)
 
         -- Set player to patreon
-        commands.add_command("patreon", "<player> -- (Makes the player a patreon)", function(param)
+        commands.add_command("patreon", "server use only", function(param)
             local player
 
             -- Moderators only
             if param and param.player_index then
-                player = game.players[param.player_index]
-                if player and player.admin == false then
-                    UTIL_SmartPrint(player, "Moderators only.")
-                    return
-                end
+                return
             end
 
             -- Argument required
@@ -662,9 +654,6 @@ script.on_load(function()
 
                 if (victim) then
                     if victim and victim.valid then
-                        if not storage.patreons then
-                            storage.patreons = {}
-                        end
                         if not storage.patreons[victim.index] then
                             storage.patreons[victim.index] = true
                             UTIL_SmartPrint(player, "Player given patreon status.")

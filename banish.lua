@@ -18,14 +18,16 @@ function BANISH_Init()
     if not storage.thebanished then
         storage.thebanished = {}
     end
+    if not storage.reportlimit then
+        storage.reportlimit = {}
+    end
+    if not storage.send_to_surface then
+        storage.send_to_surface = {}
+    end
 end
 
 function BANISH_DoReport(player, report)
     if player and player.valid and report then
-        -- Init limit list if needed
-        if not storage.reportlimit then
-            storage.reportlimit = {}
-        end
 
         -- Add or init player's limit
         if storage.reportlimit[player.index] then
@@ -51,22 +53,6 @@ end
 function BANISH_UpdateVotes()
     -- Reset banished list
     local banishedtemp = {}
-
-    -- Init if needed
-    if not storage.banishvotes then
-        storage.banishvotes = {
-            voter = {},
-            victim = {},
-            reason = {},
-            tick = {},
-            withdrawn = {},
-            overruled = {}
-        }
-    end
-
-    if not storage.thebanished then
-        storage.thebanished = {}
-    end
 
     -- Loop through votes, tally them
     for _, vote in pairs(storage.banishvotes) do
@@ -122,9 +108,6 @@ function BANISH_UpdateVotes()
             -- Kill them, so items are left behind
             if victim.character and victim.character.valid then
                 victim.character.die("player")
-            end
-            if not storage.send_to_surface then
-                storage.send_to_surface = {}
             end
 
             table.insert(storage.send_to_surface, {
@@ -246,17 +229,7 @@ function BANISH_DoBanish(player, victim, reason)
                                 UTIL_SmartPrint(player, "You have used " .. votecount .. " of your 5 available votes.")
                             end
 
-                            -- Init if needed
-                            if not storage.banishvotes then
-                                storage.banishvotes = {
-                                    voter = {},
-                                    victim = {},
-                                    reason = {},
-                                    tick = {},
-                                    withdrawn = {},
-                                    overruled = {}
-                                }
-                            end
+
                             table.insert(storage.banishvotes, {
                                 voter = player,
                                 victim = victim,
@@ -373,9 +346,6 @@ function BANISH_AddBanishCommands()
                         if victim.character and victim.character.valid then
                             victim.character.die("player")
                         end
-                        if not storage.send_to_surface then
-                            storage.send_to_surface = {}
-                        end
                         table.insert(storage.send_to_surface, {
                             victim = victim,
                             surface = "hell",
@@ -406,6 +376,7 @@ function BANISH_AddBanishCommands()
                         if args ~= {} and args[1] then
                             if args[1] == "clear" then
                                 storage.banishvotes = nil
+                                BANISH_Init()
                                 UTIL_SmartPrint(player, "All votes cleared.")
                                 BANISH_UpdateVotes()
                                 return

@@ -37,7 +37,6 @@ function PERMS_MakeUserGroups()
     storage.regularsgroup = game.permissions.get_group("Regulars")
     storage.veteransgroup = game.permissions.get_group("Veterans")
     storage.modsgroup = game.permissions.get_group("Moderators")
-
 end
 
 function PERMS_SetBlueprintsAllowed(group, option)
@@ -73,7 +72,6 @@ function PERMS_SetPermissions()
     -- Auto set default group permissions
 
     if storage.defaultgroup then
-
         -- If new user restrictions are on, then disable all permissions
         -- Otherwise undo
         local option = true
@@ -108,7 +106,7 @@ end
 -- Flag player as currently moving
 function PERMS_SetPlayerMoving(player)
     if (player and player.valid and player.connected and player.character and player.character.valid and
-        storage.playermoving) then
+            storage.playermoving) then
         -- banished players don't get move score
         if UTIL_Is_Banished(player) == false then
             storage.playermoving[player.index] = true
@@ -119,7 +117,7 @@ end
 -- Flag player as currently active
 function PERMS_SetPlayerActive(player)
     if (player and player.valid and player.connected and player.character and player.character.valid and
-        storage.playeractive) then
+            storage.playeractive) then
         -- banished players don't get activity score
         if UTIL_Is_Banished(player) == false then
             storage.playeractive[player.index] = true
@@ -127,58 +125,52 @@ function PERMS_SetPlayerActive(player)
     end
 end
 
--- Set our default game-settings
-function PERMS_SetGameSettings(player)
-    if player and player.valid and player.force and not storage.gset then
-        storage.gset = true -- Only apply these once
-        player.force.friendly_fire = false -- friendly fire
-        game.disable_replay() -- Smaller saves, prevent desync on script upgrade
-    end
-end
-
--- Automatically promote users to higher levels
-function PERMS_AutoPromotePlayer()
-
-    -- Skip if permissions are disabled
-    if game.connected_players and storage.disableperms == false then
-        -- Check all connected players
-        for _, player in pairs(game.connected_players) do
-            if (player and player.valid) then
-                -- Check if groups are valid
-                if (storage.defaultgroup and storage.membersgroup and storage.regularsgroup and storage.modsgroup) then
-                    if player.permission_group then
-                        -- (Moderators) Check if they are in the right group, including se-remote-view
-                        if (player.admin and player.permission_group.name ~= storage.modsgroup.name )then
-                            -- (REGULARS) Check if they are in the right group, including se-remote-view
-                            storage.modsgroup.add_player(player)
-                            UTIL_MsgAll(player.name .. " moved to moderators group")
-                        elseif (storage.active_playtime and storage.active_playtime[player.index] and
-                            storage.active_playtime[player.index] > (4 * 60 * 60 * 60) and not player.admin) then
-                            -- Check if player has hours for regulars status, but isn't a in regulars group.
-                            if (player.permission_group.name ~= storage.regularsgroup.name and
-                                player.permission_group.name ~= storage.veteransgroup.name )then
-                                storage.regularsgroup.add_player(player)
-                                UTIL_MsgAll(player.name .. " is now a regular!")
-                                PERMS_WelcomeNewMember(player)
-                            end
-                        elseif (storage.active_playtime and storage.active_playtime[player.index] and
-                            storage.active_playtime[player.index] > (30 * 60 * 60) and not player.admin) then
-                            -- Check if player has hours for members status, but isn't a in member group.
-                            if UTIL_Is_Veteran(player) == false and UTIL_Is_Regular(player) == false and UTIL_Is_Member(player) ==
-                                false and UTIL_Is_New(player) == true then
-                                storage.membersgroup.add_player(player)
-                                UTIL_MsgAll(player.name .. " is now a member!")
-                                PERMS_WelcomeNewMember(player)
-                            end
-                        end
-                    end
-                end
+function PERMS_PromotePlayer(player)
+    -- Check if groups are valid
+    if player.permission_group then
+        -- (Moderators) Check if they are in the right group, including se-remote-view
+        if (player.admin and player.permission_group.name ~= storage.modsgroup.name) then
+            -- (REGULARS) Check if they are in the right group, including se-remote-view
+            storage.modsgroup.add_player(player)
+            UTIL_MsgAll(player.name .. " moved to moderators group")
+        elseif (storage.active_playtime and storage.active_playtime[player.index] and
+                storage.active_playtime[player.index] > (4 * 60 * 60 * 60) and not player.admin) then
+            -- Check if player has hours for regulars status, but isn't a in regulars group.
+            if (player.permission_group.name ~= storage.regularsgroup.name and
+                    player.permission_group.name ~= storage.veteransgroup.name) then
+                storage.regularsgroup.add_player(player)
+                UTIL_MsgAll(player.name .. " is now a regular!")
+                PERMS_WelcomeMember(player)
+            end
+        elseif (storage.active_playtime and storage.active_playtime[player.index] and
+                storage.active_playtime[player.index] > (30 * 60 * 60) and not player.admin) then
+            -- Check if player has hours for members status, but isn't a in member group.
+            if UTIL_Is_Veteran(player) == false and UTIL_Is_Regular(player) == false and UTIL_Is_Member(player) ==
+                false and UTIL_Is_New(player) == true then
+                storage.membersgroup.add_player(player)
+                UTIL_MsgAll(player.name .. " is now a member!")
+                PERMS_WelcomeMember(player)
             end
         end
     end
 end
 
-function PERMS_WelcomeNewMember(player)
+-- Automatically promote users to higher levels
+function PERMS_AutoPromotePlayer()
+    -- Skip if permissions are disabled
+    if game.connected_players and storage.disableperms == false then
+        -- Check all connected players
+        for _, player in pairs(game.connected_players) do
+            if (player and player.valid) then
+                PERMS_PromotePlayer(player)
+            end
+        end
+    end
+end
+
+
+
+function PERMS_WelcomeMember(player)
     if player then
         if player.gui.screen then
             if player.gui.screen.member_welcome then
@@ -270,7 +262,7 @@ function PERMS_WelcomeNewMember(player)
                         sprite = "file/img/buttons/online-64.png",
                         tooltip = "See players online!"
                     }
-                    online_32.style.size = {64, 64}
+                    online_32.style.size = { 64, 64 }
                     rframe.add {
                         type = "label",
                         caption = tfont .. "You can also vote to rewind, reset, or skip-reset the map on Discord." ..
@@ -293,7 +285,7 @@ function PERMS_WelcomeNewMember(player)
                     sprite = "file/img/buttons/m45-64.png",
                     tooltip = "Opens the server-info window"
                 }
-                m45_32.style.size = {64, 64}
+                m45_32.style.size = { 64, 64 }
             end
         end
     end
