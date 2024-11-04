@@ -7,7 +7,7 @@ require "utility"
 -- Shamelessly stole most of this function from RedMew.
 -- I also had no idea inventory-size could be set from create_entity.
 -- https://github.com/Refactorio/RedMew/blob/develop/features/dump_offline_inventories.lua
-function dumpPlayerInventory(player, force)
+function INFO_DumpInv(player, force)
     if not player then
         return false
     end
@@ -52,7 +52,7 @@ function dumpPlayerInventory(player, force)
     local position = player.position
     local corpse = player.surface.create_entity {
         name = "character-corpse",
-        position = get_default_spawn(),
+        position = UTIL_GetDefaultSpawn(),
         inventory_size = inv_corpse_size,
         player_index = player_index
     }
@@ -94,17 +94,17 @@ function dumpPlayerInventory(player, force)
     return true
 end
 
-function check_character_abandoned()
+function INFO_CheckAbandoned()
     if not storage.active_playtime or not storage.last_playtime then
         return
     end
 
     for _, player in pairs(game.players) do
-        if not player.connected and is_new(player) then
+        if not player.connected and UTIL_Is_New(player) then
             if storage.last_playtime[player.index] then
                 if game.tick - storage.last_playtime[player.index] > 1 * 60 * 60 * 60 then
-                    if dumpPlayerInventory(player, false) then
-                        message_all_sys("[color=orange] * New player '" .. player.name ..
+                    if INFO_DumpInv(player, false) then
+                        UTIL_MsgAllSys("[color=orange] * New player '" .. player.name ..
                             "' was not active long enough to become a member, and have been offline for some time. Their items are now considered abandoned, and have been placed at spawn (expires in 15m) *[/color]")
                     end
                 end
@@ -113,7 +113,7 @@ function check_character_abandoned()
     end
 end
 
-function make_info_button(player)
+function INFO_MakeButton(player)
     if player.gui.top.m45_button then
         player.gui.top.m45_button.destroy()
     end
@@ -129,7 +129,7 @@ function make_info_button(player)
 end
 
 -- M45 Info/Welcome window
-function make_m45_info_window(player)
+function INFO_MemberWelcome(player)
     -- M45 Welcome--
 
     -- Auto close membership welcome window--
@@ -594,7 +594,7 @@ function make_m45_info_window(player)
                 type = "line",
                 direction = "horizontal"
             }
-            if is_new(player) then
+            if UTIL_Is_New(player) then
                 tab2_main_frame.add {
                     type = "label",
                     caption = "[recipe=burner-inserter]   [font=default-large-bold][color=red]Level 1: New[/color][/font]"
@@ -631,7 +631,7 @@ function make_m45_info_window(player)
                 direction = "horizontal"
             }
 
-            if is_member(player) then
+            if UTIL_Is_Member(player) then
                 tab2_main_frame.add {
                     type = "label",
                     caption = "[recipe=inserter]   [font=default-large-bold][color=red]Level 2: Members[/color] (Score: 30)[/font]"
@@ -667,7 +667,7 @@ function make_m45_info_window(player)
                 direction = "horizontal"
             }
 
-            if is_regular(player) then
+            if UTIL_Is_Regular(player) then
                 tab2_main_frame.add {
                     type = "label",
                     caption = "[recipe=fast-inserter]   [font=default-large-bold][color=red]Level 3: Regulars[/color] (Score: 240)[/font]"
@@ -698,7 +698,7 @@ function make_m45_info_window(player)
                 type = "line",
                 direction = "horizontal"
             }
-            if is_veteran(player) then
+            if UTIL_Is_Veteran(player) then
                 tab2_main_frame.add {
                     type = "label",
                     caption = "[recipe=stack-inserter]   [font=default-large-bold][color=red]Level 4: Veteran[/color][/font]"
@@ -1020,15 +1020,15 @@ function make_m45_info_window(player)
 end
 
 -- GUI clicks
-function on_gui_click(event)
+function INFO_Click(event)
     if event and event.element and event.element.valid and event.player_index then
         local player = game.players[event.player_index]
 
-        local args = mysplit(event.element.name, ",")
+        local args = UTIL_SplitStr(event.element.name, ",")
 
         if player and player.valid then
             -- debug
-            console_print("[ACT] GUI_CLICK: " .. player.name .. ": " .. event.element.name)
+            UTIL_ConsolePrint("[ACT] GUI_CLICK: " .. player.name .. ": " .. event.element.name)
 
             -- Info window close
             if event.element.name == "m45_info_close_button" and player.gui and player.gui.center and
@@ -1040,8 +1040,8 @@ function on_gui_click(event)
                     storage.info_window_timer[player.index] = game.tick
                 end
                 ----------------------------------------------------------------
-                if is_member(player) or is_regular(player) or is_veteran(player) or player.admin or
-                    (is_new(player) and game.tick - storage.info_window_timer[player.index] > (60 * 10)) then
+                if UTIL_Is_Member(player) or UTIL_Is_Regular(player) or UTIL_Is_Veteran(player) or player.admin or
+                    (UTIL_Is_New(player) and game.tick - storage.info_window_timer[player.index] > (60 * 10)) then
                     player.gui.screen.m45_info_window.destroy()
                 else
                     if player and player.character then
@@ -1057,15 +1057,15 @@ function on_gui_click(event)
                         }
 
                         player.character.damage(10, "enemy") -- Grab attention
-                        smart_print(player,
+                        UTIL_SmartPrint(player,
                             "[color=red](SYSTEM) *** PLEASE READ THE INFO WINDOW BEFORE CLOSING IT!!! ***[/color]")
-                        smart_print(player,
+                        UTIL_SmartPrint(player,
                             "[color=green](SYSTEM) **** PLEASE READ THE INFO WINDOW BEFORE CLOSING IT!!! ****[/color]")
-                        smart_print(player,
+                        UTIL_SmartPrint(player,
                             "[color=blue](SYSTEM) ***** PLEASE READ THE INFO WINDOW BEFORE CLOSING IT!!! *****[/color]")
-                        smart_print(player,
+                        UTIL_SmartPrint(player,
                             "[color=white](SYSTEM) ****** PLEASE READ THE INFO WINDOW BEFORE CLOSING IT!!! ******[/color]")
-                        smart_print(player,
+                        UTIL_SmartPrint(player,
                             "[color=black](SYSTEM) ******* PLEASE READ THE INFO WINDOW BEFORE CLOSING IT!!! ********[/color]")
                     end
                 end
@@ -1084,7 +1084,7 @@ function on_gui_click(event)
                 if player.gui and player.gui.center and player.gui.screen.m45_info_window then
                     player.gui.screen.m45_info_window.destroy()
                 else
-                    make_m45_info_window(player)
+                    INFO_MemberWelcome(player)
                 end
             elseif event.element.name == "reset_clock" then
                 -- reset-clock-close
@@ -1109,10 +1109,10 @@ function on_gui_click(event)
 end
 
 -- Auto-Fix text-boxes (no-edit text boxes feel odd)
-function on_gui_text_changed(event)
+function INFO_TextChanged(event)
     -- Automatically fix URLs, because read-only/selectable text is confusing to players --
     if event and event.element and event.player_index and event.text and event.element.name then
-        local args = mysplit(event.element.name, ",")
+        local args = UTIL_SplitStr(event.element.name, ",")
         local player = game.players[event.player_index]
 
         if event.element.name == "discord_url" then

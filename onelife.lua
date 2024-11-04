@@ -1,4 +1,4 @@
-function doOnelife(event)
+function ONELIFE_Init(event)
     if not storage.oneLifeMode then
         return
     end
@@ -14,8 +14,8 @@ function doOnelife(event)
     player.set_controller {
         type = defines.controllers.spectator
     }
-    smart_print(player, "Game over! you are now a spectator.")
-    update_player_list()
+    UTIL_SmartPrint(player, "Game over! you are now a spectator.")
+    ONLINE_UpdatePlayerList()
 
     if not player.character or not player.character.valid then
         return
@@ -44,7 +44,7 @@ function doOnelife(event)
     }
 end
 
-function onelife_clickhandler(event)
+function ONLINE_ClickHandle(event)
     if not storage.oneLifeMode then
         return
     end
@@ -57,7 +57,7 @@ function onelife_clickhandler(event)
         return
     end
     if not player.character or not player.character.valid then
-        smart_print("You are already dead!")
+        UTIL_SmartPrint("You are already dead!")
         return
     end
     if event.element and event.element.valid and event.element.name == "spec_button" then
@@ -74,16 +74,16 @@ function onelife_clickhandler(event)
             if storage.spec_confirm[player.index] >= 2 then
                 storage.spec_confirm[player.index] = nil
                 player.character.die("player")
-                doOnelife(event)
+                ONELIFE_Init(event)
                 return
             elseif storage.spec_confirm[player.index] < 2 then
-                smart_print(player,
+                UTIL_SmartPrint(player,
                     "[color=red](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.spec_confirm[player.index] ..
                     " more times to confirm.[/color]")
-                smart_print(player,
+                UTIL_SmartPrint(player,
                     "[color=white](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.spec_confirm[player.index] ..
                     " more times to confirm.[/color]")
-                smart_print(player,
+                UTIL_SmartPrint(player,
                     "[color=black](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.spec_confirm[player.index] ..
                     " more times to confirm.[/color]")
             end
@@ -93,7 +93,7 @@ function onelife_clickhandler(event)
     end
 end
 
-function make_onelife_button(player)
+function ONLINE_MakeButton(player)
     if not player then
         return
     end
@@ -107,8 +107,8 @@ function make_onelife_button(player)
                 type = defines.controllers.character,
                 character = game.surfaces[1].create_entity({name = "character", position = game.surfaces[1].find_non_colliding_position("character", {0,0}, 10000, 1), force = game.forces.player})
             }
-            smart_print(player, "You have been revived!")
-            update_player_list()
+            UTIL_SmartPrint(player, "You have been revived!")
+            ONLINE_UpdatePlayerList()
         end
         return
     end

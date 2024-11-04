@@ -5,7 +5,7 @@
 require "utility"
 
 -- Create player groups if they don't exist, and create storage links to them
-function create_groups()
+function PERMS_MakeUserGroups()
     storage.defaultgroup = game.permissions.get_group("Default")
     storage.membersgroup = game.permissions.get_group("Members")
     storage.regularsgroup = game.permissions.get_group("Regulars")
@@ -40,7 +40,7 @@ function create_groups()
 
 end
 
-function set_blueprints_enabled(group, option)
+function PERMS_SetBlueprintsAllowed(group, option)
     if group ~= nil then
         group.set_allows_action(defines.input_action.alt_select_blueprint_entities, option)
         group.set_allows_action(defines.input_action.cancel_new_blueprint, option)
@@ -69,7 +69,7 @@ function set_blueprints_enabled(group, option)
 end
 
 -- Disable some permissions for new players, minimal mode
-function set_perms()
+function PERMS_SetPermissions()
     -- Auto set default group permissions
 
     if storage.defaultgroup then
@@ -106,29 +106,29 @@ function set_perms()
 end
 
 -- Flag player as currently moving
-function set_player_moving(player)
+function PERMS_SetPlayerMoving(player)
     if (player and player.valid and player.connected and player.character and player.character.valid and
         storage.playermoving) then
         -- banished players don't get move score
-        if is_banished(player) == false then
+        if UTIL_Is_Banished(player) == false then
             storage.playermoving[player.index] = true
         end
     end
 end
 
 -- Flag player as currently active
-function set_player_active(player)
+function PERMS_SetPlayerActive(player)
     if (player and player.valid and player.connected and player.character and player.character.valid and
         storage.playeractive) then
         -- banished players don't get activity score
-        if is_banished(player) == false then
+        if UTIL_Is_Banished(player) == false then
             storage.playeractive[player.index] = true
         end
     end
 end
 
 -- Set our default game-settings
-function game_settings(player)
+function PERMS_SetGameSettings(player)
     if player and player.valid and player.force and not storage.gset then
         storage.gset = true -- Only apply these once
         player.force.friendly_fire = false -- friendly fire
@@ -137,7 +137,7 @@ function game_settings(player)
 end
 
 -- Automatically promote users to higher levels
-function get_permgroup()
+function PERMS_AutoPromotePlayer()
 
     -- Skip if permissions are disabled
     if game.connected_players and storage.disableperms == false then
@@ -151,24 +151,24 @@ function get_permgroup()
                         if (player.admin and player.permission_group.name ~= storage.modsgroup.name )then
                             -- (REGULARS) Check if they are in the right group, including se-remote-view
                             storage.modsgroup.add_player(player)
-                            message_all(player.name .. " moved to moderators group")
+                            UTIL_MsgAll(player.name .. " moved to moderators group")
                         elseif (storage.active_playtime and storage.active_playtime[player.index] and
                             storage.active_playtime[player.index] > (4 * 60 * 60 * 60) and not player.admin) then
                             -- Check if player has hours for regulars status, but isn't a in regulars group.
                             if (player.permission_group.name ~= storage.regularsgroup.name and
                                 player.permission_group.name ~= storage.veteransgroup.name )then
                                 storage.regularsgroup.add_player(player)
-                                message_all(player.name .. " is now a regular!")
-                                show_member_welcome(player)
+                                UTIL_MsgAll(player.name .. " is now a regular!")
+                                PERMS_WelcomeNewMember(player)
                             end
                         elseif (storage.active_playtime and storage.active_playtime[player.index] and
                             storage.active_playtime[player.index] > (30 * 60 * 60) and not player.admin) then
                             -- Check if player has hours for members status, but isn't a in member group.
-                            if is_veteran(player) == false and is_regular(player) == false and is_member(player) ==
-                                false and is_new(player) == true then
+                            if UTIL_Is_Veteran(player) == false and UTIL_Is_Regular(player) == false and UTIL_Is_Member(player) ==
+                                false and UTIL_Is_New(player) == true then
                                 storage.membersgroup.add_player(player)
-                                message_all(player.name .. " is now a member!")
-                                show_member_welcome(player)
+                                UTIL_MsgAll(player.name .. " is now a member!")
+                                PERMS_WelcomeNewMember(player)
                             end
                         end
                     end
@@ -178,7 +178,7 @@ function get_permgroup()
     end
 end
 
-function show_member_welcome(player)
+function PERMS_WelcomeNewMember(player)
     if player then
         if player.gui.screen then
             if player.gui.screen.member_welcome then
@@ -188,7 +188,7 @@ function show_member_welcome(player)
                 local efont = "[/font]"
 
                 local lname = "members"
-                if is_regular(player) then
+                if UTIL_Is_Regular(player) then
                     lname = "regulars"
                 end
 
@@ -259,7 +259,7 @@ function show_member_welcome(player)
                         efont
                 }
 
-                if is_regular(player) then
+                if UTIL_Is_Regular(player) then
                     rframe.add {
                         type = "label",
                         caption = tfont .. "You now also have access to BANISH in the players-online window:" .. efont

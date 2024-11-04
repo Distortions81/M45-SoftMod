@@ -3,14 +3,44 @@
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
 -- Safe console print
-function console_print(message)
+
+function UTIL_GPSObj(player, obj)
+    if obj then
+        if player and player.surface and player.surface.index ~= 1 then
+            return " [gps=" .. math.floor(obj.position.x) .. "," ..
+                math.floor(obj.position.y) .. "," .. player.surface.name .. "] "
+        else
+            return " [gps=" .. math.floor(obj.position.x) .. ","
+                .. math.floor(obj.position.y) .. "] "
+        end
+    end
+end
+
+function UTIL_GPSPlayer(player)
+    if player and player.surface and player.surface.index ~= 1 then
+        return " [gps=" .. math.floor(player.position.x) .. "," ..
+            math.floor(player.position.y) .. "," .. player.surface.name .. "] "
+    else
+        return " [gps=" .. math.floor(player.position.x) .. ","
+            .. math.floor(player.position.y) .. "] "
+    end
+end
+
+function UTIL_GPSPos(item)
+    if item and item.position then
+        return " [gps=" .. math.floor(item.position.x) .. ","
+            .. math.floor(item.position.y) .. "] "
+    end
+end
+
+function UTIL_ConsolePrint(message)
     if message then
         print(message)
     end
 end
 
 -- Smart/safe Print
-function smart_print(player, message)
+function UTIL_SmartPrint(player, message)
     if message then
         if player then
             player.print(message)
@@ -21,7 +51,7 @@ function smart_print(player, message)
 end
 
 -- Global messages (game/discord)
-function message_all(message)
+function UTIL_MsgAll(message)
     if message then
         game.print(message)
         print("[MSG] " .. message)
@@ -29,7 +59,7 @@ function message_all(message)
 end
 
 -- System messages (game/discord)
-function message_all_sys(message)
+function UTIL_MsgAllSys(message)
     if message then
         game.print("[color=orange](SYSTEM)[/color] [color=red]" .. message .. "[/color]")
         print("[MSG] " .. message)
@@ -37,21 +67,21 @@ function message_all_sys(message)
 end
 
 -- Global messages (game only)
-function message_allp(message)
+function UTIL_MsgPlayers(message)
     if message then
         game.print(message)
     end
 end
 
 -- Global messages (discord only)
-function message_alld(message)
+function UTIL_MsgDiscord(message)
     if message then
         print("[MSG] " .. message)
     end
 end
 
 -- Calculate distance between two points
-function dist_to(pos_a, pos_b)
+function UTIL_Distance(pos_a, pos_b)
     if pos_a and pos_b and pos_a.x and pos_a.y and pos_b.x and pos_b.y then
         local axbx = pos_a.x - pos_b.x
         local ayby = pos_a.y - pos_b.y
@@ -62,7 +92,7 @@ function dist_to(pos_a, pos_b)
 end
 
 -- Show players online to a player
-function show_players(victim)
+function UTIL_SendPlayers(victim)
     local buf = ""
     local count = 0
 
@@ -98,14 +128,14 @@ function show_players(victim)
 
     -- No one is online
     if not storage.player_count or storage.player_count == 0 then
-        smart_print(victim, "No players online.")
+        UTIL_SmartPrint(victim, "No players online.")
     else
-        smart_print(victim, "Players Online: " .. storage.player_count .. "\n" .. buf)
+        UTIL_SmartPrint(victim, "Players Online: " .. storage.player_count .. "\n" .. buf)
     end
 end
 
 -- Split strings
-function mysplit(inputstr, sep)
+function UTIL_SplitStr(inputstr, sep)
     if inputstr and sep and inputstr ~= "" then
         local t = {}
         local x = 0
@@ -132,14 +162,14 @@ function mysplit(inputstr, sep)
 end
 
 -- Quickly turn tables into strings
-function dump(o)
+function UTIL_Dump(o)
     if type(o) == "table" then
         local s = "{ "
         for k, v in pairs(o) do
             if type(k) ~= "number" then
                 k = '"' .. k .. '"'
             end
-            s = s .. "[" .. k .. "] = " .. dump(v) .. ","
+            s = s .. "[" .. k .. "] = " .. UTIL_Dump(v) .. ","
         end
         return s .. "} "
     else
@@ -148,14 +178,14 @@ function dump(o)
 end
 
 -- Cut off extra precision
-function round(number, precision)
+function UTIL_Round(number, precision)
     local fmtStr = string.format("%%0.%sf", precision)
     number = string.format(fmtStr, number)
     return number
 end
 
 -- Check if player is flagged patreon
-function is_patreon(victim)
+function UTIL_Is_Patreon(victim)
     if victim and victim.valid then
         if not storage.patreons then
             storage.patreons = {}
@@ -172,7 +202,7 @@ function is_patreon(victim)
 end
 
 -- Check if player is flagged nitro
-function is_nitro(victim)
+function UTIL_Is_Nitro(victim)
     if victim and victim.valid then
         if not storage.nitros then
             storage.nitros = {}
@@ -191,7 +221,7 @@ end
 
 -- permissions system
 -- Check if player should be considered a veteran
-function is_veteran(victim)
+function UTIL_Is_Veteran(victim)
     if victim and victim.valid and not victim.admin then
         -- If in group
         if victim.permission_group and storage.veteransgroup then
@@ -206,7 +236,7 @@ end
 
 -- permissions system
 -- Check if player should be considered a regular
-function is_regular(victim)
+function UTIL_Is_Regular(victim)
     if victim and victim.valid and not victim.admin then
         -- If in group
         if victim.permission_group and storage.regularsgroup then
@@ -220,7 +250,7 @@ function is_regular(victim)
 end
 
 -- Check if player should be considered a member
-function is_member(victim)
+function UTIL_Is_Member(victim)
     if victim and victim.valid and not victim.admin then
         -- If in group
         if victim.permission_group and storage.membersgroup then
@@ -234,9 +264,9 @@ function is_member(victim)
 end
 
 -- Check if player should be considered new
-function is_new(victim)
+function UTIL_Is_New(victim)
     if victim and victim.valid and not victim.admin then
-        if  is_member(victim) == false and is_regular(victim) == false and is_veteran(victim )== false then
+        if  UTIL_Is_Member(victim) == false and UTIL_Is_Regular(victim) == false and UTIL_Is_Veteran(victim )== false then
             return true
         end
     end
@@ -245,16 +275,16 @@ function is_new(victim)
 end
 
 -- Check if player should be considered banished
-function is_banished(victim)
+function UTIL_Is_Banished(victim)
     if victim and victim.valid and not victim.admin then
         -- Mods can not be marked as banished
         if victim.admin then
             return false
         elseif storage.thebanished and storage.thebanished[victim.index] then
-            if (is_new(victim) and storage.thebanished[victim.index] >= 1) or
-                (is_member(victim) and storage.thebanished[victim.index] >= 1) or
-                (is_regular(victim) and storage.thebanished[victim.index] >= 2) or 
-                (is_veteran(victim) and storage.thebanished[victim.index] >= 4) then
+            if (UTIL_Is_New(victim) and storage.thebanished[victim.index] >= 1) or
+                (UTIL_Is_Member(victim) and storage.thebanished[victim.index] >= 1) or
+                (UTIL_Is_Regular(victim) and storage.thebanished[victim.index] >= 2) or 
+                (UTIL_Is_Veteran(victim) and storage.thebanished[victim.index] >= 4) then
                 return true
             end
         end
@@ -263,9 +293,9 @@ function is_banished(victim)
     return false
 end
 
-function send_to_default_spawn(victim)
+function UTIL_SendToDefaultSpawn(victim)
     if victim and victim.valid and victim.character then
-        local nsurf = game.surfaces["nauvis"] -- Find default surface
+        local nsurf = game.surfaces[1] -- Find default surface
 
         if nsurf then
             local pforce = victim.force
@@ -273,7 +303,7 @@ function send_to_default_spawn(victim)
             if pforce then
                 spawnpos = pforce.get_spawn_position(nsurf)
             else
-                console_print("[ERROR] send_to_default_spawn: victim does not have a valid force.")
+                UTIL_ConsolePrint("[ERROR] send_to_default_spawn: victim does not have a valid force.")
             end
             local newpos = nsurf.find_non_colliding_position("character", spawnpos, 4096, 1, false)
             if newpos then
@@ -282,14 +312,14 @@ function send_to_default_spawn(victim)
                 victim.teleport({0, 0}, nsurf)
             end
         else
-            console_print("[ERROR] send_to_default_spawn: The surface nauvis does not exist, could not teleport victim.")
+            UTIL_ConsolePrint("[ERROR] send_to_default_spawn: The surface nauvis does not exist, could not teleport victim.")
         end
     else
-        console_print("[ERROR] send_to_default_spawn: victim invalid or dead")
+        UTIL_ConsolePrint("[ERROR] send_to_default_spawn: victim invalid or dead")
     end
 end
 
-function send_to_surface_spawn(victim)
+function UTIL_SendToSpawn(victim)
     if victim and victim.valid and victim.character then
         local nsurf = victim.surface
         if nsurf then
@@ -298,7 +328,7 @@ function send_to_surface_spawn(victim)
             if pforce then
                 spawnpos = pforce.get_spawn_position(nsurf)
             else
-                console_print("[ERROR] send_to_surface_spawn: victim force invalid")
+                UTIL_ConsolePrint("[ERROR] send_to_surface_spawn: victim force invalid")
             end
             local newpos = nsurf.find_non_colliding_position("character", spawnpos, 4096, 1, false)
             if newpos then
@@ -307,14 +337,14 @@ function send_to_surface_spawn(victim)
                 victim.teleport({0, 0}, nsurf)
             end
         else
-            console_print("[ERROR] send_to_surface_spawn: The surface does not exist, could not teleport victim.")
+            UTIL_ConsolePrint("[ERROR] send_to_surface_spawn: The surface does not exist, could not teleport victim.")
         end
     else
-        console_print("[ERROR] send_to_surface_spawn: victim invalid or dead")
+        UTIL_ConsolePrint("[ERROR] send_to_surface_spawn: victim invalid or dead")
     end
 end
 
-function get_default_spawn()
+function UTIL_GetDefaultSpawn()
     local nsurf = game.surfaces["nauvis"]
     if nsurf then
         local pforce = game.forces["player"]
@@ -322,11 +352,11 @@ function get_default_spawn()
             local spawnpos = pforce.get_spawn_position(nsurf)
             return spawnpos
         else
-            console_print("[ERROR] get_default_spawn: Couldn't find force 'player'")
+            UTIL_ConsolePrint("[ERROR] get_default_spawn: Couldn't find force 'player'")
             return {0, 0}
         end
     else
-        console_print("[ERROR] get_default_spawn: Couldn't find default surface nauvis.")
+        UTIL_ConsolePrint("[ERROR] get_default_spawn: Couldn't find default surface nauvis.")
         return {0, 0}
     end
 end

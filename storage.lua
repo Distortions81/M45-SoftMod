@@ -3,7 +3,7 @@
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
 -- Create storage, if needed
-function create_mystorage()
+function STORAGE_CreateGlobal()
     storage.svers = "624-11.02.2024-1043p"
 
 
@@ -87,7 +87,7 @@ function create_mystorage()
 end
 
 -- Create player storage, if needed
-function create_player_storage(player)
+function STORAGE_MakePlayerStorage(player)
     if player and player.valid then
         if storage.playeractive and player and player.index then
             if not storage.playeractive[player.index] then

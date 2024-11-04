@@ -39,7 +39,7 @@ local function make_m45_todo_submenu(player, i, edit_mode)
             local target = storage.todo_list[i]
 
             local no_edit = false
-            if not edit_mode or is_new(player) or
+            if not edit_mode or UTIL_Is_New(player) or
                 (not player.admin and player.name ~= target.owner and not target.can_edit) then
                 no_edit = true
             end
@@ -246,7 +246,7 @@ local function make_m45_todo_submenu(player, i, edit_mode)
 end
 
 -- M45 ToDo Window
-function make_m45_todo_window(player)
+function TODO_MakeWindow(player)
     if player.gui and player.gui.screen then
         if player.gui.screen.m45_todo then
             player.gui.screen.m45_todo.destroy()
@@ -397,7 +397,7 @@ function make_m45_todo_window(player)
                         submenu_edit.style.padding = 4
                         local can_edit = true
                         -- Disable button if we can't edit
-                        if is_new(player) or (not player.admin and player.name ~= target.owner and not target.can_edit) then
+                        if UTIL_Is_New(player) or (not player.admin and player.name ~= target.owner and not target.can_edit) then
                             submenu_edit.enabled = false
                             can_edit = false
                         end
@@ -486,7 +486,7 @@ function make_m45_todo_window(player)
                         }
                         movedown.style.size = {18, 18}
 
-                        if is_new(player) then
+                        if UTIL_Is_New(player) then
                             movedown.visible = false
                             moveup.visible = false
                         end
@@ -524,7 +524,7 @@ function make_m45_todo_window(player)
                 sprite = "file/img/todo/add.png",
                 name = "m45_todo_add"
             }
-            if is_new(player) then
+            if UTIL_Is_New(player) then
                 add.enabled = false
             end
             local add_note = add_frame.add {
@@ -551,7 +551,7 @@ local function update_todo_windows()
     for _, player in pairs(game.connected_players) do
         -- Already handles destroying
         if player.gui and player.gui.screen and player.gui.screen.m45_todo then
-            make_m45_todo_window(player)
+            TODO_MakeWindow(player)
             if player.gui.screen.m45_todo_submenu then
                 player.gui.screen.m45_todo_submenu.bring_to_front()
             end
@@ -613,7 +613,7 @@ local function on_player_joined_game(event)
         -- Refresh window if open
         if player.gui.screen.m45_todo then
             player.gui.screen.m45_todo.destroy()
-            make_m45_todo_window(player)
+            TODO_MakeWindow(player)
         end
     end
 end
@@ -622,7 +622,7 @@ end
 local function on_gui_click(event)
     if event and event.element and event.element.valid and event.player_index then
         local player = game.players[event.player_index]
-        local args = mysplit(event.element.name, ",")
+        local args = UTIL_SplitStr(event.element.name, ",")
 
         if player and player.valid then
             -- Grab target if we have one
@@ -648,7 +648,7 @@ local function on_gui_click(event)
                     storage.show_hidden_notes = {}
                 end
                 storage.show_hidden_notes[player.index] = event.element.state
-                make_m45_todo_window(player)
+                TODO_MakeWindow(player)
             elseif args and args[2] and args[1] == "m45_todo_moveup" then
                 ----------------------------------------------------------------
                 local i = tonumber(args[2])
@@ -908,14 +908,14 @@ local function on_gui_click(event)
                 if player.gui and player.gui.left and player.gui.left.m45_todo then
                     player.gui.left.m45_todo.destroy()
                 else
-                    make_m45_todo_window(player)
+                    TODO_MakeWindow(player)
                 end
             end
         end
     end
 end
 
-function todo_event_handler(event)
+function TODO_EventHandler(event)
     if event.name == defines.events.on_player_joined_game then
         on_player_joined_game(event)
     elseif event.name == defines.events.on_gui_click then

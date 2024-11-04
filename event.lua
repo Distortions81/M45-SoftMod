@@ -7,7 +7,7 @@ require "info"
 require "log"
 require "todo"
 require "onelife"
-local function insert_weapons(player, ammo_amount)
+local function InsWeapons(player, ammo_amount)
     if player.force.technologies["military"].researched then
         player.insert {
             name = "submachine-gun",
@@ -50,9 +50,9 @@ script.on_nth_tick(599, function(event)
 
         -- Set logo to be redrawn
         storage.drawlogo = false
-        dodrawlogo()
+        LOGO_DrawLogo()
 
-        update_player_list() -- online.lua
+        ONLINE_UpdatePlayerList() -- online.lua
     end
 
     -- Server tag
@@ -73,7 +73,7 @@ script.on_nth_tick(599, function(event)
         end
 
         local chartTag = {
-            position = get_default_spawn(),
+            position = UTIL_GetDefaultSpawn(),
             icon = {
                 type = "item",
                 name = "heavy-armor"
@@ -92,7 +92,7 @@ script.on_nth_tick(599, function(event)
     if storage.active_playtime then
         for _, player in pairs(game.connected_players) do
             -- Banish if some mod eats respawn event
-            send_to_surface(player)
+            BANISH_SendToSurface(player)
 
             -- Player active?
             if storage.playeractive[player.index] then
@@ -140,32 +140,32 @@ script.on_nth_tick(599, function(event)
         end
     end
 
-    get_permgroup() -- See if player qualifies now
+    PERMS_AutoPromotePlayer() -- See if player qualifies now
 
     if not storage.disableperms then
-        check_character_abandoned()
+        INFO_CheckAbandoned()
     end
 end)
 
 
 -- Handle killing, and teleporting users to other surfaces
-function on_player_respawned(event)
+function EVENT_Respawn(event)
     if event and event.player_index then
         local player = game.players[event.player_index]
-        send_to_surface(player) -- banish.lua
+        BANISH_SendToSurface(player) -- banish.lua
 
         -- Cutoff-point, just becomes annoying.
         if not player.force.technologies["military-science-pack"].researched then
-            insert_weapons(player, 10)
+            InsWeapons(player, 10)
         end
     end
 end
 
 -- Player connected, make variables, draw UI, set permissions, and game settings
-function on_player_joined_game(event)
+function EVENT_Joined(event)
     if event and event.player_index then
         local player = game.players[event.player_index]
-        send_to_surface(player)
+        BANISH_SendToSurface(player)
     end
 
     -- Set clock as NOT MINIMIZED on login
@@ -188,31 +188,31 @@ function on_player_joined_game(event)
     if event and event.player_index then
         local player = game.players[event.player_index]
         if player then
-            create_mystorage()
-            create_player_storage(player)
-            create_groups()
-            game_settings(player)
-            get_permgroup()
+            STORAGE_CreateGlobal()
+            STORAGE_MakePlayerStorage(player)
+            PERMS_MakeUserGroups()
+            PERMS_SetGameSettings(player)
+            PERMS_AutoPromotePlayer()
 
-            dodrawlogo() -- logo.lua
+            LOGO_DrawLogo() -- logo.lua
 
             if player.gui and player.gui.top then
-                make_info_button(player)   -- info.lua
-                make_online_button(player) -- online.lua
-                make_reset_clock(player)   -- clock.lua
-                make_onelife_button(player) --onelife.lua
+                INFO_MakeButton(player)   -- info.lua
+                ONLINE_MakeOnlineButton(player) -- online.lua
+                CLOCK_MakeClock(player)   -- clock.lua
+                ONLINE_MakeButton(player) --onelife.lua
             end
 
             if storage.last_playtime then
                 storage.last_playtime[event.player_index] = game.tick
             end
-            update_player_list() -- online.lua
+            ONLINE_UpdatePlayerList() -- online.lua
 
             -- Always show to new players, everyone else at least once per map
-            if is_new(player) or not storage.info_shown[player.index] then
+            if UTIL_Is_New(player) or not storage.info_shown[player.index] then
                 storage.info_shown[player.index] = true
-                make_m45_online_window(player) -- online.lua
-                make_m45_info_window(player)   -- info.lua
+                ONLINE_MakeWindow(player) -- online.lua
+                INFO_MemberWelcome(player)   -- info.lua
                 -- make_m45_todo_window(player) --todo.lua
             end
         end
@@ -220,17 +220,17 @@ function on_player_joined_game(event)
 end
 
 -- New player created, insert items set perms, show players online, welcome to map.
-function on_player_created(event)
+function EVENT_PlayerCreated(event)
     if event and event.player_index then
         local player = game.players[event.player_index]
 
         if player and player.valid then
             storage.drawlogo = false      -- set logo to be redrawn
-            create_groups()
-            dodrawlogo()                  -- redraw logo
-            set_perms()
-            send_to_default_spawn(player) -- incase spawn moved
-            game_settings(player)
+            PERMS_MakeUserGroups()
+            LOGO_DrawLogo()                  -- redraw logo
+            PERMS_SetPermissions()
+            UTIL_SendToDefaultSpawn(player) -- incase spawn moved
+            PERMS_SetGameSettings(player)
 
             -- Cutoff-point, just becomes annoying.
             if not player.force.technologies["military-2"].researched then
@@ -264,28 +264,28 @@ function on_player_created(event)
                 count = 1
             }
 
-            insert_weapons(player, 50) -- research-based
+            InsWeapons(player, 50) -- research-based
 
-            show_players(player)
-            message_all("[color=green](SYSTEM) Welcome " .. player.name .. " to the map![/color]")
+            UTIL_SendPlayers(player)
+            UTIL_MsgAll("[color=green](SYSTEM) Welcome " .. player.name .. " to the map![/color]")
         end
     end
 end
 
-function on_pre_player_died(event)
+function EVENT_PlayerDied(event)
     if event and event.player_index then
         local player = game.players[event.player_index]
         -- Log to discord
         if event.cause and event.cause.valid then
             cause = event.cause.name
-            message_alld(player.name ..
+            UTIL_MsgDiscord(player.name ..
                 " was killed by " .. cause .. " at [gps=" .. math.floor(player.position.x) .. "," ..
                 math.floor(player.position.y) .. "]")
         else
-            message_alld(player.name .. " was killed at [gps=" .. math.floor(player.position.x) .. "," ..
+            UTIL_MsgDiscord(player.name .. " was killed at [gps=" .. math.floor(player.position.x) .. "," ..
                 math.floor(player.position.y) .. "]")
         end
-        doOnelife(event)
+        ONELIFE_Init(event)
     end
 end
 
@@ -325,25 +325,25 @@ script.on_event(
                                 player.walking_state.direction == defines.direction.south or player.walking_state.direction ==
                                 defines.direction.southwest or player.walking_state.direction == defines.direction.west or
                                 player.walking_state.direction == defines.direction.northwest) then
-                            set_player_moving(player)
+                            PERMS_SetPlayerMoving(player)
                         end
                     end
                 else
-                    set_player_active(player)
+                    PERMS_SetPlayerActive(player)
                 end
             end
         end
 
         -- Player join/leave respawn
         if event.name == defines.events.on_player_created then
-            on_player_created(event)
+            EVENT_PlayerCreated(event)
         elseif event.name == defines.events.on_pre_player_died then
-            on_pre_player_died(event)
+            EVENT_PlayerDied(event)
         elseif event.name == defines.events.on_player_respawned then
             --
-            on_player_respawned(event)
+            EVENT_Respawn(event)
         elseif event.name == defines.events.on_player_joined_game then
-            on_player_joined_game(event)
+            EVENT_Joined(event)
         elseif event.name == defines.events.on_player_left_game then
             -- activity
             -- changed-position
@@ -351,76 +351,76 @@ script.on_event(
             -- repaired_entity
             --
             -- gui
-            on_player_left_game(event)
+            LOG_PlayerLeft(event)
         elseif event.name == defines.events.on_gui_click then
-            on_gui_click(event)
-            online_on_gui_click(event) -- online.lua
-            onelife_clickhandler(event) --onelife.lua
+            INFO_Click(event)
+            ONLINE_Clicks(event) -- online.lua
+            ONLINE_ClickHandle(event) --onelife.lua
         elseif event.name == defines.events.on_gui_text_changed then
             -- log
-            on_gui_text_changed(event)
+            INFO_TextChanged(event)
         elseif event.name == defines.events.on_console_command then
-            on_console_command(event)
+            LOG_ConsoleCmd(event)
         elseif event.name == defines.events.on_chart_tag_removed then
-            on_chart_tag_removed(event)
+            LOG_TagDel(event)
         elseif event.name == defines.events.on_chart_tag_modified then
-            on_chart_tag_modified(event)
+            LOG_TagMod(event)
         elseif event.name == defines.events.on_chart_tag_added then
-            on_chart_tag_added(event)
+            LOG_TagAdded(event)
         elseif event.name == defines.events.on_research_finished then
             -- clean up corspe tags
-            on_research_finished(event)
+            LOG_ResearchFinished(event)
         elseif event.name == defines.events.on_player_deconstructed_area then
-            on_player_deconstructed_area(event)
+            LOG_Decon(event)
         elseif event.name == defines.events.on_player_banned then
-            on_player_banned(event)
+            ANTIGRIEF_Banned(event)
         elseif event.name == defines.events.on_player_rotated_entity then
-            on_player_rotated_entity(event)
+            ANTIGRIEF_Rotated(event)
         elseif event.name == defines.events.on_player_flipped_entity then
-            on_player_flipped_entity(event)
+            ANTIGRIEF_Flipped(event)
         elseif event.name == defines.events.on_pre_player_mined_item then
-            on_pre_player_mined_item(event)
+            ANTIGRIEF_PreMined(event)
         elseif event.name == defines.events.on_built_entity then
-            on_built_entity(event)
+            ANTIGRIEF_BuiltEnt(event)
         elseif event.name == defines.events.on_redo_applied then
-            on_redo_applied(event)
+            LOG_Redo(event)
         elseif event.name == defines.events.on_undo_applied then
-            on_undo_applied(event)
+            LOG_Undo(event)
         elseif event.name == defines.events.on_train_schedule_changed then
-            on_train_schedule_changed(event)
+            LOG_TrainSchedule(event)
         elseif event.name == defines.events.on_entity_died then
-            on_entity_died(event)
+            LOG_EntDied(event)
         elseif event.name == defines.events.on_picked_up_item then
-            on_picked_up_item(event)
+            LOG_PickedItem(event)
         elseif event.name == defines.events.on_player_dropped_item then
-            on_player_dropped_item(event)
+            LOG_DroppedItem(event)
         elseif event.name == defines.events.on_marked_for_upgrade then
-            on_marked_for_upgrade(event)
+            LOG_MarkedUpgrade(event)
         elseif event.name == defines.events.on_cancelled_upgrade then
-            on_cancelled_upgrade(event)
+            LOG_CancelUpgrade(event)
         elseif event.name == defines.events.on_marked_for_deconstruction then
-            on_marked_for_deconstruction(event)
+            LOG_MarkDecon(event)
         elseif event.name == defines.events.on_cancelled_deconstruction then
-            on_cancelled_deconstruction(event)
+            LOG_CancelDecon(event)
         elseif event.name == defines.events.on_player_flushed_fluid then
-            on_player_flushed_fluid(event)
+            LOG_Flushed(event)
         elseif event.name == defines.events.on_player_driving_changed_state then
-            on_player_driving_changed_state(event)
+            LOG_PlayerDrive(event)
         elseif event.name == defines.events.on_rocket_launch_ordered then
-            on_rocket_launch_ordered(event)
+            LOG_OrderLaunch(event)
         elseif event.name == defines.events.on_player_fast_transferred then
-            on_player_fast_transferred(event)
+            LOG_FastTransfered(event)
         elseif event.name == defines.events.on_player_main_inventory_changed then
-            on_player_main_inventory_changed(event)
+            LOG_InvChanged(event)
         end
 
         -- To-Do--
         -- player_joined_game
         -- on_gui_click
-        todo_event_handler(event)
+        TODO_EventHandler(event)
     end)
 
-function clear_corpse_tag(event)
+function EVENT_Loot(event)
     if event and event.entity and event.entity.valid then
         local ent = event.entity
 
@@ -434,9 +434,9 @@ function clear_corpse_tag(event)
 
                 if victim and victim.valid and player and player.valid then
                     local buf = player.name ..
-                        " looted the body of " .. victim.name .. " at" .. make_gps_str_obj(player, victim)
+                        " looted the body of " .. victim.name .. " at" .. UTIL_GPSObj(player, victim)
                     if victim.name ~= player.name then
-                        message_all(buf)
+                        UTIL_MsgAll(buf)
                     end
                 end
             end

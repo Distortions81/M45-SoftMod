@@ -3,7 +3,7 @@
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
 -- Add M45 Logo to spawn area
-function dodrawlogo()
+function LOGO_DrawLogo()
     local msurf = game.surfaces["nauvis"]
     if msurf then
         -- Only draw if needed

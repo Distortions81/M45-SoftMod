@@ -4,7 +4,7 @@
 -- License: MPL 2.0
 require "utility"
 
-function make_banish_storage()
+function BANISH_Init()
     if not storage.banishvotes then
         storage.banishvotes = {
             voter = {},
@@ -20,7 +20,7 @@ function make_banish_storage()
     end
 end
 
-function g_report(player, report)
+function BANISH_DoReport(player, report)
     if player and player.valid and report then
         -- Init limit list if needed
         if not storage.reportlimit then
@@ -37,18 +37,18 @@ function g_report(player, report)
         -- Limit and list number of reports
         if storage.reportlimit[player.index] <= 5 then
             print("[REPORT] " .. player.name .. " " .. report)
-            smart_print(player, "Report sent! You have now used " .. storage.reportlimit[player.index] ..
+            UTIL_SmartPrint(player, "Report sent! You have now used " .. storage.reportlimit[player.index] ..
                 " of your 5 available reports.")
         else
-            smart_print("You are not allowed to send any more reports.")
+            UTIL_SmartPrint("You are not allowed to send any more reports.")
         end
     else
-        smart_print(player, "Usage: /report (your message to moderators here)")
+        UTIL_SmartPrint(player, "Usage: /report (your message to moderators here)")
     end
 end
 
 -- Process banish votes
-function update_banished_votes()
+function BANISH_UpdateVotes()
     -- Reset banished list
     local banishedtemp = {}
 
@@ -75,16 +75,16 @@ function update_banished_votes()
             -- only if data exists
             if vote.voter.valid and vote.victim.valid then
                 -- valid defendant
-                if is_new(vote.victim) or is_member(vote.victim) then
+                if UTIL_Is_New(vote.victim) or UTIL_Is_Member(vote.victim) then
                     -- valid voter
-                    if is_regular(vote.voter) or is_veteran(vote.voter) or vote.voter.admin then
+                    if UTIL_Is_Regular(vote.voter) or UTIL_Is_Veteran(vote.voter) or vote.voter.admin then
                         -- vote isn't overruled or withdrawn
                         if vote.withdrawn == false and vote.overruled == false then
                             local points = 1
                             
                             if vote.voter.admin then
                                points = 1000 -- Admins get single-vote banish
-                            elseif is_veteran(vote.voter) then
+                            elseif UTIL_Is_Veteran(vote.voter) then
                                 points = 2 -- Veterans get extra votes
                             end
 
@@ -104,7 +104,7 @@ function update_banished_votes()
 
     -- Loop though players, look for matches
     for _, victim in pairs(game.players) do
-        local prevstate = is_banished(victim)
+        local prevstate = UTIL_Is_Banished(victim)
 
         -- Add votes to storage list, erase old votes
         if banishedtemp[victim.index] then
@@ -114,10 +114,10 @@ function update_banished_votes()
         end
 
         -- Was banished, but not anymore
-        if is_banished(victim) == false and prevstate == true then
+        if UTIL_Is_Banished(victim) == false and prevstate == true then
             local msg = victim.name .. " is no longer banished."
             print("[REPORT] SYSTEM " .. msg)
-            message_all_sys(msg)
+            UTIL_MsgAllSys(msg)
 
             -- Kill them, so items are left behind
             if victim.character and victim.character.valid then
@@ -130,14 +130,14 @@ function update_banished_votes()
             table.insert(storage.send_to_surface, {
                 victim = victim,
                 surface = "nauvis",
-                position = get_default_spawn()
+                position = UTIL_GetDefaultSpawn()
             })
-        elseif is_banished(victim) == true and prevstate == false then
+        elseif UTIL_Is_Banished(victim) == true and prevstate == false then
             -- Was not banished, but is now.
             local msg = victim.name .. " has been banished."
-            message_all_sys(msg)
+            UTIL_MsgAllSys(msg)
             print("[REPORT] SYSTEM " .. msg)
-            showBanishedInform(false, victim)
+            BANISH_InformBanished(false, victim)
 
             -- Create area if needed
             if game.surfaces["hell"] == nil then
@@ -166,13 +166,13 @@ function update_banished_votes()
 
             -- Kill them, so items are left behind
             if victim.character and victim.character.valid then
-                send_to_default_spawn(victim)
+                UTIL_SendToDefaultSpawn(victim)
                 victim.character.die("player")
             else
-                dumpPlayerInventory(victim, true)
+                INFO_DumpInv(victim, true)
             end
 
-            message_all_sys(victim.name .. "'s items have been dumped at spawn so they can be recovered.")
+            UTIL_MsgAllSys(victim.name .. "'s items have been dumped at spawn so they can be recovered.")
 
             if not storage.send_to_surface then
                 storage.send_to_surface = {}
@@ -186,23 +186,23 @@ function update_banished_votes()
     end
 end
 
-function g_banish(player, victim, reason)
+function BANISH_DoBanish(player, victim, reason)
     if player and player.valid then
         -- Regulars/mods only
-        if is_regular(player) or is_veteran(player) or player.admin then
+        if UTIL_Is_Regular(player) or UTIL_Is_Veteran(player) or player.admin then
             -- Must have arguments
             if victim and reason then
                 if victim.name == player.name then
-                    smart_print(player, "You can't banish yourself. Have you considered therapy?")
+                    UTIL_SmartPrint(player, "You can't banish yourself. Have you considered therapy?")
                     return
                 end
-                if is_banished(player) then
-                    smart_print(player, "You are banished, you can't vote.")
+                if UTIL_Is_Banished(player) then
+                    UTIL_SmartPrint(player, "You are banished, you can't vote.")
                     return
                 end
 
                 if string.len(reason) < 4 then
-                    smart_print(player, "You must supply a more descriptive complaint.")
+                    UTIL_SmartPrint(player, "You must supply a more descriptive complaint.")
                     return
                 else
                     -- Must have valid victim
@@ -220,15 +220,15 @@ function g_banish(player, victim, reason)
                                         end
                                         -- Limit number of votes player gets
                                         if not vote.voter.admin and votecount >= 5 then
-                                            smart_print(player, "You have exhausted your voting privilege for this map.")
+                                            UTIL_SmartPrint(player, "You have exhausted your voting privilege for this map.")
                                             return
                                         end
 
                                         -- Can't vote twice
                                         if vote.voter == player and vote.victim == victim then
-                                            smart_print(player, "You already voted against them!")
-                                            smart_print(player, "/unbanish <player> to withdraw your vote.")
-                                            smart_print(player,
+                                            UTIL_SmartPrint(player, "You already voted against them!")
+                                            UTIL_SmartPrint(player, "/unbanish <player> to withdraw your vote.")
+                                            UTIL_SmartPrint(player,
                                                 "[color=red](WARNING) If you withdraw a vote, you CAN NOT reintroduce it.[/color]")
                                             return
                                         end
@@ -237,13 +237,13 @@ function g_banish(player, victim, reason)
 
                                 -- Send report to discord and add to vote list
                                 local message = player.name .. " voted to banish: " .. victim.name .. " for: " .. reason
-                                message_all_sys(message)
+                                UTIL_MsgAllSys(message)
                                 print("[REPORT] " .. message)
-                                smart_print(player, "(SYSTEM): Your vote has been added, and posted on Discord!")
-                                smart_print(player, "/unbanish <player> to withdraw your vote.")
-                                smart_print(player,
+                                UTIL_SmartPrint(player, "(SYSTEM): Your vote has been added, and posted on Discord!")
+                                UTIL_SmartPrint(player, "/unbanish <player> to withdraw your vote.")
+                                UTIL_SmartPrint(player,
                                     "[color=red](WARNING) If you withdraw a vote, you CAN NOT reintroduce it.[/color]")
-                                smart_print(player, "You have used " .. votecount .. " of your 5 available votes.")
+                                UTIL_SmartPrint(player, "You have used " .. votecount .. " of your 5 available votes.")
                             end
 
                             -- Init if needed
@@ -265,27 +265,27 @@ function g_banish(player, victim, reason)
                                 withdrawn = false,
                                 overruled = false
                             })
-                            update_banished_votes() -- Must do this to add to tally
+                            BANISH_UpdateVotes() -- Must do this to add to tally
                         else
-                            smart_print(player, "Moderators can not be banished.")
+                            UTIL_SmartPrint(player, "Moderators can not be banished.")
                         end
                     else
-                        smart_print(player, "There are no players by that name.")
+                        UTIL_SmartPrint(player, "There are no players by that name.")
                     end
                 end
             else
-                smart_print(player, "Usage: /banish <player> <reason for banishment>")
+                UTIL_SmartPrint(player, "Usage: /banish <player> <reason for banishment>")
             end
         else
-            smart_print(player, "This command is for regulars/veterans (level 3+) players and moderators only!")
+            UTIL_SmartPrint(player, "This command is for regulars/veterans (level 3+) players and moderators only!")
             return
         end
     else
-        smart_print(nil, "The console can't vote.")
+        UTIL_SmartPrint(nil, "The console can't vote.")
     end
 end
 
-function send_to_surface(player)
+function BANISH_SendToSurface(player)
     -- Anything queued?
     if storage.send_to_surface then
         -- Valid player?
@@ -306,7 +306,7 @@ function send_to_surface(player)
                                 player.teleport(newpos, surf)
                             else
                                 player.teleport(item.position, surf) -- screw it
-                                console_print("[ERROR] send_to_surface(respawn): unable to find non_colliding_position.")
+                                UTIL_ConsolePrint("[ERROR] send_to_surface(respawn): unable to find non_colliding_position.")
                             end
                             index = i
                             break
@@ -316,14 +316,14 @@ function send_to_surface(player)
             end
             -- Remove item we processed
             if index then
-                console_print("[ERROR] send_to_surface: item removed: " .. index)
+                UTIL_ConsolePrint("[ERROR] send_to_surface: item removed: " .. index)
                 table.remove(storage.send_to_surface, index)
             end
         end
     end
 end
 
-function add_banish_commands()
+function BANISH_AddBanishCommands()
     -- Damn them!
     commands.add_command("damn", "<player>\n(sends player to hell, tfrom <player> to teleport them back out.)",
         function(param)
@@ -333,7 +333,7 @@ function add_banish_commands()
             if param and param.player_index then
                 player = game.players[param.player_index]
                 if player and player.admin == false then
-                    smart_print(player, "Moderators only.")
+                    UTIL_SmartPrint(player, "Moderators only.")
                     return
                 end
             end
@@ -382,11 +382,11 @@ function add_banish_commands()
                             position = {0, 0}
                         })
                     else
-                        smart_print(player, "Couldn't find that player.")
+                        UTIL_SmartPrint(player, "Couldn't find that player.")
                     end
                 end
             else
-                smart_print(player, "Moderators only.")
+                UTIL_SmartPrint(player, "Moderators only.")
             end
         end)
     -- Mod vote overrrule
@@ -400,14 +400,14 @@ function add_banish_commands()
                 if (player and player.admin) then
                     if storage.banishvotes then
                         -- get arguments
-                        local args = mysplit(param.parameter, " ")
+                        local args = UTIL_SplitStr(param.parameter, " ")
 
                         -- Must have arguments
                         if args ~= {} and args[1] then
                             if args[1] == "clear" then
                                 storage.banishvotes = nil
-                                smart_print(player, "All votes cleared.")
-                                update_banished_votes()
+                                UTIL_SmartPrint(player, "All votes cleared.")
+                                BANISH_UpdateVotes()
                                 return
                             end
                             local victim = game.players[args[1]]
@@ -424,7 +424,7 @@ function add_banish_commands()
                                     end
                                 end
                                 if count > 0 then
-                                    smart_print(player, "Overruled " .. count .. " votes against " .. victim.name)
+                                    UTIL_SmartPrint(player, "Overruled " .. count .. " votes against " .. victim.name)
                                 else
                                     for _, vote in pairs(storage.banishvotes) do
                                         if vote and vote.victim and vote.victim.valid then
@@ -434,22 +434,22 @@ function add_banish_commands()
                                             end
                                         end
                                     end
-                                    smart_print(player, "Withdrew " .. count .. " overrulings, against " .. victim.name)
+                                    UTIL_SmartPrint(player, "Withdrew " .. count .. " overrulings, against " .. victim.name)
                                 end
-                                update_banished_votes()
+                                BANISH_UpdateVotes()
                                 return
                             else
-                                smart_print(player, "Couldn't find a player by that name.")
+                                UTIL_SmartPrint(player, "Couldn't find a player by that name.")
                             end
                         else
-                            smart_print(player,
+                            UTIL_SmartPrint(player,
                                 "Who do you want to overrule votes against? <player> or <clear> (clears/unbanishes all)")
                         end
                     else
-                        smart_print(player, "There are no votes to overrule.")
+                        UTIL_SmartPrint(player, "There are no votes to overrule.")
                     end
                 else
-                    smart_print(player, "Moderators only.")
+                    UTIL_SmartPrint(player, "Moderators only.")
                 end
             end
         end)
@@ -473,19 +473,19 @@ function add_banish_commands()
                             notes = "(OVERRULED) "
                         end
                         pcount = pcount + 1
-                        smart_print(player, notes .. "plaintiff: " .. vote.voter.name .. ", defendant: " ..
+                        UTIL_SmartPrint(player, notes .. "plaintiff: " .. vote.voter.name .. ", defendant: " ..
                             vote.victim.name .. ", complaint:\n" .. vote.reason)
                     end
                 end
 
                 -- Tally votes before proceeding
-                update_banished_votes()
+                BANISH_UpdateVotes()
 
                 -- Print accused
                 if storage.thebanished then
                     for _, victim in pairs(game.players) do
                         if storage.thebanished[victim.index] and storage.thebanished[victim.index] > 1 then
-                            smart_print(player, victim.name .. " has had " .. storage.thebanished[victim.index] ..
+                            UTIL_SmartPrint(player, victim.name .. " has had " .. storage.thebanished[victim.index] ..
                                 " complaints against them.")
                             pcount = pcount + 1
                         end
@@ -501,20 +501,20 @@ function add_banish_commands()
                             end
                         end
                         if votecount > 2 then
-                            smart_print(player, victim.name .. " has voted against " .. votecount .. " players.")
+                            UTIL_SmartPrint(player, victim.name .. " has voted against " .. votecount .. " players.")
                             pcount = pcount + 1
                         end
                     end
                 end
                 -- Nothing found, report it
                 if pcount <= 0 then
-                    smart_print(player, "The docket is clean.")
+                    UTIL_SmartPrint(player, "The docket is clean.")
                 end
                 return
             else
                 -- No vote data
-                smart_print(player, "The docket is clean.")
-                update_banished_votes()
+                UTIL_SmartPrint(player, "The docket is clean.")
+                BANISH_UpdateVotes()
                 return
             end
         end
@@ -526,9 +526,9 @@ function add_banish_commands()
             local player = game.players[param.player_index]
             if player and param.parameter then
                 -- regulars/moderators players only
-                if is_regular(player) or is_veteran(player) or player.admin then
+                if UTIL_Is_Regular(player) or UTIL_Is_Veteran(player) or player.admin then
                     -- get arguments
-                    local args = mysplit(param.parameter, " ")
+                    local args = UTIL_SplitStr(param.parameter, " ")
 
                     -- Must have arguments
                     if args ~= {} and args[1] then
@@ -544,32 +544,32 @@ function add_banish_commands()
                                             -- Send report to discord and withdraw vote
                                             local message = player.name .. " WITHDREW their vote to banish: " ..
                                                                 victim.name
-                                            message_all_sys(message)
+                                            UTIL_MsgAllSys(message)
                                             print("[REPORT] " .. message)
-                                            smart_print(player, "Your vote has been withdrawn, and posted on Discord.")
+                                            UTIL_SmartPrint(player, "Your vote has been withdrawn, and posted on Discord.")
                                             vote.withdrawn = true
-                                            update_banished_votes() -- Must do this to delete from tally
+                                            BANISH_UpdateVotes() -- Must do this to delete from tally
                                             return
                                         end
                                     end
                                 end
-                                smart_print(player, "I don't see a vote from you, against that player, to withdraw.")
+                                UTIL_SmartPrint(player, "I don't see a vote from you, against that player, to withdraw.")
                             end
                         else
-                            smart_print(player, "There are no players online by that name.")
+                            UTIL_SmartPrint(player, "There are no players online by that name.")
                         end
                     else
-                        smart_print(player, "Usage: /unbanish <player>")
+                        UTIL_SmartPrint(player, "Usage: /unbanish <player>")
                     end
                 else
-                    smart_print(player, "Only regulars/moderator status players can vote.")
+                    UTIL_SmartPrint(player, "Only regulars/moderator status players can vote.")
                     return
                 end
             else
-                smart_print(player, "Usage: /unbanish <player>")
+                UTIL_SmartPrint(player, "Usage: /unbanish <player>")
             end
         else
-            smart_print(nil, "The console can't vote.")
+            UTIL_SmartPrint(nil, "The console can't vote.")
         end
     end)
 
@@ -580,12 +580,12 @@ function add_banish_commands()
                 local player = game.players[param.player_index]
 
                 if not param.parameter then
-                    smart_print(player, "Banish who?")
+                    UTIL_SmartPrint(player, "Banish who?")
                     return
                 end
-                local args = mysplit(param.parameter, " ")
+                local args = UTIL_SplitStr(param.parameter, " ")
                 if not args[2] then
-                    smart_print(player, "You must specify a reason.")
+                    UTIL_SmartPrint(player, "You must specify a reason.")
                     return
                 end
                 local victim = game.players[args[1]]
@@ -598,12 +598,12 @@ function add_banish_commands()
                     end
                 end
 
-                if is_banished(victim) then
-                    smart_print(player, "They are already banished!")
+                if UTIL_Is_Banished(victim) then
+                    UTIL_SmartPrint(player, "They are already banished!")
                     return
                 end
 
-                g_banish(player, victim, reason)
+                BANISH_DoBanish(player, victim, reason)
             end
         end)
 
@@ -611,14 +611,14 @@ function add_banish_commands()
     commands.add_command("report", "<detailed report here>\n(Sends in a report to the moderators)", function(param)
         if param and param.player_index then
             local player = game.players[param.player_index]
-            g_report(player, param.parameter)
+            BANISH_DoReport(player, param.parameter)
         else
-            smart_print(nil, "The console doesn't need to send in reports this way.")
+            UTIL_SmartPrint(nil, "The console doesn't need to send in reports this way.")
         end
     end)
 end
 
-function showBanishedInform(close, victim)
+function BANISH_InformBanished(close, victim)
 
     if victim and victim.gui and victim.gui.screen then
         if not victim.gui.screen.banished_inform then

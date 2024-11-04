@@ -1,4 +1,4 @@
-function make_reset_clock(player)
+function CLOCK_MakeClock(player)
     -- Online button--
     if player.gui.top.reset_clock then
         player.gui.top.reset_clock.destroy()
