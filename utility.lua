@@ -313,7 +313,7 @@ function UTIL_Is_Banished(victim)
         return false
     elseif victim.surface and victim.surface.name == "jail" then
         return true
-    elseif storage.PData[victim.player_index].banished then
+    elseif storage.PData[victim.index].banished then
         return true
     else
         return false

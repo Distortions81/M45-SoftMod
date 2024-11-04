@@ -226,7 +226,7 @@ script.on_load(function()
                     local victim = game.players[param.parameter]
 
                     if victim then
-                        if storage.PData[victim.player_index].permDeath then
+                        if storage.PData[victim.index].permDeath then
                             storage.SM_Store.oneLifeMode = false
                             ONELIFE_MakeButton(victim)
                             storage.SM_Store.oneLifeMode = true

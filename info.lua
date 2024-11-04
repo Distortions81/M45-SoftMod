@@ -17,8 +17,8 @@ function INFO_DumpInv(player, force)
     end
 
     if not force then
-        if storage.PData[player.player_index].cleaned then
-            if storage.PData[player.player_index].cleaned == true then
+        if storage.PData[player.index].cleaned then
+            if storage.PData[player.index].cleaned == true then
                 return false
             end
         end
@@ -55,7 +55,7 @@ function INFO_DumpInv(player, force)
         name = "character-corpse",
         position = UTIL_GetDefaultSpawn(),
         inventory_size = inv_corpse_size,
-        player_index = player.player_index
+        player_index = player.index
     }
     if not corpse then
         return false
