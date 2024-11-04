@@ -35,7 +35,7 @@ script.on_load(function()
             PERMS_MakeUserGroups()
             for _, target in pairs(game.connected_players) do
                 if target.valid and target.gui and target.gui.top and target.gui.top.reset_clock then
-                    if storage.hide_clock and storage.hide_clock[target.index] == true or input == "" then
+                    if storage.PData and storage.PData[target.index].hideClock == true or input == "" then
                         target.gui.top.reset_clock.caption = ">"
                     else
                         target.gui.top.reset_clock.caption = "MAP RESET: " .. input
@@ -44,8 +44,8 @@ script.on_load(function()
                 end
             end
             -- Refresh open info windows
-            if storage.resetdur ~= input then
-                storage.resetdur = input
+            if storage.SM_Store.resetDuration ~= input then
+                storage.SM_Store.resetDuration = input
                 for _, victim in pairs(game.connected_players) do
                     if victim and victim.valid and victim.gui and victim.gui.screen and
                         victim.gui.screen.m45_info_window then
@@ -74,7 +74,7 @@ script.on_load(function()
                 input = param.parameter
             end
             PERMS_MakeUserGroups()
-            storage.resetint = input
+            storage.SM_Store.resetDate = input
         end)
 
         -- Enable / disable friendly fire
@@ -131,20 +131,20 @@ script.on_load(function()
 
                 if pforce then
                     if string.lower(param.parameter) == "off" then
-                        storage.noBlueprints = false
-                        PERMS_SetBlueprintsAllowed(storage.defaultgroup, false)
-                        PERMS_SetBlueprintsAllowed(storage.membersgroup, false)
-                        PERMS_SetBlueprintsAllowed(storage.regularsgroup, false)
-                        PERMS_SetBlueprintsAllowed(storage.veteransgroup, false)
-                        PERMS_SetBlueprintsAllowed(storage.modsgroup, false)
+                        storage.SM_Store.noBlueprints = false
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.defGroup, false)
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.memGroup, false)
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.regGroup, false)
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.vetGroup, false)
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.modGroup, false)
                         UTIL_SmartPrint(player, "blueprints disabled...")
                     elseif string.lower(param.parameter) == "on" then
-                        storage.noBlueprints = true
-                        PERMS_SetBlueprintsAllowed(storage.defaultgroup, true)
-                        PERMS_SetBlueprintsAllowed(storage.membersgroup, true)
-                        PERMS_SetBlueprintsAllowed(storage.regularsgroup, true)
-                        PERMS_SetBlueprintsAllowed(storage.modsgroup, true)
-                        PERMS_SetBlueprintsAllowed(storage.veteransgroup, true)
+                        storage.SM_Store.noBlueprints = true
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.defGroup, true)
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.memGroup, true)
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.regGroup, true)
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.vetGroup, true)
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.modGroup, true)
                         UTIL_SmartPrint(player, "blueprints enabled...")
                     end
                 end
@@ -174,13 +174,13 @@ script.on_load(function()
 
                 if pforce then
                     if string.lower(param.parameter) == "off" then
-                        storage.cheatson = false
+                        storage.SM_Store.cheats = false
                         for _, player in pairs(game.players) do
                             player.cheat_mode = false
                         end
                         UTIL_SmartPrint(player, "cheats disabled...")
                     elseif string.lower(param.parameter) == "on" then
-                        storage.cheatson = true
+                        storage.SM_Store.cheats = true
                         for _, player in pairs(game.players) do
                             player.cheat_mode = true
                         end
@@ -208,28 +208,28 @@ script.on_load(function()
             end
 
             if param and param.parameter then
-                if param.parameter == "on" and not storage.oneLifeMode then
-                    storage.oneLifeMode = true
-                    UTIL_SmartPrint(player,"One-life mode enabled.")
+                if param.parameter == "on" and not storage.SM_Store.oneLifeMode then
+                    storage.SM_Store.oneLifeMode = true
+                    UTIL_SmartPrint(player, "One-life mode enabled.")
                     UTIL_MsgAll("One-life mode enabled.")
                     for _, victim in pairs(game.players) do
                         ONELIFE_MakeButton(victim)
                     end
-                elseif param.parameter == "off" and storage.oneLifeMode then
-                    storage.oneLifeMode = false
-                    UTIL_SmartPrint(player,"One-life mode disabled.")
+                elseif param.parameter == "off" and storage.SM_Store.oneLifeMode then
+                    storage.SM_Store.oneLifeMode = false
+                    UTIL_SmartPrint(player, "One-life mode disabled.")
                     UTIL_MsgAll("One-life mode disabled.")
                     for _, victim in pairs(game.players) do
                         ONELIFE_MakeButton(victim)
                     end
-                elseif storage.oneLifeMode then
+                elseif storage.SM_Store.oneLifeMode then
                     local victim = game.players[param.parameter]
 
                     if victim then
-                        if victim.controller_type == defines.controllers.spectator then
-                            storage.oneLifeMode = false
+                        if storage.PData[victim.player_index].permDeath then
+                            storage.SM_Store.oneLifeMode = false
                             ONELIFE_MakeButton(victim)
-                            storage.oneLifeMode = true
+                            storage.SM_Store.oneLifeMode = true
                             ONELIFE_MakeButton(victim)
 
                             UTIL_MsgAll(victim.name .. " was revived!")
@@ -346,12 +346,12 @@ script.on_load(function()
                 UTIL_SmartPrint(player, "options: on, off")
                 return
             elseif string.lower(param.parameter) == "off" then
-                storage.restrict = false
+                storage.SM_Store.restrictNew = false
                 PERMS_SetPermissions()
                 UTIL_SmartPrint(player, "New player restrictions disabled.")
                 return
             elseif string.lower(param.parameter) == "on" then
-                storage.restrict = true
+                storage.SM_Store.restrictNew = true
                 PERMS_SetPermissions()
                 UTIL_SmartPrint(player, "New player restrictions enabled.")
                 return
@@ -375,7 +375,7 @@ script.on_load(function()
             end
 
             if param.parameter == "debug" then
-                print(die.debug)
+                print(die.debug) --intentional bug
             end
         end)
 
@@ -387,17 +387,13 @@ script.on_load(function()
 
                 -- Only if arguments
                 if param.parameter and player and player.valid then
-
                     -- Init player if needed, else add to
-                    if not storage.access_count[player.index] then
-                        storage.access_count[player.index] = 1
-                    else
-                        if storage.access_count[player.index] > 3 then
-                            UTIL_SmartPrint(player, "You have exhausted your registration attempts.")
-                            return
-                        end
-                        storage.access_count[player.index] = storage.access_count[player.index] + 1
+
+                    if storage.PData[player.index].regAttempts > 3 then
+                        UTIL_SmartPrint(player, "You have exhausted your registration attempts.")
+                        return
                     end
+                    storage.PData[player.index].regAttempts = storage.PData[player.index].regAttempts + 1
 
                     local ptype = "Error"
 
@@ -435,9 +431,9 @@ script.on_load(function()
             end
 
             if player then
-                UTIL_SmartPrint(player, "[SVERSION] " .. storage.svers)
+                UTIL_SmartPrint(player, "[SVERSION] " .. storage.SM_Version)
             else
-                print("[SVERSION] " .. storage.svers)
+                print("[SVERSION] " .. storage.SM_Version)
             end
         end)
 
@@ -455,16 +451,9 @@ script.on_load(function()
             PERMS_MakeUserGroups()
 
             if param.parameter then
-                storage.servname = param.parameter
+                storage.SM_Store.serverName = param.parameter
 
-                -- Set logo to be redrawn
-                storage.drawlogo = false
-                -- Redraw
-                LOGO_DrawLogo()
-
-                storage.servers = nil
-                storage.ports = nil
-                STORAGE_CreateGlobal()
+                LOGO_DrawLogo(true)
             end
         end)
 
@@ -719,7 +708,7 @@ script.on_load(function()
 
             -- Argument required
             if param.parameter then
-                storage.patreonlist = UTIL_SplitStr(param.parameter, ",")
+                storage.patreonList = UTIL_SplitStr(param.parameter, ",")
             end
         end)
 
@@ -736,7 +725,7 @@ script.on_load(function()
 
             -- Argument required
             if param.parameter then
-                storage.nitrolist = UTIL_SplitStr(param.parameter, ",")
+                storage.nitroList = UTIL_SplitStr(param.parameter, ",")
             end
         end)
 
@@ -744,8 +733,8 @@ script.on_load(function()
         commands.add_command("cspawn", "<x,y> -- (OPTIONAL) (Sets spawn point to <x,y>, or where you stand by default)",
             function(param)
                 local victim
-                local new_pos_x = 0.0
-                local new_pos_y = 0.0
+                local new_pos_x
+                local new_pos_y
 
                 -- Moderators only
                 if param and param.player_index then
@@ -772,10 +761,8 @@ script.on_load(function()
                 if param.parameter then
                     local xytable = UTIL_SplitStr(param.parameter, ",")
                     if xytable ~= {} and tonumber(xytable[1]) and tonumber(xytable[2]) then
-                        local argx = xytable[1]
-                        local argy = xytable[2]
-                        new_pos_x = argx
-                        new_pos_y = argy
+                        new_pos_x = tonumber(xytable[1])
+                        new_pos_y = tonumber(xytable[2])
                     else
                         UTIL_SmartPrint(victim, "Invalid argument. /cspawn x,y. No argument uses your current location.")
                         return
@@ -803,6 +790,7 @@ script.on_load(function()
             "<size> -- (OPTIONAL) Reveals <size> units of the map from map center, or 1024 by default. Min 128, Max 8192)",
             function(param)
                 local victim
+                local size = tonumber(1024)
 
                 -- Moderators only
                 if param and param.player_index then
@@ -816,8 +804,6 @@ script.on_load(function()
                 -- Get surface and force
                 local psurface = game.surfaces[1]
                 local pforce = game.forces["player"]
-                -- Default size
-                local size = 1024
 
                 -- Use mods's surface and force if possible
                 if victim and victim.valid then

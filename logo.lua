@@ -3,27 +3,31 @@
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
 -- Add M45 Logo to spawn area
-function LOGO_DrawLogo()
+function LOGO_DrawLogo(force)
+    if force then
+        storage.SM_Store.redrawLogo = true
+    end
+
     local msurf = game.surfaces[1]
     if msurf then
         -- Only draw if needed
-        if not storage.drawlogo then
+        if not storage.SM_Store.redrawLogo then
             -- Destroy if already exists
-            if storage.m45logo then
-               storage.m45logo.destroy()
+            if storage.SM_Store.spawnLogo then
+                storage.SM_Store.spawnLogo.destroy()
             end
-            if storage.m45logo_light then
-               storage.m45logo_light.destroy()
+            if storage.SM_Store.spawnLight then
+                storage.SM_Store.spawnLight.destroy()
             end
-            if storage.servtext then
-               storage.servtext.destroy()
+            if storage.SM_Store.spawnText then
+                storage.SM_Store.spawnText.destroy()
             end
 
             -- Get spawn position
-            local cpos = get_default_spawn()
+            local cpos = UTIL_GetDefaultSpawn()
 
             -- Find nice clear area for spawn
-            local newpos = msurf.find_non_colliding_position("crash-site-spaceship", cpos, 8192, 10, false)
+            local newpos = msurf.find_non_colliding_position("crash-site-spaceship", cpos, 0, 10, true)
             -- Set spawn position if we found a better spot
             if newpos then
                 cpos = newpos
@@ -31,13 +35,13 @@ function LOGO_DrawLogo()
                 if pforce then
                     pforce.set_spawn_position(cpos, msurf)
                 else
-                    console_print("[ERROR] dodrawlogo: Player force not found.")
+                    UTIL_ConsolePrint("[ERROR] dodrawlogo: Player force not found.")
                 end
             end
 
             -- Set drawn flag
-            storage.drawlogo = true
-            storage.m45logo = rendering.draw_sprite {
+            storage.SM_Store.redrawLogo = false
+            storage.SM_Store.spawnLogo = rendering.draw_sprite {
                 sprite = "file/img/world/m45-pad-v6.png",
                 render_layer = "floor",
                 target = cpos,
@@ -45,7 +49,7 @@ function LOGO_DrawLogo()
                 y_scale = 0.5,
                 surface = msurf
             }
-            storage.m45logo_light = rendering.draw_light {
+            storage.SM_Store.spawnLight = rendering.draw_light {
                 sprite = "utility/light_medium",
                 render_layer = 148,
                 target = cpos,
@@ -53,11 +57,11 @@ function LOGO_DrawLogo()
                 surface = msurf,
                 minimum_darkness = 0.5
             }
-            if not storage.servname then
-                storage.servname = ""
+            if not storage.SM_Store.serverName then
+                storage.SM_Store.serverName = ""
             end
-            storage.servtext = rendering.draw_text {
-                text = storage.servname,
+            storage.SM_Store.spawnText = rendering.draw_text {
+                text = storage.SM_Store.serverName,
                 draw_on_ground = true,
                 surface = msurf,
                 target = {cpos.x - 0.125, cpos.y - 2.5},
@@ -68,9 +72,4 @@ function LOGO_DrawLogo()
             }
         end
     end
-end
-
-function LOGO_Init()
-    storage.drawlogo = false
-    LOGO_DrawLogo()
 end

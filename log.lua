@@ -4,117 +4,102 @@
 -- License: MPL 2.0
 require "utility"
 
-function LOG_Init()
-    if not storage.last_ghost_log then
-        storage.last_ghost_log = {}
-    end
-end
-
 -- Create map tag -- log
 function LOG_TagAdded(event)
-    if not event or not event.player_index then
+    if not event or not event.player_index or not event.tag then
         return
     end
     local player = game.players[event.player_index]
 
-    if player and player.valid and event.tag then
-        UTIL_MsgAll(player.name .. " add-tag" .. make_gps_str_obj(player, event.tag) .. event.tag.text)
-    end
+    UTIL_MsgAll(player.name .. " add-tag" .. event.tag.gps_tag .. event.tag.text)
 end
 
 -- Edit map tag -- log
 function LOG_TagMod(event)
-    if not event or not event.player_index then
+    if not event or not event.player_index or not event.tag then
         return
     end
-        local player = game.players[event.player_index]
-        if player and player.valid and event.tag then
-            UTIL_MsgAll(player.name .. " mod-tag" .. make_gps_str_obj(player, event.tag) .. event.tag.text)
-        end
+    local player = game.players[event.player_index]
+    UTIL_MsgAll(player.name .. " mod-tag" .. event.tag.gps_tag .. event.tag.text)
 end
 
 -- Delete map tag -- log
 function LOG_TagDel(event)
-    if not event or not event.player_index then
+    if not event or not event.player_index or not event.tag then
         return
     end
-        local player = game.players[event.player_index]
+    local player = game.players[event.player_index]
 
-        -- Because factorio will hand us an nil event... nice.
-        if player and player.valid and event.tag then
-            UTIL_MsgAll(player.name .. " del-tag" .. make_gps_str_obj(player, event.tag) .. event.tag.text)
-        end
+    UTIL_MsgAll(player.name .. " del-tag" .. event.tag.gps_tag .. event.tag.text)
 end
 
 -- Player disconnect messages, with reason (Fact >= v1.1)
 function LOG_PlayerLeft(event)
     UTIL_SendPlayers(nil)
-    
+
     if not event or not event.player_index then
         return
     end
+    storage.PData[event.player_index].lastOnline = game.tick
     local player = game.players[event.player_index]
 
     if event.reason then
-        if storage.last_playtime then
-            storage.last_playtime[event.player_index] = game.tick
-        end
-
         local reason = { "(quit)", "(dropped)", "(reconnecting)", "(wrong input)", "(too many desync)",
             "(cannot keep up)", "(afk)", "(kicked)", "(kicked and deleted)", "(banned)",
             "(switching servers)", "(unknown reason)" }
         UTIL_MsgDiscord(player.name .. " disconnected. " .. reason[event.reason + 1])
-
-        ONLINE_UpdatePlayerList() -- online.lua
-        return
+    else
+        UTIL_MsgDiscord(player.name .. " disconnected!")
     end
 
-    ONLINE_UpdatePlayerList() -- online.lua
-    UTIL_MsgDiscord(player.name .. " disconnected!")
+    ONLINE_UpdatePlayerList()
 end
 
 function LOG_Redo(event)
-    if event and event.player_index and event.actions then
-        local player = game.players[event.player_index]
-
-        local buf = ""
-        for _, act in pairs(event.actions) do
-            if buf ~= "" then
-                buf = buf .. ", "
-            end
-            buf = buf .. act.type
-        end
-        UTIL_ConsolePrint("[ACT] " .. player.name .. " redo " .. buf .. make_gps_str_player(player))
+    if not event or not event.player_index or not event.actions then
+        return
     end
+    local player = game.players[event.player_index]
+
+    local buf = ""
+    for _, act in pairs(event.actions) do
+        if buf ~= "" then
+            buf = buf .. ", "
+        end
+        buf = buf .. act.type
+    end
+    UTIL_ConsolePrint("[ACT] " .. player.name .. " redo " .. buf .. player.gps_tag)
 end
 
 function LOG_Undo(event)
-    if event and event.player_index and event.actions then
-        local player = game.players[event.player_index]
-
-        local buf = ""
-        for _, act in pairs(event.actions) do
-            if buf ~= "" then
-                buf = buf .. ", "
-            end
-            buf = buf .. act.type
-        end
-        UTIL_ConsolePrint("[ACT] " .. player.name .. " undo " .. buf .. make_gps_str_player(player))
+    if not event or not event.player_index or not event.actions then
+        return
     end
+    local player = game.players[event.player_index]
+
+    local buf = ""
+    for _, act in pairs(event.actions) do
+        if buf ~= "" then
+            buf = buf .. ", "
+        end
+        buf = buf .. act.type
+    end
+    UTIL_ConsolePrint("[ACT] " .. player.name .. " undo " .. buf .. player.gps_tag)
 end
 
 function LOG_TrainSchedule(event)
-    if event and event.player_index and event.train then
-        local player = game.players[event.player_index]
+    if not event or not event.player_index or not event.train then
+        return
+    end
+    local player = game.players[event.player_index]
 
-        local msg = player.name ..
-            " changed schedule on train ID " .. event.train.id .. " at" .. make_gps_str(player, event.train.get_rails())
+    local msg = player.name ..
+        " changed schedule on train ID " .. event.train.id .. " at" .. event.train.gps_tag
 
-        if UTIL_Is_Regular(player) or UTIL_Is_Veteran(player) or player.admin then
-            UTIL_ConsolePrint("[ACT] " .. msg)
-        else
-            UTIL_MsgAll(msg)
-        end
+    if UTIL_Is_Regular(player) or UTIL_Is_Veteran(player) or player.admin then
+        UTIL_ConsolePrint("[ACT] " .. msg)
+    else
+        UTIL_MsgAll(msg)
     end
 end
 
@@ -123,7 +108,7 @@ function LOG_EntDied(event)
         if event.entity.name == "character" then
             return
         end
-        UTIL_ConsolePrint(event.entity.name .. " died at" .. make_gps_str(event.entity))
+        UTIL_ConsolePrint(event.entity.name .. " died at" .. event.entity.gps_tag)
     end
 end
 
@@ -142,7 +127,7 @@ function LOG_PickedItem(event)
         end
 
         if buf ~= "" then
-            UTIL_ConsolePrint("[ACT] " .. player.name .. " picked up " .. buf .. " at" .. make_gps_str(player))
+            UTIL_ConsolePrint("[ACT] " .. player.name .. " picked up " .. buf .. " at" .. player.gps_tag)
         end
     end
 end
@@ -151,7 +136,7 @@ function LOG_DroppedItem(event)
     if event and event.player_index and event.entity then
         local player = game.players[event.player_index]
 
-        UTIL_ConsolePrint("[ACT] " .. player.name .. " dropped " .. event.entity.name .. " at" .. make_gps_str(player))
+        UTIL_ConsolePrint("[ACT] " .. player.name .. " dropped " .. event.entity.name .. " at" .. player.gps_tag)
     end
 end
 
@@ -168,28 +153,13 @@ function LOG_Decon(event)
             if decon_size ~= 0 then
                 local msg = ""
                 if event.alt then
-                    msg = "[ACT] " .. player.name .. " unmarking for deconstruction [gps=" ..
-                        math.floor(area.left_top.x) .. "," .. math.floor(area.left_top.y) .. "] to [gps=" ..
-                        math.floor(area.right_bottom.x) .. "," .. math.floor(area.right_bottom.y) .. "] AREA: " ..
-                        math.floor(decon_size * decon_size) .. "sq"
-                    if player.surface and player.surface.index ~= 1 then
-                        msg = msg .. " (" .. player.surface.name .. ")"
-                    end
+                    msg = "[ACT] " .. player.name .. " at " .. player.gps_tag .. " is unmarking for deconstruction " .. UTIL_Area(decon_size, event.area)
                 else
-                    msg = "[ACT] " .. player.name .. " deconstructing [gps=" .. math.floor(area.left_top.x) .. "," ..
-                        math.floor(area.left_top.y) .. "] to [gps=" .. math.floor(area.right_bottom.x) .. "," ..
-                        math.floor(area.right_bottom.y) .. "] AREA: " .. math.floor(decon_size * decon_size) ..
-                        "sq"
-                    if player.surface and player.surface.index ~= 1 then
-                        msg = msg .. " (" .. player.surface.name .. ")"
-                    end
+                    msg = "[ACT] " .. player.name  .. " at " .. player.gps_tag .. " is deconstructing ".. UTIL_Area(decon_size, event.area)
 
                     if UTIL_Is_New(player) or UTIL_Is_Member(player) then -- Dont bother with regulars/moderators
                         if not UTIL_Is_Banished(player) then              -- Don't let bansihed players use this to spam
-                            if (storage.last_warning and game.tick - storage.last_warning >= 120) then
-                                storage.last_warning = game.tick
-                                UTIL_MsgAll(msg)
-                            end
+                            UTIL_MsgAll(msg)
                         end
                     end
                 end
@@ -214,8 +184,7 @@ function LOG_MarkedUpgrade(event)
 
             if UTIL_Is_New(player) or UTIL_Is_Member(player) then -- Dont bother with regulars/moderators
                 if not UTIL_Is_Banished(player) then              -- Don't let bansihed players use this to spam
-                    if (storage.last_warning and game.tick - storage.last_warning >= 120) then
-                        storage.last_warning = game.tick
+                    if UTIL_WarnOkay(event.player_index) then
                         UTIL_MsgAll(msg)
                     end
                 end
@@ -240,8 +209,7 @@ function LOG_CancelUpgrade(event)
 
             if UTIL_Is_New(player) or UTIL_Is_Member(player) then -- Dont bother with regulars/moderators
                 if not UTIL_Is_Banished(player) then              -- Don't let bansihed players use this to spam
-                    if (storage.last_warning and game.tick - storage.last_warning >= 120) then
-                        storage.last_warning = game.tick
+                    if UTIL_WarnOkay(event.player_index) then
                         UTIL_MsgAll(msg)
                     end
                 end
@@ -266,8 +234,7 @@ function LOG_MarkDecon(event)
 
             if UTIL_Is_New(player) or UTIL_Is_Member(player) then -- Dont bother with regulars/moderators
                 if not UTIL_Is_Banished(player) then              -- Don't let bansihed players use this to spam
-                    if (storage.last_warning and game.tick - storage.last_warning >= 120) then
-                        storage.last_warning = game.tick
+                    if UTIL_WarnOkay(event.player_index) then
                         UTIL_MsgAll(msg)
                     end
                 end
@@ -292,8 +259,7 @@ function LOG_CancelDecon(event)
 
             if UTIL_Is_New(player) or UTIL_Is_Member(player) then -- Dont bother with regulars/moderators
                 if not UTIL_Is_Banished(player) then              -- Don't let bansihed players use this to spam
-                    if (storage.last_warning and game.tick - storage.last_warning >= 120) then
-                        storage.last_warning = game.tick
+                    if UTIL_WarnOkay(event.player_index) then
                         UTIL_MsgAll(msg)
                     end
                 end
@@ -314,19 +280,14 @@ function LOG_Flushed(event)
                 player.name ..
                 " flushed " ..
                 obj.name ..
-                " of " .. math.floor(event.amount) .. " " .. event.fluid .. " at" .. make_gps_str_obj(player, obj)
+                " of " .. math.floor(event.amount) .. " " .. event.fluid .. " at" .. obj.gps_tag
 
             if player.surface and player.surface.index ~= 1 then
                 msg = msg .. " (" .. player.surface.name .. ")"
             end
 
             if UTIL_Is_New(player) or UTIL_Is_Member(player) then -- Dont bother with regulars/moderators
-                if not UTIL_Is_Banished(player) then              -- Don't let bansihed players use this to spam
-                    if (storage.last_warning and game.tick - storage.last_warning >= 120) then
-                        storage.last_warning = game.tick
-                        UTIL_MsgAll(msg)
-                    end
-                end
+                UTIL_MsgAll(msg)
             end
 
             UTIL_ConsolePrint(msg)
@@ -344,12 +305,12 @@ function LOG_PlayerDrive(event)
                 msg = "[ACT] " ..
                     player.name ..
                     " got in of a " ..
-                    event.entity.name .. " at" .. make_gps_str_obj(player, event.entity)
+                    event.entity.name .. " at" .. event.entity.gps_tag
             else
                 msg = "[ACT] " ..
                     player.name ..
                     " got out of a " ..
-                    event.entity.name .. " at" .. make_gps_str_obj(player, event.entity)
+                    event.entity.name .. " at" .. event.entity.gps_tag
             end
 
             if player.surface and player.surface.index ~= 1 then
@@ -357,12 +318,7 @@ function LOG_PlayerDrive(event)
             end
 
             if UTIL_Is_New(player) or UTIL_Is_Member(player) then -- Dont bother with regulars/moderators
-                if not UTIL_Is_Banished(player) then              -- Don't let bansihed players use this to spam
-                    if (storage.last_warning and game.tick - storage.last_warning >= 120) then
-                        storage.last_warning = game.tick
-                        UTIL_MsgAll(msg)
-                    end
-                end
+                UTIL_MsgAll(msg)
             end
 
             UTIL_ConsolePrint(msg)
@@ -375,7 +331,7 @@ function LOG_OrderLaunch(event)
         local player = game.players[event.player_index]
 
         local msg = "[ACT] " ..
-            player.name .. " ordered a rocket launch at" .. make_gps_str_obj(player, event.rocket_silo)
+            player.name .. " ordered a rocket launch at" .. event.rocket_silo.gps_tag
         UTIL_ConsolePrint(msg)
         UTIL_MsgAll(msg)
     end
@@ -389,10 +345,10 @@ function LOG_FastTransfered(event)
         if player and obj then
             if event.from_player then
                 UTIL_ConsolePrint("[ACT] " ..
-                    player.name .. " fast-transfered items to " .. obj.name .. " at" .. make_gps_str_obj(player, obj))
+                    player.name .. " fast-transfered items to " .. obj.name .. " at" .. obj.gps_tag)
             else
                 UTIL_ConsolePrint("[ACT] " ..
-                    player.name .. " fast-transfered items from " .. obj.name .. " at" .. make_gps_str_obj(player, obj))
+                    player.name .. " fast-transfered items from " .. obj.name .. " at" .. obj.gps_tag)
             end
         end
     end
@@ -403,7 +359,7 @@ function LOG_InvChanged(event)
         local player = game.players[event.player_index]
 
         if player then
-            UTIL_ConsolePrint("[ACT] " .. player.name .. " transfered some items at" .. make_gps_str(player))
+            UTIL_ConsolePrint("[ACT] " .. player.name .. " transfered some items at" .. player.gps_tag)
         end
     end
 end
@@ -426,8 +382,6 @@ function LOG_ConsoleCmd(event)
         if event.player_index then
             local player = game.players[event.player_index]
             print(string.format("[CMD] NAME: %s, COMMAND: %s, ARGS: %s", player.name, command, args))
-        elseif command ~= "time" and command ~= "online" and command ~= "server-save" and command ~= "p" then -- Ignore spammy console commands
-            print(string.format("[CMD] NAME: CONSOLE, COMMAND: %s, ARGS: %s", command, args))
         end
     end
 end
@@ -445,139 +399,84 @@ function LOG_ResearchFinished(event)
 end
 
 function LOG_BuiltEnt(event)
+    if not event or not event.player_index or not event.entity then
+        return
+    end
     local player = game.players[event.player_index]
     local obj = event.entity
 
-    if player and player.valid then
-        if obj and obj.valid then
-            if not storage.last_speaker_warning then
-                storage.last_speaker_warning = 0
-            end
+    if obj.name == "programmable-speaker" or
+        (obj.name == "entity-ghost" and obj.ghost_name == "programmable-speaker") then
+        UTIL_MsgAll(player.name .. " placed a speaker at" .. obj.gps_tag)
+        return
+    end
 
-            if obj.name == "programmable-speaker" or
-                (obj.name == "entity-ghost" and obj.ghost_name == "programmable-speaker") then
-                if (storage.last_speaker_warning and game.tick - storage.last_speaker_warning >= 120) then
-                    if player.admin == false then -- Don't bother with mods
-                        UTIL_MsgAll(player.name .. " placed a speaker at" .. UTIL_GPSObj(player, obj))
-                        storage.last_speaker_warning = game.tick
-                    end
-                end
-            end
-
-            if obj.name ~= "tile-ghost" and obj.name ~= "tile" then
-                if obj.name ~= "entity-ghost" then
-                    UTIL_ConsolePrint("[ACT] " .. player.name .. " placed " .. obj.name .. UTIL_GPSObj(player, obj))
-                else
-                    
-                    if storage.last_ghost_log[player.index] then
-                        if game.tick - storage.last_ghost_log[player.index] > 120 then
-                            UTIL_ConsolePrint("[ACT] " ..
-                                player.name .. " placed-ghost " .. obj.name .. UTIL_GPSObj(player, obj) ..
-                                obj.ghost_name)
-                        end
-                    end
-                    storage.last_ghost_log[player.index] = game.tick
-                end
-            end
+    if obj.name ~= "tile-ghost" and obj.name ~= "tile" then
+        if obj.name ~= "entity-ghost" then
+            UTIL_ConsolePrint("[ACT] " .. player.name .. " placed " .. obj.name .. obj.gps_tag)
         else
-            UTIL_ConsolePrint("[ERROR] on_built_entity: invalid obj")
+            if UTIL_WarnOkay(event.player_index) then
+                UTIL_ConsolePrint("[ACT] " ..
+                    player.name .. " placed-ghost " .. obj.name .. obj.gps_tag ..
+                    obj.ghost_name)
+            end
         end
-    else
-        UTIL_ConsolePrint("[ERROR] on_built_entity: invalid player")
     end
 end
 
 function LOG_PreMined(event)
-    -- Sanity check
-    if event and event.entity and event.player_index then
-        local player = game.players[event.player_index]
-        local obj = event.entity
+    if not event or not event.player_index or not event.entity then
+        return
+    end
+    local player = game.players[event.player_index]
+    local obj = event.entity
 
-        if obj and obj.valid and player and player.valid then
-            if obj.force.name ~= "enemy" and obj.force.name ~= "neutral" then
-                if obj.name ~= "tile-ghost" and obj.name ~= "tile" then
-                    if obj.name ~= "entity-ghost" then
-                        -- log
-                        UTIL_ConsolePrint("[ACT] " .. player.name .. " mined " .. obj.name .. UTIL_GPSObj(player, obj))
+    if obj.force.name ~= "enemy" and obj.force.name ~= "neutral" then
+        if obj.name ~= "tile-ghost" and obj.name ~= "tile" then
+            if obj.name ~= "entity-ghost" then
+                -- log
+                UTIL_ConsolePrint("[ACT] " .. player.name .. " mined " .. obj.name .. obj.gps_tag)
 
-                        -- Mark player as having picked up an item, and needing to be cleaned.
-                        if storage.cleaned_players and player.index and storage.cleaned_players[player.index] then
-                            storage.cleaned_players[player.index] = false
-                        end
-                    else
-                        UTIL_ConsolePrint("[ACT] " ..
-                            player.name .. " mined-ghost " .. obj.name .. UTIL_GPSObj(player, obj) ..
-                            obj.ghost_name)
-                    end
+                -- Mark player as having picked up an item, and needing to be cleaned.
+                if storage.PData[event.player_index].cleaned then
+                    storage.PData[event.player_index].cleaned = false
                 end
             else
-                EVENT_Loot(event)
+                UTIL_ConsolePrint("[ACT] " ..
+                    player.name .. " mined-ghost " .. obj.name .. obj.gps_tag ..
+                    obj.ghost_name)
             end
-        else
-            UTIL_ConsolePrint("[ERROR] pre_player_mined_item: invalid obj")
         end
+    else
+        EVENT_Loot(event)
     end
 end
 
 function LOG_Rotated(event)
-    -- Sanity check
-    if event and event.player_index and event.previous_direction then
-        local player = game.players[event.player_index]
-        local obj = event.entity
-
-        -- If player and object are valid
-        if player and player.valid then
-            if obj and obj.valid then
-                if obj.name ~= "tile-ghost" and obj.name ~= "tile" then
-                    if obj.name ~= "entity-ghost" then
-                        UTIL_ConsolePrint("[ACT] " .. player.name .. " rotated " .. obj.name .. UTIL_GPSObj(player, obj))
-                    else
-                        UTIL_ConsolePrint("[ACT] " ..
-                            player.name .. " rotated ghost " .. obj.name .. UTIL_GPSObj(player, obj) ..
-                            obj.ghost_name)
-                    end
-                end
-            else
-                UTIL_ConsolePrint("[ERROR] on_player_rotated_entity: invalid obj")
-            end
-        else
-            UTIL_ConsolePrint("[ERROR] on_player_rotated_entity: invalid player")
-        end
+    if not event or not event.player_index or not event.previous_direction then
+        return
     end
-end
 
-function LOG_Flipped(event)
-    if event and event.player_index then
-        local player = game.players[event.player_index]
-        local obj = event.entity
+    local player = game.players[event.player_index]
+    local obj = event.entity
 
-        -- If player and object are valid
-        if player and player.valid then
-            if obj and obj.valid then
-                if obj.name ~= "tile-ghost" and obj.name ~= "tile" then
-                    if obj.name ~= "entity-ghost" then
-                        UTIL_ConsolePrint("[ACT] " .. player.name .. " flipped " .. obj.name .. UTIL_GPSObj(player, obj))
-                    else
-                        UTIL_ConsolePrint("[ACT] " ..
-                            player.name .. " flipped ghost " .. obj.name .. UTIL_GPSObj(player, obj) ..
-                            obj.ghost_name)
-                    end
-                end
-            else
-                UTIL_ConsolePrint("[ERROR] on_player_flipped_entity: invalid obj")
-            end
+    -- If player and object are valid
+    if obj.name ~= "tile-ghost" and obj.name ~= "tile" then
+        if obj.name ~= "entity-ghost" then
+            UTIL_ConsolePrint("[ACT] " .. player.name .. " rotated " .. obj.name .. obj.gps_tag)
         else
-            UTIL_ConsolePrint("[ERROR] on_player_flipped_entity: invalid player")
+            UTIL_ConsolePrint("[ACT] " ..
+                player.name .. " rotated ghost " .. obj.name .. obj.gps_tag ..
+                obj.ghost_name)
         end
     end
 end
 
 function LOG_Banned(event)
-    if event and event.player_index then
-        local player = game.players[event.player_index]
-        if player then
-            INFO_DumpInv(player, true)
-            UTIL_MsgAllSys(player.name .. "'s items have been left at spawn, so they can be recovered.")
-        end
+    if not event or not event.player_index then
+        return
     end
+    local player = game.players[event.player_index]
+    INFO_DumpInv(player, true)
+    UTIL_MsgAllSys(player.name .. "'s items have been left at spawn, so they can be recovered.")
 end

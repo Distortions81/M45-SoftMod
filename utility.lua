@@ -31,36 +31,38 @@ function UTIL_MapPin()
             storage.servertag = pforce.add_chart_tag(psurface, chartTag)
         end
     end
-
 end
 
-function UTIL_GPSObj(player, obj)
-    if obj then
-        if player and player.surface and player.surface.index ~= 1 then
-            return " [gps=" .. math.floor(obj.position.x) .. "," ..
-                math.floor(obj.position.y) .. "," .. player.surface.name .. "] "
+function UTIL_WarnOkay(player_index)
+    if (storage.PData[player_index].lastWarned and game.tick ~= storage.PData[player_index].lastWarned) then
+        storage.PData[player_index].lastWarned = game.tick
+        return true
+    end
+    return false
+end
+
+function UTIL_Area(size, area)
+    return "from: " ..
+    UTIL_GPSXY(area.left_top.x, area.left_top.y) ..
+        " to " .. UTIL_GPSXY(area.right_bottom.x, area.right_bottom.Y) ..
+        " AREA: " .. size .. "sq"
+end
+
+function UTIL_GPSPos(item, sName)
+    if item and item.position then
+        if sName then
+            return " [gps=" .. math.floor(item.position.x) .. ","
+                .. math.floor(item.position.y) .. "," .. sName .. "]"
         else
-            return " [gps=" .. math.floor(obj.position.x) .. ","
-                .. math.floor(obj.position.y) .. "] "
+            return " [gps=" .. math.floor(item.position.x) .. ","
+                .. math.floor(item.position.y) .. "] "
         end
     end
 end
 
-function UTIL_GPSPlayer(player)
-    if player and player.surface and player.surface.index ~= 1 then
-        return " [gps=" .. math.floor(player.position.x) .. "," ..
-            math.floor(player.position.y) .. "," .. player.surface.name .. "] "
-    else
-        return " [gps=" .. math.floor(player.position.x) .. ","
-            .. math.floor(player.position.y) .. "] "
-    end
-end
-
-function UTIL_GPSPos(item)
-    if item and item.position then
-        return " [gps=" .. math.floor(item.position.x) .. ","
-            .. math.floor(item.position.y) .. "] "
-    end
+function UTIL_GPSXY(x, y)
+    return " [gps=" .. math.floor(x) .. ","
+        .. math.floor(y) .. "] "
 end
 
 function UTIL_ConsolePrint(message)
@@ -133,14 +135,14 @@ function UTIL_SendPlayers(victim)
             for i, target in pairs(storage.player_list) do
                 if target and target.victim and target.victim.connected then
                     buf = buf .. target.victim.name .. "," .. math.floor(target.score / 60 / 60) .. "," ..
-                              math.floor(target.time / 60 / 60) .. "," .. target.type .. "," .. target.afk .. ";"
+                        math.floor(target.time / 60 / 60) .. "," .. target.type .. "," .. target.afk .. ";"
                 end
             end
         end
 
         -- Don't send unless there is a change
-        if storage.lastonlinestring ~= buf then
-            storage.lastonlinestring = buf
+        if storage.onlinePlayersCache ~= buf then
+            storage.onlinePlayersCache = buf
             print(buf)
         end
         return
@@ -150,7 +152,7 @@ function UTIL_SendPlayers(victim)
         for i, target in pairs(storage.player_list) do
             if target and target.victim and target.victim.connected then
                 buf = buf ..
-                          string.format("~%16s: - Score: %4d - Online: %4dm - (%s)%s\n", target.victim.name,
+                    string.format("~%16s: - Score: %4d - Online: %4dm - (%s)%s\n", target.victim.name,
                         math.floor(target.score / 60 / 60), math.floor(target.time / 60 / 60), target.type, target.afk)
             end
         end
@@ -188,7 +190,7 @@ function UTIL_SplitStr(inputstr, sep)
         end
         return t
     end
-    return {""}
+    return { "" }
 end
 
 -- Quickly turn tables into strings
@@ -242,7 +244,6 @@ function UTIL_Is_Nitro(victim)
     return false
 end
 
-
 -- permissions system
 -- Check if player should be considered a veteran
 function UTIL_Is_Veteran(victim)
@@ -290,7 +291,7 @@ end
 -- Check if player should be considered new
 function UTIL_Is_New(victim)
     if victim and victim.valid and not victim.admin then
-        if  UTIL_Is_Member(victim) == false and UTIL_Is_Regular(victim) == false and UTIL_Is_Veteran(victim )== false then
+        if UTIL_Is_Member(victim) == false and UTIL_Is_Regular(victim) == false and UTIL_Is_Veteran(victim) == false then
             return true
         end
     end
@@ -298,23 +299,25 @@ function UTIL_Is_New(victim)
     return false
 end
 
+function UTIL_SmartPrintColor(victim, message)
+    UTIL_SmartPrint(victim, "[color=red]"..message.."[/color]")
+    UTIL_SmartPrint(victim, "[color=cyan]"..message.."[/color]")
+    UTIL_SmartPrint(victim, "[color=black]"..message.."[/color]")
+end
+
 -- Check if player should be considered banished
 function UTIL_Is_Banished(victim)
-    if victim and victim.valid and not victim.admin then
-        -- Mods can not be marked as banished
-        if victim.admin then
-            return false
-        elseif storage.thebanished and storage.thebanished[victim.index] then
-            if (UTIL_Is_New(victim) and storage.thebanished[victim.index] >= 1) or
-                (UTIL_Is_Member(victim) and storage.thebanished[victim.index] >= 1) or
-                (UTIL_Is_Regular(victim) and storage.thebanished[victim.index] >= 2) or 
-                (UTIL_Is_Veteran(victim) and storage.thebanished[victim.index] >= 4) then
-                return true
-            end
-        end
+    if not victim then
+        return false
+    elseif victim.admin then
+        return false
+    elseif victim.surface and victim.surface.name == "jail" then
+        return true
+    elseif storage.PData[victim.player_index].banished then
+        return true
+    else
+        return false
     end
-
-    return false
 end
 
 function UTIL_SendToDefaultSpawn(victim)
@@ -323,7 +326,7 @@ function UTIL_SendToDefaultSpawn(victim)
 
         if nsurf then
             local pforce = victim.force
-            local spawnpos = {0, 0}
+            local spawnpos = { 0, 0 }
             if pforce then
                 spawnpos = pforce.get_spawn_position(nsurf)
             else
@@ -333,7 +336,7 @@ function UTIL_SendToDefaultSpawn(victim)
             if newpos then
                 victim.teleport(newpos, nsurf)
             else
-                victim.teleport({0, 0}, nsurf)
+                victim.teleport({ 0, 0 }, nsurf)
             end
         else
             UTIL_ConsolePrint("[ERROR] send_to_default_spawn: The surface 1 does not exist, could not teleport victim.")
@@ -348,7 +351,7 @@ function UTIL_SendToSpawn(victim)
         local nsurf = victim.surface
         if nsurf then
             local pforce = victim.force
-            local spawnpos = {0, 0}
+            local spawnpos = { 0, 0 }
             if pforce then
                 spawnpos = pforce.get_spawn_position(nsurf)
             else
@@ -358,7 +361,7 @@ function UTIL_SendToSpawn(victim)
             if newpos then
                 victim.teleport(newpos, nsurf)
             else
-                victim.teleport({0, 0}, nsurf)
+                victim.teleport({ 0, 0 }, nsurf)
             end
         else
             UTIL_ConsolePrint("[ERROR] send_to_surface_spawn: The surface does not exist, could not teleport victim.")
@@ -377,10 +380,10 @@ function UTIL_GetDefaultSpawn()
             return spawnpos
         else
             UTIL_ConsolePrint("[ERROR] get_default_spawn: Couldn't find force 'player'")
-            return {0, 0}
+            return { 0, 0 }
         end
     else
         UTIL_ConsolePrint("[ERROR] get_default_spawn: Couldn't find default surface 1.")
-        return {0, 0}
+        return { 0, 0 }
     end
 end

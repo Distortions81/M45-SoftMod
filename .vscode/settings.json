@@ -15,5 +15,15 @@
     ],
     "githubPullRequests.ignoredPullRequestBranches": [
         "Main"
+    ],
+    "Lua.diagnostics.globals": [
+        "storage",
+        "game",
+        "commands",
+        "script",
+        "event",
+        "defines",
+        "rendering",
+        "rcon"
     ]
 }

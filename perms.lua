@@ -75,7 +75,7 @@ function PERMS_SetPermissions()
         -- If new user restrictions are on, then disable all permissions
         -- Otherwise undo
         local option = true
-        if storage.restrict then
+        if storage.newRestrict then
             option = false
         end
 

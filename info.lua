@@ -17,8 +17,8 @@ function INFO_DumpInv(player, force)
     end
 
     if not force then
-        if storage.cleaned_players[player.index] then
-            if storage.cleaned_players[player.index] == true then
+        if storage.PData[player.player_index].cleaned then
+            if storage.PData[player.player_index].cleaned == true then
                 return false
             end
         end
@@ -55,7 +55,7 @@ function INFO_DumpInv(player, force)
         name = "character-corpse",
         position = UTIL_GetDefaultSpawn(),
         inventory_size = inv_corpse_size,
-        player_index = player_index
+        player_index = player.player_index
     }
     if not corpse then
         return false
@@ -90,24 +90,18 @@ function INFO_DumpInv(player, force)
 
 
     -- Mark as cleaned up.
-    storage.cleaned_players[player.index] = true
+    storage.PData[player.index].cleaned = true
 
     return true
 end
 
 function INFO_CheckAbandoned()
-    if not storage.active_playtime or not storage.last_playtime then
-        return
-    end
-
     for _, player in pairs(game.players) do
         if not player.connected and UTIL_Is_New(player) then
-            if storage.last_playtime[player.index] then
-                if game.tick - storage.last_playtime[player.index] > 1 * 60 * 60 * 60 then
-                    if INFO_DumpInv(player, false) then
-                        UTIL_MsgAllSys("[color=orange] * New player '" .. player.name ..
-                            "' was not active long enough to become a member, and have been offline for some time. Their items are now considered abandoned, and have been placed at spawn (expires in 15m) *[/color]")
-                    end
+            if game.tick - storage.PData[player.index].lastOnline > 1 * 60 * 60 * 60 then
+                if INFO_DumpInv(player, false) then
+                    UTIL_MsgAllSys("New player '" .. player.name ..
+                        "' was not active long enough to become a member, and have been offline for some time. Their items are now considered abandoned, and have been placed at spawn.")
                 end
             end
         end
@@ -171,7 +165,7 @@ function INFO_InfoWin(player)
             info_titlebar.style.horizontal_align = "center"
             info_titlebar.style.horizontally_stretchable = true
 
-            if storage.servname == "" then
+            if storage.SM_Store.serverName == "" then
                 info_titlebar.add {
                     type = "label",
                     name = "online_title",
@@ -183,7 +177,7 @@ function INFO_InfoWin(player)
                     type = "label",
                     name = "online_title",
                     style = "frame_title",
-                    caption = "You are playing on: " .. storage.servname
+                    caption = "You are playing on: " .. storage.SM_Store.serverName
                 }
             end
             local pusher = info_titlebar.add {
@@ -267,24 +261,24 @@ function INFO_InfoWin(player)
             }
 
             -- PATREON
-            if storage.patreonlist[1] ~= nil then
+            if storage.SM_Store.patreonCredits[1] ~= nil then
                 tab1_lframe.add {
                     type = "label",
                     caption = "[color=purple]SUPPORTERS:[/color]"
                 }
                 local i = 1
-                while storage.patreonlist[i] ~= nil do
-                    if storage.patreonlist[i + 1] ~= nil then
+                while storage.SM_Store.patreonCredits[i] ~= nil do
+                    if storage.SM_Store.patreonCredits[i + 1] ~= nil then
                         tab1_lframe.add {
                             type = "label",
-                            caption = "[color=purple]" .. storage.patreonlist[i] .. ", " .. storage.patreonlist[i + 1] ..
+                            caption = "[color=purple]" .. storage.SM_Store.patreonCredits[i] .. ", " .. storage.SM_Store.patreonCredits[i+1] ..
                                 "[/color]"
                         }
                         i = i + 1
                     else
                         tab1_lframe.add {
                             type = "label",
-                            caption = "[color=purple]" .. storage.patreonlist[i] .. "[/color]"
+                            caption = "[color=purple]" .. storage.SM_Store.patreonCredits[i] .. "[/color]"
                         }
                     end
                     i = i + 1
@@ -297,24 +291,24 @@ function INFO_InfoWin(player)
             }
 
             -- NITRO
-            if storage.nitrolist[1] ~= nil then
+            if storage.SM_Store.nitroCredits[1] ~= nil then
                 tab1_lframe.add {
                     type = "label",
                     caption = "[color=cyan]DISCORD NITRO:[/color]"
                 }
                 local i = 1
-                while storage.nitrolist[i] ~= nil do
-                    if storage.nitrolist[i + 1] ~= nil then
+                while storage.SM_Store.nitroCredits[i] ~= nil do
+                    if storage.SM_Store.nitroCredits[i + 1] ~= nil then
                         tab1_lframe.add {
                             type = "label",
-                            caption = "[color=cyan]" .. storage.nitrolist[i] .. ", " .. storage.nitrolist[i + 1] ..
+                            caption = "[color=cyan]" .. storage.SM_Store.nitroCredits[i] .. ", " .. storage.SM_Store.nitroCredits[i + 1] ..
                                 "[/color]"
                         }
                         i = i + 1
                     else
                         tab1_lframe.add {
                             type = "label",
-                            caption = "[color=cyan]" .. storage.nitrolist[i] .. "[/color]"
+                            caption = "[color=cyan]" .. storage.SM_Store.nitroCredits[i] .. "[/color]"
                         }
                     end
                     i = i + 1
@@ -373,7 +367,7 @@ function INFO_InfoWin(player)
             }
             tab1_info_center.add {
                 type = "label",
-                caption = "v" .. storage.svers
+                caption = "v" .. storage.SM_Version
             }
 
             local tab1_cframe = { tab1_main_frame.add {
@@ -394,18 +388,18 @@ function INFO_InfoWin(player)
                 type = "label",
                 caption = ""
             }
-            if storage.resetint and storage.resetint ~= "" then
+            if storage.SM_Store.resetDate and storage.SM_Store.resetDate ~= "" then
                 local reset_warning = tab1_info_top.add {
                     type = "label",
                     caption = "[virtual-signal=signal-everything]  [color=orange][font=default-large-bold]Next map reset: " ..
-                        string.upper(storage.resetint) .. "[/font][/color]"
+                        string.upper(storage.SM_Store.resetDate) .. "[/font][/color]"
                 }
             end
-            if storage.resetdur and storage.resetdur ~= "" then
+            if storage.SM_Store.resetDuration and storage.SM_Store.resetDuration ~= "" then
                 local reset_warning = tab1_info_top.add {
                     type = "label",
                     caption = "[virtual-signal=signal-everything]  [color=orange][font=default-large-bold]Map will reset in: " ..
-                        string.upper(storage.resetdur) .. "[/font][/color]"
+                        string.upper(storage.SM_Store.resetDuration) .. "[/font][/color]"
                 }
             end
             tab1_info_top.style.horizontally_stretchable = true
@@ -419,22 +413,22 @@ function INFO_InfoWin(player)
             }
             local friendly_fire = tab1_info_top.add {
                 type = "label",
-                caption = "[recipe=combat-shotgun] [font=default-large]Friendly fire is OFF, for players and buildings.[/font]"
+                caption = "[recipe=combat-shotgun] [font=default-large-bold]Friendly fire is OFF, for players and buildings.[/font]"
             }
-            if storage.oneLifeMode then
+            if storage.SM_Store.oneLifeMode then
                 tab1_info_top.add {
                     type = "label",
-                    caption = "[color=red][font=default-large]THIS SERVER IS PERMA-DEATH. YOU HAVE ONE LIFE TO LIVE PER MAP![/font][/color]"
+                    caption = "[color=red][font=default-large-bold]THIS SERVER IS PERMA-DEATH. YOU HAVE ONE LIFE TO LIVE PER MAP![/font][/color]"
                 }
-            elseif storage.noBlueprints then
+            elseif storage.SM_Store.noBlueprints then
                 tab1_info_top.add {
                     type = "label",
-                    caption = "[color=cyan][font=default-large]BLUEPRINTS ARE DISABLED! BUILD STUFF ON YOUR OWN![/font][/color]"
+                    caption = "[color=cyan][font=default-large-bold]BLUEPRINTS ARE DISABLED! BUILD STUFF ON YOUR OWN![/font][/color]"
                 }
-            elseif storage.cheatson then
+            elseif storage.SM_Store.cheats then
                 tab1_info_top.add {
                     type = "label",
-                    caption = "[color=red][font=default-large]CHEATS ARE ENABLED![/font][/color]"
+                    caption = "[color=red][font=default-large-bold]CHEATS ARE ENABLED![/font][/color]"
                 }
             else
                 tab1_info_top.add {
@@ -444,7 +438,7 @@ function INFO_InfoWin(player)
             end
             tab1_info_top.add {
                 type = "label",
-                caption = "[font=default-large]Click the '[item=automation-science-pack] FREE-MEMBERSHIP' tab to learn more.[/font]"
+                caption = "[font=default-large-bold]Click the '[item=automation-science-pack] FREE-MEMBERSHIP' tab to learn more.[/font]"
             }
             tab1_info_top.add {
                 type = "label",
@@ -455,7 +449,7 @@ function INFO_InfoWin(player)
             if player.force.friendly_fire then
                 friendly_fire.caption = "Friendly fire is currently ON (normally off)."
             end
-            if storage.restrict == false then
+            if storage.SM_Store.restrictNew == false then
                 restrictions.caption = ""
             end
 
@@ -495,7 +489,7 @@ function INFO_InfoWin(player)
             -- Tab 1 Main -- Discord -- Info Text
             tab1_discord_sub1_frame.add {
                 type = "label",
-                caption = "[font=default-large-bold]See our [color=blue]Discord Server[/color] for commands like vote-map![/font]"
+                caption = "[font=default-large-bold]See our [color=cyan]Discord Server[/color] for commands like vote-map![/font]"
             }
             tab1_discord_sub1_frame.add {
                 type = "label",
@@ -562,7 +556,7 @@ function INFO_InfoWin(player)
                 type = "label",
                 name = "tab2_score",
                 caption = "[color=orange][font=default-large-bold]Current score: " ..
-                    math.floor(storage.active_playtime[player.index] / 60 / 60) .. "[/font][/color]"
+                    math.floor(storage.PData[player.index].score / 60 / 60) .. "[/font][/color]"
             }
             tab2_main_frame.add {
                 type = "label",
@@ -1047,15 +1041,15 @@ function INFO_Click(event)
             elseif event.element.name == "reset_clock" then
                 -- reset-clock-close
                 if player.gui and player.gui.top and player.gui.top.reset_clock then
-                    if storage.hide_clock then
-                        if storage.hide_clock[player.index] and storage.hide_clock[player.index] == true and
-                            storage.resetdur ~= "" then
-                            storage.hide_clock[player.index] = false
-                            player.gui.top.reset_clock.caption = "Map reset: " .. storage.resetdur
+                    if storage.PData then
+                        if storage.PData[player.index].hideClock == true and
+                            storage.SM_Store.resetDuration ~= "" then
+                                storage.PData[player.index].hideClock  = false
+                            player.gui.top.reset_clock.caption = "Map reset: " .. storage.SM_Store.resetDuration
                             player.gui.top.reset_clock.style = "red_button"
                         else
                             if event.button and event.button == defines.mouse_button_type.right and event.control then
-                                storage.hide_clock[player.index] = true
+                                storage.PData[player.index].hideClock  = true
                                 player.gui.top.reset_clock.caption = ">"
                             end
                         end

@@ -41,13 +41,13 @@ end
 
 script.on_nth_tick(599, function(event)
     -- Tick divider, one minute
-    if not storage.tickdiv then
-        storage.tickdiv = 0
+    if not storage.SM_Store.tickDiv then
+        storage.SM_Store.tickDiv = 0
     end
-    storage.tickdiv = storage.tickdiv + 1
+    storage.SM_Store.tickDiv = storage.SM_Store.tickDiv + 1
 
-    if storage.tickdiv >= 6 then
-        storage.tickdiv = 0
+    if storage.SM_Store.tickDiv >= 6 then
+        storage.SM_Store.tickDiv = 0
         ONLINE_UpdatePlayerList() -- online.lua
         UTIL_MapPin()             -- fix map pin if edit/delete
         INFO_CheckAbandoned()
@@ -55,53 +55,53 @@ script.on_nth_tick(599, function(event)
 
 
     -- Add time to connected players
-    if storage.active_playtime then
+    if storage.PData then
         for _, player in pairs(game.connected_players) do
             -- Banish if some mod eats respawn event
             BANISH_SendToSurface(player)
 
             -- Player active?
-            if storage.playeractive[player.index] then
-                if storage.playeractive[player.index] == true then
-                    storage.playeractive[player.index] = false -- Turn back off
+            if storage.PData[player.index].active then
+                if storage.PData[player.index].active == true then
+                    storage.PData[player.index].active = false -- Turn back off
 
-                    if storage.active_playtime[player.index] then
+                    if storage.PData[player.index].playtime then
                         -- Compensate for game speed
-                        storage.active_playtime[player.index] =
-                            storage.active_playtime[player.index] + (600.0 / game.speed) -- Same as loop time
-                        if storage.last_playtime then
-                            storage.last_playtime[player.index] = game.tick
+                        storage.PData[player.index].playtime[player.index] =
+                            storage.PData[player.index].playtime + (600.0 / game.speed) -- Same as loop time
+                        if storage.PData[player.index].lastOnline then
+                            storage.PData[player.index].lastOnline = game.tick
                         end
                     else
                         -- INIT
-                        storage.active_playtime[player.index] = 0
+                        storage.PData[player.index].playtime = 0
                     end
                 end
             else
                 -- INIT
-                storage.playeractive[player.index] = false
+                storage.PData[player.index].active = false
             end
 
             -- Player moving?
-            if storage.playermoving[player.index] then
-                if storage.playermoving[player.index] == true then
-                    storage.playermoving[player.index] = false -- Turn back off
+            if storage.PData[player.index].moving then
+                if storage.PData[player.index].moving == true then
+                    storage.PData[player.index].moving = false -- Turn back off
 
-                    if storage.active_playtime[player.index] then
+                    if storage.PData[player.index].playtime then
                         -- Compensate for game speed
-                        storage.active_playtime[player.index] =
-                            storage.active_playtime[player.index] + (600.0 / game.speed) -- Same as loop time
-                        if storage.last_playtime then
-                            storage.last_playtime[player.index] = game.tick
+                        storage.PData[player.index].playtime =
+                            storage.PData[player.index].playtime + (600.0 / game.speed) -- Same as loop time
+                        if storage.PData[player.index].lastOnline then
+                            storage.PData[player.index].lastOnline = game.tick
                         end
                     else
                         -- INIT
-                        storage.active_playtime[player.index] = 0
+                        storage.PData[player.index].playtime = 0
                     end
                 end
             else
                 -- INIT
-                storage.playermoving[player.index] = false
+                storage.PData[player.index].moving = false
             end
         end
     end
@@ -140,8 +140,8 @@ function EVENT_PlayerInit(player)
     makeUI(player)
     ONLINE_UpdatePlayerList()
 
-    if storage.last_playtime then
-        storage.last_playtime[event.player_index] = game.tick
+    if storage.PData then
+        storage.PData[event.player_index].lastOnline = game.tick
     end
     if storage.cheatson then
         player.cheat_mode = true
@@ -221,7 +221,7 @@ function EVENT_PlayerDied(event)
 
     -- Log to discord
     if event.cause and event.cause.valid then
-        cause = event.cause.name
+        local cause = event.cause.name
         UTIL_MsgDiscord(player.name ..
             " was killed by " .. cause .. " at [gps=" .. math.floor(player.position.x) .. "," ..
             math.floor(player.position.y) .. "]")
@@ -302,7 +302,7 @@ script.on_event(
             LOG_PlayerLeft(event)
         elseif event.name == defines.events.on_gui_click then
             INFO_Click(event)
-            ONLINE_Clicks(event)       -- online.lua
+            ONLINE_Clicks(event)  -- online.lua
             ONELIFE_Clicks(event) --onelife.lua
         elseif event.name == defines.events.on_gui_text_changed then
             -- log
@@ -321,15 +321,15 @@ script.on_event(
         elseif event.name == defines.events.on_player_deconstructed_area then
             LOG_Decon(event)
         elseif event.name == defines.events.on_player_banned then
-            ANTIGRIEF_Banned(event)
+            LOG_Banned(event)
         elseif event.name == defines.events.on_player_rotated_entity then
-            ANTIGRIEF_Rotated(event)
+            LOG_Rotated(event)
         elseif event.name == defines.events.on_player_flipped_entity then
-            ANTIGRIEF_Flipped(event)
+            LOG_Rotated(event)
         elseif event.name == defines.events.on_pre_player_mined_item then
-            ANTIGRIEF_PreMined(event)
+            LOG_PreMined(event)
         elseif event.name == defines.events.on_built_entity then
-            ANTIGRIEF_BuiltEnt(event)
+            LOG_BuiltEnt(event)
         elseif event.name == defines.events.on_redo_applied then
             LOG_Redo(event)
         elseif event.name == defines.events.on_undo_applied then
@@ -369,23 +369,24 @@ script.on_event(
     end)
 
 function EVENT_Loot(event)
-    if event and event.entity and event.entity.valid then
-        local ent = event.entity
+    if not event or not event.entity then
+        return
+    end
+    local ent = event.entity
 
-        if ent and ent.type and ent.type == "character-corpse" then
-            if ent and ent.character_corpse_player_index and event.player_index then
-                if event.character_corpse_player_index == event.player_index then
-                    return -- Dont warn if it is ours
-                end
-                player = game.players[event.player_index]
-                victim = game.players[ent.character_corpse_player_index]
+    if ent and ent.type and ent.type == "character-corpse" then
+        if ent and ent.character_corpse_player_index and event.player_index then
+            if event.character_corpse_player_index == event.player_index then
+                return     -- Dont warn if it is ours
+            end
+            local player = game.players[event.player_index]
+            local victim = game.players[ent.character_corpse_player_index]
 
-                if victim and victim.valid and player and player.valid then
-                    local buf = player.name ..
-                        " looted the body of " .. victim.name .. " at" .. UTIL_GPSObj(player, victim)
-                    if victim.name ~= player.name then
-                        UTIL_MsgAll(buf)
-                    end
+            if victim and victim.valid and player and player.valid then
+                local buf = player.name ..
+                    " looted the body of " .. victim.name .. " at" .. victim.gps_tag
+                if victim.name ~= player.name then
+                    UTIL_MsgAll(buf)
                 end
             end
         end

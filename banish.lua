@@ -4,42 +4,14 @@
 -- License: MPL 2.0
 require "utility"
 
-function BANISH_Init()
-    if not storage.banishvotes then
-        storage.banishvotes = {
-            voter = {},
-            victim = {},
-            reason = {},
-            tick = {},
-            withdrawn = {},
-            overruled = {}
-        }
-    end
-    if not storage.thebanished then
-        storage.thebanished = {}
-    end
-    if not storage.reportlimit then
-        storage.reportlimit = {}
-    end
-    if not storage.send_to_surface then
-        storage.send_to_surface = {}
-    end
-end
-
 function BANISH_DoReport(player, report)
     if player and player.valid and report then
-
-        -- Add or init player's limit
-        if storage.reportlimit[player.index] then
-            storage.reportlimit[player.index] = storage.reportlimit[player.index] + 1
-        else
-            storage.reportlimit[player.index] = 1
-        end
+        storage.PData[player.index].reports = storage.PData[player.index].reports + 1
 
         -- Limit and list number of reports
-        if storage.reportlimit[player.index] <= 5 then
+        if storage.PData[player.index].reports <= 5 then
             print("[REPORT] " .. player.name .. " " .. report)
-            UTIL_SmartPrint(player, "Report sent! You have now used " .. storage.reportlimit[player.index] ..
+            UTIL_SmartPrint(player, "Report sent! You have now used " .. storage.PData[player.index].reports ..
                 " of your 5 available reports.")
         else
             UTIL_SmartPrint("You are not allowed to send any more reports.")
@@ -55,7 +27,7 @@ function BANISH_UpdateVotes()
     local banishedtemp = {}
 
     -- Loop through votes, tally them
-    for _, vote in pairs(storage.banishvotes) do
+    for vote in (storage.SM_Store.votes) do
         -- only if everything seems to exist
         if vote and vote.voter and vote.victim then
             -- only if data exists
@@ -67,11 +39,11 @@ function BANISH_UpdateVotes()
                         -- vote isn't overruled or withdrawn
                         if vote.withdrawn == false and vote.overruled == false then
                             local points = 1
-                            
+
                             if vote.voter.admin then
-                               points = 1000 -- Admins get single-vote banish
+                                points = 1000 -- Admins get single-vote banish
                             elseif UTIL_Is_Veteran(vote.voter) then
-                                points = 2 -- Veterans get extra votes
+                                points = 2   -- Veterans get extra votes
                             end
 
                             --Add vote, or init if needed
@@ -94,9 +66,9 @@ function BANISH_UpdateVotes()
 
         -- Add votes to storage list, erase old votes
         if banishedtemp[victim.index] then
-            storage.thebanished[victim.index] = banishedtemp[victim.index]
+            storage.SM_Store.votes = banishedtemp[victim.index]
         else
-            storage.thebanished[victim.index] = 0 -- Erase/init
+            storage.SM_Store.votes = 0 -- Erase/init
         end
 
         -- Was banished, but not anymore
@@ -110,9 +82,9 @@ function BANISH_UpdateVotes()
                 victim.character.die("player")
             end
 
-            table.insert(storage.send_to_surface, {
+            table.insert(storage.SM_Store.sendToSurface, {
                 victim = victim,
-                surface = "nauvis",
+                surface = 1,
                 position = UTIL_GetDefaultSpawn()
             })
         elseif UTIL_Is_Banished(victim) == true and prevstate == false then
@@ -122,30 +94,7 @@ function BANISH_UpdateVotes()
             print("[REPORT] SYSTEM " .. msg)
             BANISH_InformBanished(false, victim)
 
-            -- Create area if needed
-            if game.surfaces["hell"] == nil then
-                local my_map_gen_settings = {
-                    width = 100,
-                    height = 100,
-                    default_enable_all_autoplace_controls = false,
-                    property_expression_names = {
-                        cliffiness = 0
-                    },
-                    autoplace_settings = {
-                        tile = {
-                            settings = {
-                                ["sand-1"] = {
-                                    frequency = "normal",
-                                    size = "normal",
-                                    richness = "normal"
-                                }
-                            }
-                        }
-                    },
-                    starting_area = "none"
-                }
-                game.create_surface("hell", my_map_gen_settings)
-            end
+            BANISH_MakeJail()
 
             -- Kill them, so items are left behind
             if victim.character and victim.character.valid then
@@ -157,16 +106,49 @@ function BANISH_UpdateVotes()
 
             UTIL_MsgAllSys(victim.name .. "'s items have been dumped at spawn so they can be recovered.")
 
-            if not storage.send_to_surface then
-                storage.send_to_surface = {}
-            end
-            table.insert(storage.send_to_surface, {
-                victim = victim,
-                surface = "hell",
-                position = {0, 0}
-            })
+            BANISH_ToHell(victim)
         end
     end
+end
+
+function BANISH_MakeJail()
+    -- Create area if needed
+    if game.surfaces["hell"] == nil then
+        local my_map_gen_settings = {
+            width = 100,
+            height = 100,
+            default_enable_all_autoplace_controls = false,
+            property_expression_names = {
+                cliffiness = 0
+            },
+            autoplace_settings = {
+                tile = {
+                    settings = {
+                        ["sand-1"] = {
+                            frequency = "normal",
+                            size = "normal",
+                            richness = "normal"
+                        }
+                    }
+                }
+            },
+            starting_area = "none"
+        }
+        game.create_surface("hell", my_map_gen_settings)
+    end
+end
+
+function BANISH_ToHell(victim)
+    if victim.character and victim.character.valid then
+
+        victim.character.die("player")
+    end
+    local newpos = game.surfaces["jail"].find_non_colliding_position("character", { 0, 0 }, 0, 0.01, false)
+    table.insert(storage.SM_Store.sendToSurface, {
+        victim = victim,
+        surface = "hell",
+        position = newpos
+    })
 end
 
 function BANISH_DoBanish(player, victim, reason)
@@ -193,9 +175,9 @@ function BANISH_DoBanish(player, victim, reason)
                         -- Victim can not be an moderator
                         if not victim.admin then
                             -- Check if we already voted against them
-                            if storage.banishvotes and storage.banishvotes ~= {} then
+                            if storage.SM_Store.votes and storage.SM_Store.votes ~= {} then
                                 local votecount = 1
-                                for _, vote in pairs(storage.banishvotes) do
+                                for vote in (storage.SM_Store.votes) do
                                     if vote and vote.voter and vote.victim then
                                         -- Count player's total votes, cap them
                                         if vote.voter == player then
@@ -203,7 +185,8 @@ function BANISH_DoBanish(player, victim, reason)
                                         end
                                         -- Limit number of votes player gets
                                         if not vote.voter.admin and votecount >= 5 then
-                                            UTIL_SmartPrint(player, "You have exhausted your voting privilege for this map.")
+                                            UTIL_SmartPrint(player,
+                                                "You have exhausted your voting privilege for this map.")
                                             return
                                         end
 
@@ -230,7 +213,7 @@ function BANISH_DoBanish(player, victim, reason)
                             end
 
 
-                            table.insert(storage.banishvotes, {
+                            table.insert(storage.SM_Store.votes, 0, {
                                 voter = player,
                                 victim = victim,
                                 reason = reason,
@@ -260,12 +243,12 @@ end
 
 function BANISH_SendToSurface(player)
     -- Anything queued?
-    if storage.send_to_surface then
+    if storage.SM_Store.sendToSurface then
         -- Valid player?
         if player and player.valid and player.character and player.character.valid then
             local index = nil
             -- Check list
-            for i, item in pairs(storage.send_to_surface) do
+            for i, item in pairs(storage.SM_Store.sendToSurface) do
                 -- Check if item is valid
                 if item and item.victim and item.victim.valid and item.victim.character and item.victim.character.valid and
                     item.position and item.surface then
@@ -274,12 +257,13 @@ function BANISH_SendToSurface(player)
                         -- If surface is valid
                         local surf = game.surfaces[item.surface]
                         if surf and surf.valid then
-                            local newpos = surf.find_non_colliding_position("character", item.position, 100, 0.1, false)
+                            local newpos = surf.find_non_colliding_position("character", item.position, 0, 0.01, false)
                             if newpos then
                                 player.teleport(newpos, surf)
                             else
                                 player.teleport(item.position, surf) -- screw it
-                                UTIL_ConsolePrint("[ERROR] send_to_surface(respawn): unable to find non_colliding_position.")
+                                UTIL_ConsolePrint(
+                                "[ERROR] send_to_surface(respawn): unable to find non_colliding_position.")
                             end
                             index = i
                             break
@@ -290,7 +274,7 @@ function BANISH_SendToSurface(player)
             -- Remove item we processed
             if index then
                 UTIL_ConsolePrint("[ERROR] send_to_surface: item removed: " .. index)
-                table.remove(storage.send_to_surface, index)
+                table.remove(storage.SM_Store.sendToSurface, index)
             end
         end
     end
@@ -311,52 +295,15 @@ function BANISH_AddBanishCommands()
                 end
             end
 
-            -- Handle console too
-            if (player and player.admin) or (not player) then
-                if game.surfaces["hell"] == nil then
-                    local my_map_gen_settings = {
-                        width = 100,
-                        height = 100,
-                        default_enable_all_autoplace_controls = false,
-                        property_expression_names = {
-                            cliffiness = 0
-                        },
-                        autoplace_settings = {
-                            tile = {
-                                settings = {
-                                    ["sand-1"] = {
-                                        frequency = "normal",
-                                        size = "normal",
-                                        richness = "normal"
-                                    }
-                                }
-                            }
-                        },
-                        starting_area = "none"
-                    }
-                    game.create_surface("hell", my_map_gen_settings)
-                end
+            -- Only if name provided
+            if param.parameter then
+                local victim = game.players[param.parameter]
 
-                -- Only if name provided
-                if param.parameter then
-                    local victim = game.players[param.parameter]
-
-                    if (victim and victim.valid) then
-                        -- If they have a character, kill it to release items
-                        if victim.character and victim.character.valid then
-                            victim.character.die("player")
-                        end
-                        table.insert(storage.send_to_surface, {
-                            victim = victim,
-                            surface = "hell",
-                            position = {0, 0}
-                        })
-                    else
-                        UTIL_SmartPrint(player, "Couldn't find that player.")
-                    end
+                if (victim and victim.valid) then
+                    BANISH_ToHell(victim)
+                else
+                    UTIL_SmartPrint(player, "Couldn't find that player.")
                 end
-            else
-                UTIL_SmartPrint(player, "Moderators only.")
             end
         end)
     -- Mod vote overrrule
@@ -368,15 +315,14 @@ function BANISH_AddBanishCommands()
 
                 -- Moderator only
                 if (player and player.admin) then
-                    if storage.banishvotes then
+                    if storage.SM_Store.votes then
                         -- get arguments
                         local args = UTIL_SplitStr(param.parameter, " ")
 
                         -- Must have arguments
                         if args ~= {} and args[1] then
                             if args[1] == "clear" then
-                                storage.banishvotes = nil
-                                BANISH_Init()
+                                storage.SM_Store.votes = {}
                                 UTIL_SmartPrint(player, "All votes cleared.")
                                 BANISH_UpdateVotes()
                                 return
@@ -386,7 +332,7 @@ function BANISH_AddBanishCommands()
                             -- If victim found
                             if victim and victim.valid then
                                 local count = 0
-                                for _, vote in pairs(storage.banishvotes) do
+                                for vote in ( storage.SM_Store.votes) do
                                     if vote and vote.victim and vote.victim.valid then
                                         if vote.victim == victim and vote.overruled == false then
                                             vote.overruled = true
@@ -397,7 +343,7 @@ function BANISH_AddBanishCommands()
                                 if count > 0 then
                                     UTIL_SmartPrint(player, "Overruled " .. count .. " votes against " .. victim.name)
                                 else
-                                    for _, vote in pairs(storage.banishvotes) do
+                                    for vote in ( storage.SM_Store.votes) do
                                         if vote and vote.victim and vote.victim.valid then
                                             if vote.victim == victim and vote.overruled == true then
                                                 vote.overruled = false
@@ -405,7 +351,8 @@ function BANISH_AddBanishCommands()
                                             end
                                         end
                                     end
-                                    UTIL_SmartPrint(player, "Withdrew " .. count .. " overrulings, against " .. victim.name)
+                                    UTIL_SmartPrint(player,
+                                        "Withdrew " .. count .. " overrulings, against " .. victim.name)
                                 end
                                 BANISH_UpdateVotes()
                                 return
@@ -431,10 +378,10 @@ function BANISH_AddBanishCommands()
             local player = game.players[param.player_index]
 
             -- Only if banish data found
-            if storage.banishvotes then
+            if  storage.SM_Store.votes then
                 -- Print votes
                 local pcount = 0
-                for _, vote in pairs(storage.banishvotes) do
+                for vote in (storage.SM_Store.votes) do
                     if vote and vote.voter and vote.voter.valid and vote.victim and vote.victim.valid then
                         local notes = ""
                         if vote.withdrawn then
@@ -453,20 +400,20 @@ function BANISH_AddBanishCommands()
                 BANISH_UpdateVotes()
 
                 -- Print accused
-                if storage.thebanished then
+                if storage.PData then
                     for _, victim in pairs(game.players) do
-                        if storage.thebanished[victim.index] and storage.thebanished[victim.index] > 1 then
-                            UTIL_SmartPrint(player, victim.name .. " has had " .. storage.thebanished[victim.index] ..
+                        if storage.PData[victim.index].banished and storage.PData[victim.index].banished > 1 then
+                            UTIL_SmartPrint(player, victim.name .. " has had " .. storage.PData[victim.index].banished ..
                                 " complaints against them.")
                             pcount = pcount + 1
                         end
                     end
                 end
                 -- Show summery of votes against them
-                if storage.banishvotes then
+                if storage.SM_Store.votes then
                     for _, victim in pairs(game.players) do
                         local votecount = 0
-                        for _, vote in pairs(storage.banishvotes) do
+                        for vote in (storage.SM_Store.votes) do
                             if victim == vote.voter then
                                 votecount = votecount + 1
                             end
@@ -508,16 +455,17 @@ function BANISH_AddBanishCommands()
                         -- Must have valid victim
                         if victim and victim.valid and victim.character and victim.character.valid then
                             -- Check if we voted against them
-                            if storage.banishvotes and storage.banishvotes ~= {} then
-                                for _, vote in pairs(storage.banishvotes) do
+                            if storage.SM_Store.votes and storage.SM_Store.votes ~= {} then
+                                for vote in (storage.SM_Store.votes) do
                                     if vote and vote.voter and vote.victim then
                                         if vote.voter == player and vote.victim == victim then
                                             -- Send report to discord and withdraw vote
                                             local message = player.name .. " WITHDREW their vote to banish: " ..
-                                                                victim.name
+                                                victim.name
                                             UTIL_MsgAllSys(message)
                                             print("[REPORT] " .. message)
-                                            UTIL_SmartPrint(player, "Your vote has been withdrawn, and posted on Discord.")
+                                            UTIL_SmartPrint(player,
+                                                "Your vote has been withdrawn, and posted on Discord.")
                                             vote.withdrawn = true
                                             BANISH_UpdateVotes() -- Must do this to delete from tally
                                             return
@@ -590,7 +538,6 @@ function BANISH_AddBanishCommands()
 end
 
 function BANISH_InformBanished(close, victim)
-
     if victim and victim.gui and victim.gui.screen then
         if not victim.gui.screen.banished_inform then
             local main_flow = victim.gui.screen.add {

@@ -73,14 +73,8 @@ function ONELIFE_Clicks(event)
                 ONELIFE_Main(event)
                 return
             elseif storage.spec_confirm[player.index] < 2 then
-                UTIL_SmartPrint(player,
+                UTIL_SmartPrintColor(player,
                     "[color=red](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.spec_confirm[player.index] ..
-                    " more times to confirm.[/color]")
-                UTIL_SmartPrint(player,
-                    "[color=white](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.spec_confirm[player.index] ..
-                    " more times to confirm.[/color]")
-                UTIL_SmartPrint(player,
-                    "[color=black](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.spec_confirm[player.index] ..
                     " more times to confirm.[/color]")
             end
 

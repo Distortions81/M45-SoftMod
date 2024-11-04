@@ -17,22 +17,29 @@ require "reset" -- Time until map reset
 
 
 function RunSetup()
-    if not storage.lastVersion or storage.lastVersion ~= storage.svers then
-        storage.lastVersion = storage.svers
 
-        game.surfaces[1].show_clouds = false
+    --Handle first run
+    if not storage.SM_Version then
+        storage.SM_Version = "NewVersion"
+    end
+    if not storage.SM_OldVersion then
+        storage.SM_OldVersion = "OldVersion"
+    end
+
+    --Only rerun on version change
+    if not storage.SM_OldVersion or storage.SM_OldVersion ~= storage.SM_Version then
+        storage.SM_OldVersion = storage.SM_Version
+
         STORAGE_CreateGlobal()
-
-        BANISH_Init()
         TODO_Init()
-        LOG_Init()
         ONELIFE_Init()
-        LOGO_Init()
+        LOGO_DrawLogo(true)
 
         PERMS_MakeUserGroups()
         PERMS_SetPermissions()
         
-        player.force.friendly_fire = false -- friendly fire
+        game.forces["player"].friendly_fire = false -- disable friendly fire
         game.disable_replay() -- Smaller saves, prevent desync on script upgrade
+        game.surfaces[1].show_clouds = false
     end
 end

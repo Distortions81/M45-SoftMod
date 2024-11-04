@@ -24,7 +24,7 @@ local function id_to_index(id)
             end
         end
     end
-    console_print("[ERROR] todo_id_to_index: could not find note id: " .. id)
+    UTIL_ConsolePrint("[ERROR] todo_id_to_index: could not find note id: " .. id)
     return -1
 end
 
@@ -214,6 +214,9 @@ local function makeTodoSubmenu(player, i, edit_mode)
                                     style = "red_button",
                                     name = "m45_todo_hide," .. storage.todo_player_editing_id[player.index]
                                 }
+                                if no_edit then
+                                    delete_button.enabled = false
+                                end
                             else
                                 local delete_button = todo_save_frame.add {
                                     type = "button",
@@ -221,6 +224,9 @@ local function makeTodoSubmenu(player, i, edit_mode)
                                     style = "red_button",
                                     name = "m45_todo_hide," .. storage.todo_player_editing_id[player.index]
                                 }
+                                if no_edit then
+                                    delete_button.enabled = false
+                                end
                             end
                             local lock_spacer = todo_save_frame.add {
                                 type = "empty-widget"
@@ -235,7 +241,6 @@ local function makeTodoSubmenu(player, i, edit_mode)
 
                             if no_edit then
                                 save_button.enabled = false
-                                delete_button.enabled = false
                             end
                         end
                     end
@@ -621,10 +626,10 @@ local function guiClick(event)
                     table.insert(storage.todo_list, i - 1, table.remove(storage.todo_list, i))
                     update_todo_windows()
                 else
-                    smart_print(player, "It is already the first item!")
+                    UTIL_SmartPrint(player, "It is already the first item!")
                 end
                 local moved_item = todo_key(i)
-                console_print("[TODO] " .. player.name .. " moved item " .. todo_key(i) .. " up.")
+                UTIL_ConsolePrint("[TODO] " .. player.name .. " moved item " .. todo_key(i) .. " up.")
             elseif args and args[2] and args[1] == "m45_todo_movedown" then
                 ----------------------------------------------------------------
                 local i = tonumber(args[2])
@@ -636,9 +641,9 @@ local function guiClick(event)
                     table.insert(storage.todo_list, i + 1, table.remove(storage.todo_list, i))
                     update_todo_windows()
                 else
-                    smart_print(player, "It is already at the end of the list.")
+                    UTIL_SmartPrint(player, "It is already at the end of the list.")
                 end
-                console_print("[TODO] " .. player.name .. " moved item " .. todo_key(i) .. " down.")
+                UTIL_ConsolePrint("[TODO] " .. player.name .. " moved item " .. todo_key(i) .. " down.")
             elseif args and args[2] and args[1] == "m45_todo_submenu_edit" then
                 ----------------------------------------------------------------
                 if player and player.valid and player.character and player.character.valid then
@@ -650,8 +655,8 @@ local function guiClick(event)
                         makeTodoSubmenu(player, i, true)
                     else
                         local error = "[ERROR] m45_todo_submenu_edit: Unable to find item: " .. i
-                        smart_print(player, error)
-                        console_print(error)
+                        UTIL_SmartPrint(player, error)
+                        UTIL_ConsolePrint(error)
                     end
                 end
             elseif args and args[2] and args[1] == "m45_todo_submenu_view" then
@@ -667,7 +672,7 @@ local function guiClick(event)
                 -- edit/create throttle
                 if storage.todo_throttle[player.index] then
                     if game.tick - storage.todo_throttle[player.index] < (60 * 5) then -- 10 seconds
-                        smart_print(player, "(SYSTEM) Please wait 5 seconds before attempting to make a new item.")
+                        UTIL_SmartPrint(player, "(SYSTEM) Please wait 5 seconds before attempting to make a new item.")
                         -- storage.todo_throttle[player.index] = game.tick --Reset timer, prevent spamming
                         return
                     end
@@ -681,7 +686,7 @@ local function guiClick(event)
                     if storage.todo_max[player.index] < 25 then
                         storage.todo_max[player.index] = storage.todo_max[player.index] + 1
                     else
-                        smart_print(player, "You have personally created 25 todo items, limit reached.")
+                        UTIL_SmartPrint(player, "You have personally created 25 todo items, limit reached.")
                         return
                     end
                 else
@@ -703,7 +708,7 @@ local function guiClick(event)
 
                 updateTodoCount()
                 update_todo_windows()
-                console_print("[TODO] " .. player.name .. " added a new todo item: " .. todo_key(i))
+                UTIL_ConsolePrint("[TODO] " .. player.name .. " added a new todo item: " .. storage.todo_list_id )
             elseif args and args[2] and args[1] == "m45_todo_hide" then
                 ----------------------------------------------------------------
                 local id = tonumber(args[2]) -- Grab passed ID
@@ -720,13 +725,9 @@ local function guiClick(event)
                         end
                         if storage.todo_throttle[player.index] then
                             if game.tick - storage.todo_throttle[player.index] < (60 * 5) then -- 10 seconds
-                                smart_print(player,
-                                    "[color=red](SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.[/color]")
-                                smart_print(player,
-                                    "[color=cyan](SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.[/color]")
-                                smart_print(player,
-                                    "[color=white](SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.[/color]")
-                                -- storage.todo_throttle[player.index] = game.tick --Reset timer so you can't spam.
+                                UTIL_SmartPrintColor(player,
+                                    "(SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.")
+                                    
                                 return
                             end
                         else
@@ -740,7 +741,7 @@ local function guiClick(event)
                         updateTodoCount()
 
                         -- Log action
-                        console_print("[TODO] " .. player.name .. " hid todo item: " .. todo_key(i))
+                        UTIL_ConsolePrint("[TODO] " .. player.name .. " hid todo item: " .. storage.todo_list_id )
 
                         -- Destroy window
                         player.gui.screen.m45_todo_submenu.destroy()
@@ -752,10 +753,10 @@ local function guiClick(event)
                         storage.todo_player_editing_id[player.index] = nil
                     else
                         -- Something is broken
-                        smart_print(player, "Sorry, something went wrong, unable to delete. Please report this issue.")
+                        UTIL_SmartPrint(player, "Sorry, something went wrong, unable to delete. Please report this issue.")
                     end
                 else
-                    smart_print(player, "Error: Could not find note id: " .. id)
+                    UTIL_SmartPrint(player, "Error: Could not find note id: " .. id)
                 end
             elseif args and args[2] and args[1] == "m45_todo_save" then
                 ----------------------------------------------------------------
@@ -786,13 +787,8 @@ local function guiClick(event)
 
                             if storage.todo_throttle[player.index] then
                                 if game.tick - storage.todo_throttle[player.index] < (60 * 5) then -- 5 seconds
-                                    smart_print(player,
-                                        "[color=red](SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.[/color]")
-                                    smart_print(player,
-                                        "[color=cyan](SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.[/color]")
-                                    smart_print(player,
-                                        "[color=white](SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.[/color]")
-                                    -- storage.todo_throttle[player.index] = game.tick --Reset timer so you can't spam.
+                                    UTIL_SmartPrintColor(player,
+                                        "(SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.")
                                     return
                                 end
                             else
@@ -824,7 +820,7 @@ local function guiClick(event)
                             storage.todo_throttle[player.index] = game.tick
 
                             -- Log action
-                            console_print("[TODO] " .. player.name .. " editied todo item: " .. todo_key(i))
+                            UTIL_ConsolePrint("[TODO] " .. player.name .. " editied todo item: " .. todo_key(i))
 
                             -- Destroy window
                             player.gui.screen.m45_todo_submenu.destroy()
@@ -836,14 +832,14 @@ local function guiClick(event)
                             storage.todo_player_editing_id[player.index] = nil
                         else
                             -- Nothing changed
-                            smart_print(player, "No changes to save.")
+                            UTIL_SmartPrint(player, "No changes to save.")
                         end
                     else
                         -- Something is broken
-                        smart_print(player, "Sorry, something went wrong, unable to save. Please report this issue.")
+                        UTIL_SmartPrint(player, "Sorry, something went wrong, unable to save. Please report this issue.")
                     end
                 else
-                    smart_print(player, "Error: Could not find note id: " .. id)
+                    UTIL_SmartPrint(player, "Error: Could not find note id: " .. id)
                 end
             elseif event.element.name == "m45_todo_close_button" then
                 ----------------------------------------------------------------

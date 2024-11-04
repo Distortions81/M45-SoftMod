@@ -4,89 +4,72 @@
 -- License: MPL 2.0
 -- Create storage, if needed
 function STORAGE_CreateGlobal()
-    storage.svers = "624-11.02.2024-1043p"
+    storage.SM_Version = "624-11.02.2024-1043p"
 
-    if not storage.access_count then
-        storage.access_count = {}
+    if not storage.PData then
+        storage.PData = {}
     end
-    if not storage.resetdur then
-        storage.resetdur = ""
-    end
-    if not storage.resetint then
-        storage.resetint = ""
-    end
-    if not storage.restrict == nil then
-        storage.restrict = true
-    end
-    if not storage.playeractive then
-        storage.playeractive = {}
-    end
-    if not storage.playermoving then
-        storage.playermoving = {}
-    end
-    if not storage.active_playtime then
-        storage.active_playtime = {}
-    end
-    if not storage.last_playtime then
-        storage.last_playtime = {}
-    end
-    if not storage.patreons then
-        storage.patreons = {}
-    end
-    if not storage.nitros then
-        storage.nitros = {}
-    end
-    if not storage.patreonlist then
-        storage.patreonlist = {}
-    end
-    if not storage.nitrolist then
-        storage.nitrolist = {}
-    end
-    if not storage.last_speaker_warning then
-        storage.last_speaker_warning = 1
-    end
-    if not storage.last_warning then
-        storage.last_warning = 1
-    end
-    if not storage.last_ghost_log then
-        storage.last_warning = 1
-    end
-    if not storage.hide_clock then
-        storage.hide_clock = {}
-    end
-    if not storage.lastonlinestring then
-        storage.lastonlinestring = ""
-    end
-    if not storage.cleaned_players then
-        storage.cleaned_players = {}
+    if not storage.SM_Store then
+        storage.SM_Store = {
+            --Map resets
+            resetDuration = "",
+            resetDate = "",
+
+            --Perms
+            restrictNew = false,
+
+            --Credits
+            patreonCredits = {},
+            nitroCredits = {},
+
+            --Banish
+            votes = {},
+            sendToSurface = {},
+
+            --Game Modes
+            noBlueprints = false,
+            oneLifeMode = false,
+            cheats = false,
+
+            --Player Groups
+            defaultGroup = nil,
+            membersGroup = nil,
+            vetsGroup = nil,
+            modsGroup = nil,
+
+            --Players Online
+            onlineCache = "",
+
+            --Spawn Logo
+            redrawLogo = true,
+            spawnLogo = nil,
+            spawnLight = nil,
+            spawnText = nil,
+            serverName = "",
+
+            --Tick divider
+            tickDiv = 0
+        }
     end
 end
 
 -- Create player storage, if needed
 function STORAGE_MakePlayerStorage(player)
-    if player and player.valid then
-        if storage.playeractive and player and player.index then
-            if not storage.playeractive[player.index] then
-                storage.playeractive[player.index] = false
-            end
-            if not storage.playermoving[player.index] then
-                storage.playermoving[player.index] = false
-            end
-            if not storage.active_playtime[player.index] then
-                storage.active_playtime[player.index] = 0
-            end
-            if not storage.thebanished[player.index] then
-                storage.thebanished[player.index] = 0
-            end
-            if not storage.hide_clock[player.index] then
-                storage.hide_clock[player.index] = false
-            end
-            if not storage.last_playtime[player.index] then
-                storage.last_playtime[player.index] = false
-            end
-            if not storage.cleaned_players[player.index] then
-                storage.cleaned_players[player.index] = true
-            end
-        end
+    if not storage.PData[player.index] then
+        storage.PData[player.index] = {
+            active = false,
+            moving = false,
+            score = 0,
+            banished = 0,
+            hideClock = false,
+            lastOnline = game.tick,
+            cleaned = false,
+            patreon = false,
+            nitro = false,
+            regAttempts = 0,
+            lastWarned = 0,
+            reports = 0,
+            permDeath = false
+        }
     end
 end

@@ -146,11 +146,11 @@ function ONLINE_UpdatePlayerList()
     storage.tplayer_count = tcount
     storage.player_list = results
 
-    local tmp_online = storage.lastonlinestring
+    local tmp_online = storage.onlinePlayersCache
     UTIL_SendPlayers(nil)
 
     -- Refresh open player-online windows
-    if tmp_online ~= storage.lastonlinestring then
+    if tmp_online ~= storage.onlinePlayersCache then
         for _, victim in pairs(game.connected_players) do
             if victim and victim.valid and victim.gui and victim.gui.left and victim.gui.left.m45_online then
                 victim.gui.left.m45_online.destroy()
@@ -848,7 +848,7 @@ function ONLINE_Clicks(event)
                             if string.match(reason, "\n") then
                                 reason = string.gsub(reason, "\n", " ")
                             end
-                            g_report(player, ": " .. victim.name .. ": " .. reason)
+                            BANISH_DoReport(player, ": " .. victim.name .. ": " .. reason)
                         end
                         player.gui.screen.m45_online_submenu.main.report_frame.report_textbox.text = ""
                     else
