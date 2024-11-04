@@ -2,7 +2,6 @@
 -- carlotto81@gmail.com
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
-require "antigrief"
 require "info"
 require "log"
 require "todo"
