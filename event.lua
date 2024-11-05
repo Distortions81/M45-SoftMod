@@ -36,7 +36,7 @@ end
 
 script.on_nth_tick(599, function(event)
     -- Tick divider, one minute
-    --RunSetup()
+    RunSetup()
     storage.SM_Store.tickDiv = storage.SM_Store.tickDiv + 1
 
     if storage.SM_Store.tickDiv >= 6 then
@@ -58,16 +58,16 @@ script.on_nth_tick(599, function(event)
                 if storage.PData[player.index].active == true then
                     storage.PData[player.index].active = false -- Turn back off
 
-                    if storage.PData[player.index].playtime then
+                    if storage.PData[player.index].score then
                         -- Compensate for game speed
-                        storage.PData[player.index].playtime[player.index] =
-                            storage.PData[player.index].playtime + (600.0 / game.speed) -- Same as loop time
+                        storage.PData[player.index].score =
+                            storage.PData[player.index].score + (600.0 / game.speed) -- Same as loop time
                         if storage.PData[player.index].lastOnline then
                             storage.PData[player.index].lastOnline = game.tick
                         end
                     else
                         -- INIT
-                        storage.PData[player.index].playtime = 0
+                        storage.PData[player.index].score = 0
                     end
                 end
             else
@@ -80,16 +80,16 @@ script.on_nth_tick(599, function(event)
                 if storage.PData[player.index].moving == true then
                     storage.PData[player.index].moving = false -- Turn back off
 
-                    if storage.PData[player.index].playtime then
+                    if storage.PData[player.index].score then
                         -- Compensate for game speed
-                        storage.PData[player.index].playtime =
-                            storage.PData[player.index].playtime + (600.0 / game.speed) -- Same as loop time
+                        storage.PData[player.index].score =
+                            storage.PData[player.index].score + (600.0 / game.speed) -- Same as loop time
                         if storage.PData[player.index].lastOnline then
                             storage.PData[player.index].lastOnline = game.tick
                         end
                     else
                         -- INIT
-                        storage.PData[player.index].playtime = 0
+                        storage.PData[player.index].score = 0
                     end
                 end
             else
@@ -143,7 +143,6 @@ end
 
 -- Player connected, make variables, draw UI, set permissions, and game settings
 function EVENT_Joined(event)
-    ONLINE_UpdatePlayerList()
 
     if not event or not event.player_index then
         return
@@ -152,11 +151,12 @@ function EVENT_Joined(event)
 
     EVENT_PlayerInit(player)
     BANISH_SendToSurface(player)
+    ONLINE_UpdatePlayerList()
+
 end
 
 -- New player created, insert items set perms, show players online, welcome to map.
 function EVENT_PlayerCreated(event)
-    ONLINE_UpdatePlayerList()
 
     if not event or not event.player_index then
         return
@@ -165,6 +165,7 @@ function EVENT_PlayerCreated(event)
 
     EVENT_PlayerInit(player)
     UTIL_SendToDefaultSpawn(player)
+    ONLINE_UpdatePlayerList()
 
     -- Cutoff-point, just becomes annoying.
     if not player.force.technologies["military-2"].researched then

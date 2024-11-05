@@ -598,12 +598,6 @@ local function guiClick(event)
 
         if player and player.valid then
             -- Grab target if we have one
-            local victim_name
-            local victim
-            if storage.m45_online_submenu_target and storage.m45_online_submenu_target[player.index] then
-                victim_name = storage.m45_online_submenu_target[player.index]
-                victim = game.players[victim_name]
-            end
             if event.element.name == "m45_todo_submenu_close_button" then
                 ----------------------------------------------------------------
                 -- Close online submenu

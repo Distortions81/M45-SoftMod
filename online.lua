@@ -80,7 +80,6 @@ function ONLINE_UpdatePlayerList()
                 local days = math.floor(time / 60 / 60 / 24)
                 local hours = math.floor(time / 60 / 60)
                 local minutes = math.floor(time / 60)
-                local seconds = math.floor(time)
                 if days > 0 then
                     isafk = string.format("%3.2fd", time / 60 / 60 / 24)
                 elseif hours > 0 then
@@ -127,20 +126,7 @@ function ONLINE_UpdatePlayerList()
     storage.SM_Store.pcount = count
     storage.SM_Store.tcount = tcount
     storage.SM_Store.playerList = results
-
-    local tmp_online = storage.onlineCache
     UTIL_SendPlayers(nil)
-
-    -- Refresh open player-online windows
-    if tmp_online ~= storage.SM_Store.onlineCache then
-        for _, victim in pairs(game.connected_players) do
-            if victim and victim.valid and victim.gui and victim.gui.left and victim.gui.left.m45_online then
-                victim.gui.left.m45_online.destroy()
-                ONLINE_Window(victim) -- online.lua
-            end
-        end
-    end
-
 end
 
 -- Global, called from control.lua
@@ -312,16 +298,16 @@ function ONLINE_MakeM45OnlineSub(player, target_name)
     end
 end
 
-local function DestroyM45OnlineSub(player)
+local function destoryOnlineSub(player)
     if player.gui and player.gui.screen and player.gui.screen.m45_online_submenu then
         player.gui.screen.m45_online_submenu.destroy()
     end
 end
 
-local function handle_m45_online_submenu(player, target_name)
+local function handleOnlineSubmenu(player, target_name)
     if player and player.valid and target_name then
         storage.m45_online_submenu_target[player.index] = target_name
-        DestroyM45OnlineSub(player)
+        destoryOnlineSub(player)
         ONLINE_MakeM45OnlineSub(player, target_name)
     end
 end
@@ -368,27 +354,23 @@ function ONLINE_Window(player)
             online_titlebar.style.horizontal_align = "center"
             online_titlebar.style.horizontally_stretchable = true
 
-            if not storage.player_count or not storage.player_list then
-                ONLINE_UpdatePlayerList()
-            end
-
             local bcheckstate = false
-            if storage.online_brief[player.index] then
-                if storage.online_brief[player.index] == true then
+            if storage.PData[player.index].onlineBrief then
+                if storage.PData[player.index].onlineBrief  == true then
                     bcheckstate = true
                 else
                     bcheckstate = false
                 end
             else
-                storage.online_brief[player.index] = false
+                storage.PData[player.index].onlineBrief = false
             end
 
-            if not storage.online_brief[player.index] then
+            if not storage.PData[player.index].onlineBrief  then
                 online_titlebar.add {
                     type = "label",
                     name = "online_title",
                     style = "frame_title",
-                    caption = "Players Online: " .. storage.player_count .. ", Total: " .. storage.tplayer_count
+                    caption = "Players Online: " .. storage.SM_Store.pcount .. ", Total: " .. storage.SM_Store.tcount
                 }
             else
                 online_titlebar.add {
@@ -406,17 +388,17 @@ function ONLINE_Window(player)
             }
 
             local checkstate = false
-            if storage.show_offline_state[player.index] then
-                if storage.show_offline_state[player.index] == true then
+            if storage.PData[player.index].onlineShowOffline then
+                if storage.PData[player.index].onlineShowOffline == true then
                     checkstate = true
                 else
                     checkstate = false
                 end
             else
-                storage.show_offline_state[player.index] = false
+                storage.PData[player.index].onlineShowOffline = false
             end
 
-            if not storage.online_brief[player.index] then
+            if not storage.PData[player.index].brief then
                 local show_offline = online_close_button.add {
                     type = "checkbox",
                     caption = "Show offline  ",
@@ -450,7 +432,7 @@ function ONLINE_Window(player)
                 direction = "vertical"
             }
 
-            if not storage.online_brief[player.index] then
+            if not storage.PData[player.index].onlineBrief then
                 local pframe = online_main.add {
                     type = "frame",
                     direction = "horizontal"
@@ -507,8 +489,7 @@ function ONLINE_Window(player)
                 }
             end
 
-            -- for x = 0, 100, 1 do
-            for i, target in pairs(storage.player_list) do
+            for i, target in pairs(storage.SM_Store.playerList) do
                 local skip = false
                 local is_offline = false
 
@@ -516,7 +497,7 @@ function ONLINE_Window(player)
                     skip = true
                 end
 
-                if skip and storage.show_offline_state and storage.show_offline_state[player.index] then
+                if skip and storage.PData[player.index].onlineBrief and storage.show_offline_state[player.index] then
                     skip = false
                     is_offline = true
                 end
@@ -525,7 +506,7 @@ function ONLINE_Window(player)
                     local victim = target.victim
 
                     local pframe
-                    if not storage.online_brief[player.index] then
+                    if not storage.PData[player.index].onlineBrief then
                         pframe = online_main.add {
                             type = "frame",
                             direction = "horizontal"
@@ -537,7 +518,7 @@ function ONLINE_Window(player)
                         }
                     end
 
-                    if not storage.online_brief[player.index] then
+                    if not storage.PData[player.index].onlineBrief then
                         local submenu
                         -- Yeah don't need this menu for ourself
                         if victim.name == player.name then
@@ -625,7 +606,7 @@ function ONLINE_Window(player)
                         }
                     end
 
-                    if not storage.online_brief[player.index] then
+                    if not storage.PData[player.index].onlineBrief then
                         name_label.style.font = "default-bold"
                         name_label.style.width = 200
                     end
@@ -642,7 +623,7 @@ function ONLINE_Window(player)
                     -- Set font color
                     name_label.style.font_color = newcolor
 
-                    if not storage.online_brief[player.index] then
+                    if not storage.PData[player.index].onlineBrief then
                         local name_label = pframe.add {
                             type = "line",
                             direction = "vertical"
@@ -750,15 +731,15 @@ function ONLINE_Clicks(event)
             -- Grab target if we have one
             local victim_name
             local victim
-            if storage.m45_online_submenu_target and storage.m45_online_submenu_target[player.index] then
-                victim_name = storage.m45_online_submenu_target[player.index]
+            if storage.PData[player.index].onlineSub then
+                victim_name = storage.PData[player.index].onlineSub
                 victim = game.players[victim_name]
             end
 
             if args and args[1] == "m45_online_submenu_open" then
                 ----------------------------------------------------------------
                 -- Online sub-menu
-                handle_m45_online_submenu(player, args[2])
+                handleOnlineSubmenu(player, args[2])
             elseif event.element.name == "m45_online_submenu_close_button" then
                 ----------------------------------------------------------------
                 -- Close online submenu
@@ -861,10 +842,10 @@ function ONLINE_Clicks(event)
                     player.gui.left.m45_online.destroy()
                 end
             elseif event.element.name == "m45_online_show_offline" then
-                storage.show_offline_state[player.index] = event.element.state
+                storage.PData[player.index].onlineShowOffline = event.element.state
                 ONLINE_Window(player)
             elseif event.element.name == "m45_online_brief" then
-                storage.online_brief[player.index] = event.element.state
+                storage.PData[player.index].onlineBrief = event.element.state
                 ONLINE_Window(player)
             elseif event.element.name == "m45_member_welcome_close" then
                 PERMS_WelcomeMember(player)

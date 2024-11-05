@@ -62,7 +62,7 @@ function STORAGE_CreateGlobal()
         storage.SM_Store.tcount = 0
     end
     if not storage.SM_Store.playerList then
-        storage.SM_Store.playerList = 0
+        storage.SM_Store.playerList = {}
     end
 
     --Spawn Logo
@@ -133,10 +133,10 @@ function STORAGE_MakePlayerStorage(player)
     end
 
     --online menu
-    if not storage.PData[player.index].online_brief then
+    if not storage.PData[player.index].onlineBrief then
         storage.PData[player.index].online_brief = false
     end
-    if not storage.PData[player.index].online_show_offline then
+    if not storage.PData[player.index].onlineShowOffline then
         storage.PData[player.index].online_show_offline = false
     end
 end

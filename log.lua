@@ -66,7 +66,7 @@ function LOG_Redo(event)
         end
         buf = buf .. act.type
     end
-    UTIL_ConsolePrint("[ACT] " .. player.name .. " redo " .. buf .. player.gps_tag)
+    UTIL_ConsolePrint("[ACT] " .. player.name .. " redo " .. buf .. player.character.gps_tag)
 end
 
 function LOG_Undo(event)
@@ -82,7 +82,7 @@ function LOG_Undo(event)
         end
         buf = buf .. act.type
     end
-    UTIL_ConsolePrint("[ACT] " .. player.name .. " undo " .. buf .. player.gps_tag)
+    UTIL_ConsolePrint("[ACT] " .. player.name .. " undo " .. buf .. player.character.gps_tag)
 end
 
 function LOG_TrainSchedule(event)
@@ -125,7 +125,7 @@ function LOG_PickedItem(event)
         end
 
         if buf ~= "" then
-            UTIL_ConsolePrint("[ACT] " .. player.name .. " picked up " .. buf .. " at" .. player.gps_tag)
+            UTIL_ConsolePrint("[ACT] " .. player.name .. " picked up " .. buf .. " at" .. player.character.gps_tag)
         end
     end
 end
@@ -134,7 +134,7 @@ function LOG_DroppedItem(event)
     if event and event.player_index and event.entity then
         local player = game.players[event.player_index]
 
-        UTIL_ConsolePrint("[ACT] " .. player.name .. " dropped " .. event.entity.name .. " at" .. player.gps_tag)
+        UTIL_ConsolePrint("[ACT] " .. player.name .. " dropped " .. event.entity.name .. " at" .. player.character.gps_tag)
     end
 end
 
@@ -151,9 +151,9 @@ function LOG_Decon(event)
             if decon_size ~= 0 then
                 local msg = ""
                 if event.alt then
-                    msg = "[ACT] " .. player.name .. " at " .. player.gps_tag .. " is unmarking for deconstruction " .. UTIL_Area(decon_size, event.area)
+                    msg = "[ACT] " .. player.name .. " at " .. player.character.gps_tag .. " is unmarking for deconstruction " .. UTIL_Area(decon_size, event.area)
                 else
-                    msg = "[ACT] " .. player.name  .. " at " .. player.gps_tag .. " is deconstructing ".. UTIL_Area(decon_size, event.area)
+                    msg = "[ACT] " .. player.name  .. " at " .. player.character.gps_tag .. " is deconstructing ".. UTIL_Area(decon_size, event.area)
 
                     if UTIL_Is_New(player) or UTIL_Is_Member(player) then -- Dont bother with regulars/moderators
                         if not UTIL_Is_Banished(player) then              -- Don't let bansihed players use this to spam
@@ -357,7 +357,7 @@ function LOG_InvChanged(event)
         local player = game.players[event.player_index]
 
         if player then
-            UTIL_ConsolePrint("[ACT] " .. player.name .. " transfered some items at" .. player.gps_tag)
+            UTIL_ConsolePrint("[ACT] " .. player.name .. " transfered some items at" .. player.character.gps_tag)
         end
     end
 end

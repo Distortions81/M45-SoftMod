@@ -131,8 +131,8 @@ function UTIL_SendPlayers(victim)
     -- For console use
     if not victim then
         buf = "[ONLINE2] "
-        if storage.player_list then
-            for i, target in pairs(storage.player_list) do
+        if storage.SM_Store.playerList then
+            for i, target in pairs(storage.SM_Store.playerList) do
                 if target and target.victim and target.victim.connected then
                     buf = buf .. target.victim.name .. "," .. math.floor(target.score / 60 / 60) .. "," ..
                         math.floor(target.time / 60 / 60) .. "," .. target.type .. "," .. target.afk .. ";"
@@ -148,8 +148,8 @@ function UTIL_SendPlayers(victim)
         return
     end
 
-    if storage.player_list then
-        for i, target in pairs(storage.player_list) do
+    if storage.SM_Store.playerList then
+        for i, target in pairs(storage.SM_Store.playerList) do
             if target and target.victim and target.victim.connected then
                 buf = buf ..
                     string.format("~%16s: - Score: %4d - Online: %4dm - (%s)%s\n", target.victim.name,

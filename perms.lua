@@ -130,8 +130,8 @@ function PERMS_PromotePlayer(player)
             -- (REGULARS) Check if they are in the right group, including se-remote-view
             storage.modsgroup.add_player(player)
             UTIL_MsgAll(player.name .. " moved to moderators group")
-        elseif (storage.active_playtime and storage.active_playtime[player.index] and
-                storage.active_playtime[player.index] > (4 * 60 * 60 * 60) and not player.admin) then
+        elseif (storage.PData[player.index].score and
+                storage.PData[player.index].score > (4 * 60 * 60 * 60) and not player.admin) then
             -- Check if player has hours for regulars status, but isn't a in regulars group.
             if (player.permission_group.name ~= storage.regularsgroup.name and
                     player.permission_group.name ~= storage.veteransgroup.name) then
@@ -139,8 +139,8 @@ function PERMS_PromotePlayer(player)
                 UTIL_MsgAll(player.name .. " is now a regular!")
                 PERMS_WelcomeMember(player)
             end
-        elseif (storage.active_playtime and storage.active_playtime[player.index] and
-                storage.active_playtime[player.index] > (30 * 60 * 60) and not player.admin) then
+        elseif (storage.PData[player.index].score and
+                storage.PData[player.index].score > (30 * 60 * 60) and not player.admin) then
             -- Check if player has hours for members status, but isn't a in member group.
             if UTIL_Is_Veteran(player) == false and UTIL_Is_Regular(player) == false and UTIL_Is_Member(player) ==
                 false and UTIL_Is_New(player) == true then
