@@ -2,7 +2,6 @@
 -- carlotto81@gmail.com
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
-require "utility"
 
 function ONLINE_MakeOnlineButton(player)
     -- Online button--

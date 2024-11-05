@@ -1,3 +1,9 @@
+-- Carl Frank Otto III
+-- carlotto81@gmail.com
+-- GitHub: https://github.com/M45-Science/SoftMod
+-- License: MPL 2.0
+-- Safe console print
+
 function RESET_MakeClock(player)
     -- Online button--
     if player.gui.top.reset_clock then

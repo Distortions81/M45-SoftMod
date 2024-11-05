@@ -2,10 +2,6 @@
 -- carlotto81@gmail.com
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
-require "info"
-require "log"
-require "todo"
-require "onelife"
 
 local function InsWeapons(player, ammo_amount)
     if player.force.technologies["military"].researched then
@@ -39,7 +35,6 @@ end
 -- Refresh players online window
 
 script.on_nth_tick(599, function(event)
-
     -- Tick divider, one minute
     --RunSetup()
     storage.SM_Store.tickDiv = storage.SM_Store.tickDiv + 1
@@ -148,21 +143,20 @@ end
 
 -- Player connected, make variables, draw UI, set permissions, and game settings
 function EVENT_Joined(event)
-    UTIL_SendPlayers(nil)
+    ONLINE_UpdatePlayerList()
 
     if not event or not event.player_index then
         return
     end
     local player = game.players[event.player_index]
 
-    STORAGE_MakePlayerStorage(player)
     EVENT_PlayerInit(player)
     BANISH_SendToSurface(player)
 end
 
 -- New player created, insert items set perms, show players online, welcome to map.
 function EVENT_PlayerCreated(event)
-    UTIL_SendPlayers(nil)
+    ONLINE_UpdatePlayerList()
 
     if not event or not event.player_index then
         return
@@ -171,7 +165,6 @@ function EVENT_PlayerCreated(event)
 
     EVENT_PlayerInit(player)
     UTIL_SendToDefaultSpawn(player)
-    ONLINE_Window(player)
 
     -- Cutoff-point, just becomes annoying.
     if not player.force.technologies["military-2"].researched then
@@ -233,25 +226,20 @@ end
 -- Main event handler
 script.on_event(
     {
-        defines.events.on_player_created, defines.events.on_pre_player_died, defines.events.on_player_respawned,
-        defines.events.on_player_joined_game, defines.events.on_player_left_game, defines.events
-        .on_player_main_inventory_changed,
-        defines.events.on_player_changed_position, defines.events.on_console_chat, defines.events
-        .on_player_repaired_entity,
-        defines.events.on_gui_click, defines.events.on_gui_text_changed, defines.events.on_player_fast_transferred,
-        defines.events.on_console_command, defines.events.on_chart_tag_removed, defines.events.on_chart_tag_modified,
-        defines.events.on_chart_tag_added, defines.events.on_research_finished,
-        defines.events.on_redo_applied, defines.events.on_undo_applied, defines.events.on_train_schedule_changed,
-        defines.events.on_entity_died, defines.events.on_cancelled_upgrade, defines.events.on_picked_up_item, defines
-        .events.on_player_dropped_item,
-        defines.events.on_player_deconstructed_area, defines.events.on_marked_for_upgrade, defines.events
-        .on_rocket_launch_ordered,
-        defines.events.on_cancelled_upgrade, defines.events.on_marked_for_deconstruction, defines.events
-        .on_cancelled_deconstruction, defines.events.on_player_flushed_fluid, defines.events
-        .on_player_driving_changed_state,
-        defines.events.on_player_banned, defines.events.on_player_rotated_entity, defines.events
-        .on_player_flipped_entity,
-        defines.events.on_pre_player_mined_item, defines.events.on_built_entity }, function(event)
+        defines.events.on_player_created, defines.events.on_pre_player_died, defines.events.on_player_respawned, defines
+        .events.on_player_joined_game, defines.events.on_player_left_game, defines.events
+        .on_player_main_inventory_changed, defines.events.on_player_changed_position, defines.events.on_console_chat,
+        defines.events.on_player_repaired_entity, defines.events.on_gui_click, defines.events.on_gui_text_changed,
+        defines.events.on_player_fast_transferred, defines.events.on_console_command, defines.events
+        .on_chart_tag_removed, defines.events.on_chart_tag_modified, defines.events.on_chart_tag_added, defines.events
+        .on_research_finished, defines.events.on_redo_applied, defines.events.on_undo_applied, defines.events
+        .on_train_schedule_changed, defines.events.on_entity_died, defines.events.on_cancelled_upgrade, defines.events
+        .on_picked_up_item, defines.events.on_player_dropped_item, defines.events.on_player_deconstructed_area, defines
+        .events.on_marked_for_upgrade, defines.events.on_rocket_launch_ordered, defines.events.on_cancelled_upgrade,
+        defines.events.on_marked_for_deconstruction, defines.events.on_cancelled_deconstruction, defines.events
+        .on_player_flushed_fluid, defines.events.on_player_driving_changed_state, defines.events.on_player_banned,
+        defines.events.on_player_rotated_entity, defines.events.on_player_flipped_entity, defines.events
+        .on_pre_player_mined_item, defines.events.on_built_entity }, function(event)
         -- If no event, or event is a tick
         if not event or (event and event.name == defines.events.on_tick) then
             return
@@ -375,7 +363,7 @@ function EVENT_Loot(event)
     if ent and ent.type and ent.type == "character-corpse" then
         if ent and ent.character_corpse_player_index and event.player_index then
             if event.character_corpse_player_index == event.player_index then
-                return     -- Dont warn if it is ours
+                return -- Dont warn if it is ours
             end
             local player = game.players[event.player_index]
             local victim = game.players[ent.character_corpse_player_index]

@@ -2,7 +2,6 @@
 -- carlotto81@gmail.com
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
-require "utility"
 
 -- Create map tag -- log
 function LOG_TagAdded(event)
@@ -35,7 +34,6 @@ end
 
 -- Player disconnect messages, with reason (Fact >= v1.1)
 function LOG_PlayerLeft(event)
-    UTIL_SendPlayers(nil)
 
     if not event or not event.player_index then
         return

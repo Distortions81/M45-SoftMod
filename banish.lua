@@ -2,7 +2,6 @@
 -- carlotto81@gmail.com
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
-require "utility"
 
 function BANISH_DoReport(player, report)
     if player and player.valid and report then

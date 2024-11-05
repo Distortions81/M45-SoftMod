@@ -5,29 +5,27 @@
 require "banish" -- Banish system
 require "commands" -- Slash commands
 require "event" -- Event/tick handler
-require "storage" -- Global variable init
 require "info" -- Welcome/Info window
 require "log" -- Action logging
 require "logo" -- Spawn logo
+require "onelife" -- Time until map reset
 require "online" -- Players online window
 require "perms" -- Permissions system
+require "reset" -- Time until map reset
+require "storage" -- Global variable init
 require "todo" -- To-Do-list
 require "utility" -- Widely used general utility
-require "reset" -- Time until map reset
-
 
 function RunSetup()
 
-    --Handle first run
-    if not storage.SM_Version then
-        storage.SM_Version = "NewVersion"
-    end
+    storage.SM_Version = "624-11.02.2024-1043p"
+    
     if not storage.SM_OldVersion then
         storage.SM_OldVersion = "OldVersion"
     end
 
     --Only rerun on version change
-    if not storage.SM_OldVersion or storage.SM_OldVersion ~= storage.SM_Version then
+    if storage.SM_OldVersion ~= storage.SM_Version then
         storage.SM_OldVersion = storage.SM_Version
 
         STORAGE_CreateGlobal()

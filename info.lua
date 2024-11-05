@@ -2,11 +2,6 @@
 -- carlotto81@gmail.com
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
-require "utility"
-
--- Shamelessly stole most of this function from RedMew.
--- I also had no idea inventory-size could be set from create_entity.
--- https://github.com/Refactorio/RedMew/blob/develop/features/dump_offline_inventories.lua
 
 function INFO_DumpInv(player, force)
     if not player then

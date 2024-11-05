@@ -2,9 +2,6 @@
 -- carlotto81@gmail.com
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
-require "utility"
-require "banish"
-require "logo"
 
 -- Custom commands
 script.on_load(function()
@@ -417,6 +414,8 @@ script.on_load(function()
         -- softmod version
         commands.add_command("sversion", "server use only", function(param)
             local player
+
+            RunSetup()
 
             if param and param.player_index then
                 player = game.players[param.player_index]

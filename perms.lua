@@ -2,7 +2,6 @@
 -- carlotto81@gmail.com
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
-require "utility"
 
 -- Create player groups if they don't exist, and create storage links to them
 function PERMS_MakeUserGroups()
