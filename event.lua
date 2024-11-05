@@ -41,7 +41,7 @@ end
 script.on_nth_tick(599, function(event)
 
     -- Tick divider, one minute
-    RunSetup()
+    --RunSetup()
     storage.SM_Store.tickDiv = storage.SM_Store.tickDiv + 1
 
     if storage.SM_Store.tickDiv >= 6 then
