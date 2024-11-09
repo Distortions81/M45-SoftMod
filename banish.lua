@@ -118,7 +118,12 @@ function BANISH_DoJail(victim)
     })
 end
 
-function BANISH_MakeJail()
+function BANISH_MakeJail() 
+
+    --Migrate old maps
+    if game.surfaces["hell"] ~= nil then
+        game.delete_surface("hell")
+    end
     -- Create area if needed
     if game.surfaces["jail"] == nil then
         local my_map_gen_settings = {
