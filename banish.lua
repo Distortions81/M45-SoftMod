@@ -83,7 +83,7 @@ function BANISH_UpdateVotes()
 
             table.insert(storage.SM_Store.sendToSurface, {
                 victim = victim,
-                surface = 1,
+                surface = "nauvis",
                 position = UTIL_GetDefaultSpawn()
             })
         elseif UTIL_Is_Banished(victim) == true and prevstate == false then
@@ -91,21 +91,31 @@ function BANISH_UpdateVotes()
             local msg = victim.name .. " has been banished."
             UTIL_MsgAllSys(msg)
             print("[REPORT] SYSTEM " .. msg)
-            BANISH_InformBanished(false, victim)
 
-            -- Kill them, so items are left behind
-            if victim.character and victim.character.valid then
-                UTIL_SendToDefaultSpawn(victim)
-                victim.character.die("player")
-            else
-                INFO_DumpInv(victim, true)
-            end
-
-            UTIL_MsgAllSys(victim.name .. "'s items have been dumped at spawn so they can be recovered.")
-
-            BANISH_ToJail(victim)
+            BANISH_DoJail(victim)
         end
     end
+end
+
+function BANISH_DoJail(victim)
+    BANISH_InformBanished(false, victim)
+
+    -- Kill them, so items are left behind
+    if victim.character and victim.character.valid then
+        UTIL_SendToDefaultSpawn(victim)
+        victim.character.die("player")
+    else
+        INFO_DumpInv(victim, true)
+    end
+
+    UTIL_MsgAllSys(victim.name .. "'s items have been dumped at spawn so they can be recovered.")
+
+    local newpos = game.surfaces["jail"].find_non_colliding_position("character", { x=0, y=0 }, 1024, 1, false)
+    table.insert(storage.SM_Store.sendToSurface, {
+        victim = victim,
+        surface = "jail",
+        position = newpos
+    })
 end
 
 function BANISH_MakeJail()
@@ -133,19 +143,6 @@ function BANISH_MakeJail()
         }
         game.create_surface("jail", my_map_gen_settings)
     end
-end
-
-function BANISH_ToJail(victim)
-    if victim.character and victim.character.valid then
-        victim.character.die("player")
-    end
-
-    local newpos = game.surfaces["jail"].find_non_colliding_position("character", { 0, 0 }, 1024, 1, false)
-    table.insert(storage.SM_Store.sendToSurface, {
-        victim = victim,
-        surface = "jail",
-        position = newpos
-    })
 end
 
 function BANISH_DoBanish(player, victim, reason)
@@ -247,21 +244,34 @@ function BANISH_SendToSurface(player)
             -- Check list
             for i, item in pairs(storage.SM_Store.sendToSurface) do
                 -- Check if item is valid
-                if item and item.victim and item.victim.valid and item.victim.character and item.victim.character.valid and
-                    item.position and item.surface then
+                if item and item.victim and item.victim.character then
                     -- Check if names match
                     if item.victim.name == player.name then
                         -- If surface is valid
                         local surf = game.surfaces[item.surface]
-                        if surf and surf.valid then
-                            local newpos = surf.find_non_colliding_position("character", item.position, 1024, 1, false)
+                        if not surf then
+                            UTIL_ConsolePrint(
+                                    "[ERROR] send_to_surface(respawn): INVALID SURFACE")
+
+                            index = i 
+                            break
+                        end
+                        if item.position then
+                            local newpos = surf.find_non_colliding_position("character", item.position, 1024, 1,
+                                false)
                             if newpos then
                                 player.teleport(newpos, surf)
                             else
-                                player.teleport(item.position, surf) -- screw it
+                                player.teleport(item.position, surf)     -- screw it
                                 UTIL_ConsolePrint(
                                     "[ERROR] send_to_surface(respawn): unable to find non_colliding_position.")
                             end
+                            index = i
+                            break
+                        else
+                            player.teleport({ x = 0, y = 0 }, surf) -- screw it
+                            UTIL_ConsolePrint(
+                                "[ERROR] send_to_surface(respawn): invalid position!")
                             index = i
                             break
                         end
@@ -296,12 +306,12 @@ function BANISH_AddBanishCommands()
             if param.parameter then
                 local victim = game.players[param.parameter]
 
-                if (victim and victim.valid) then
+                if (victim) then
                     if UTIL_Is_Banished(victim) then
-                       UTIL_SendToDefaultSpawn(victim)
+                        UTIL_SendToDefaultSpawn(victim)
                         UTIL_SmartPrint(player, "Unjailed player.")
                     else
-                        BANISH_ToJail(victim)
+                        BANISH_DoJail(victim)
                         UTIL_SmartPrint(player, "Jailed player.")
                     end
                 else
