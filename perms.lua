@@ -126,16 +126,16 @@ function PERMS_PromotePlayer(player)
     -- Check if groups are valid
     if player.permission_group then
         -- (Moderators) Check if they are in the right group, including se-remote-view
-        if (player.admin and player.permission_group.name ~= storage.modsgroup.name) then
+        if (player.admin and player.permission_group.name ~= storage.SM_Store.modGroup.name) then
             -- (REGULARS) Check if they are in the right group, including se-remote-view
-            storage.modsgroup.add_player(player)
+            storage.SM_Store.modGroup.add_player(player)
             UTIL_MsgAll(player.name .. " moved to moderators group")
         elseif (storage.PData[player.index].score and
                 storage.PData[player.index].score > (4 * 60 * 60 * 60) and not player.admin) then
             -- Check if player has hours for regulars status, but isn't a in regulars group.
-            if (player.permission_group.name ~= storage.regularsgroup.name and
-                    player.permission_group.name ~= storage.veteransgroup.name) then
-                storage.regularsgroup.add_player(player)
+            if (player.permission_group.name ~= storage.SM_Store.regGroup.name and
+                    player.permission_group.name ~= storage.SM_Store.vetGroup.name) then
+                storage.SM_Store.regGroup.add_player(player)
                 UTIL_MsgAll(player.name .. " is now a regular!")
                 PERMS_WelcomeMember(player)
             end
@@ -144,7 +144,7 @@ function PERMS_PromotePlayer(player)
             -- Check if player has hours for members status, but isn't a in member group.
             if UTIL_Is_Veteran(player) == false and UTIL_Is_Regular(player) == false and UTIL_Is_Member(player) ==
                 false and UTIL_Is_New(player) == true then
-                storage.membersgroup.add_player(player)
+                storage.SM_Store.memGroup.add_player(player)
                 UTIL_MsgAll(player.name .. " is now a member!")
                 PERMS_WelcomeMember(player)
             end
@@ -154,6 +154,8 @@ end
 
 -- Automatically promote users to higher levels
 function PERMS_AutoPromotePlayer()
+    PERMS_MakeUserGroups()
+
     -- Skip if permissions are disabled
     if game.connected_players and storage.disableperms == false then
         -- Check all connected players
