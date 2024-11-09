@@ -44,6 +44,7 @@ script.on_nth_tick(599, function(event)
         ONLINE_UpdatePlayerList() -- online.lua
         UTIL_MapPin()             -- fix map pin if edit/delete
         INFO_CheckAbandoned()
+        --LOGO_DrawLogo(true)
     end
 
 
