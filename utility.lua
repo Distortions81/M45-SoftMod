@@ -322,7 +322,7 @@ function UTIL_SendToDefaultSpawn(victim)
             else
                 UTIL_ConsolePrint("[ERROR] send_to_default_spawn: victim does not have a valid force.")
             end
-            local newpos = nsurf.find_non_colliding_position("character", spawnpos, 4096, 1, false)
+            local newpos = nsurf.find_non_colliding_position("character", spawnpos, 1024, 0.1, false)
             if newpos then
                 victim.teleport(newpos, nsurf)
             else
@@ -347,7 +347,7 @@ function UTIL_SendToSpawn(victim)
             else
                 UTIL_ConsolePrint("[ERROR] send_to_surface_spawn: victim force invalid")
             end
-            local newpos = nsurf.find_non_colliding_position("character", spawnpos, 4096, 1, false)
+            local newpos = nsurf.find_non_colliding_position("character", spawnpos, 1024, 1, false)
             if newpos then
                 victim.teleport(newpos, nsurf)
             else

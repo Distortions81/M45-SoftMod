@@ -42,7 +42,7 @@ function BANISH_UpdateVotes()
                             if vote.voter.admin then
                                 points = 1000 -- Admins get single-vote banish
                             elseif UTIL_Is_Veteran(vote.voter) then
-                                points = 2   -- Veterans get extra votes
+                                points = 2    -- Veterans get extra votes
                             end
 
                             --Add vote, or init if needed
@@ -93,8 +93,6 @@ function BANISH_UpdateVotes()
             print("[REPORT] SYSTEM " .. msg)
             BANISH_InformBanished(false, victim)
 
-            BANISH_MakeJail()
-
             -- Kill them, so items are left behind
             if victim.character and victim.character.valid then
                 UTIL_SendToDefaultSpawn(victim)
@@ -105,14 +103,14 @@ function BANISH_UpdateVotes()
 
             UTIL_MsgAllSys(victim.name .. "'s items have been dumped at spawn so they can be recovered.")
 
-            BANISH_ToHell(victim)
+            BANISH_ToJail(victim)
         end
     end
 end
 
 function BANISH_MakeJail()
     -- Create area if needed
-    if game.surfaces["hell"] == nil then
+    if game.surfaces["jail"] == nil then
         local my_map_gen_settings = {
             width = 100,
             height = 100,
@@ -133,21 +131,20 @@ function BANISH_MakeJail()
             },
             starting_area = "none"
         }
-        game.create_surface("hell", my_map_gen_settings)
+        game.create_surface("jail", my_map_gen_settings)
     end
 end
 
-function BANISH_ToHell(victim)
+function BANISH_ToJail(victim)
     if victim.character and victim.character.valid then
-
         victim.character.die("player")
+        local newpos = game.surfaces["jail"].find_non_colliding_position("character", { 0, 0 }, 1024, 0.1, false)
+        table.insert(storage.SM_Store.sendToSurface, {
+            victim = victim,
+            surface = "jail",
+            position = newpos
+        })
     end
-    local newpos = game.surfaces["jail"].find_non_colliding_position("character", { 0, 0 }, 0, 0.01, false)
-    table.insert(storage.SM_Store.sendToSurface, {
-        victim = victim,
-        surface = "hell",
-        position = newpos
-    })
 end
 
 function BANISH_DoBanish(player, victim, reason)
@@ -256,13 +253,13 @@ function BANISH_SendToSurface(player)
                         -- If surface is valid
                         local surf = game.surfaces[item.surface]
                         if surf and surf.valid then
-                            local newpos = surf.find_non_colliding_position("character", item.position, 0, 0.01, false)
+                            local newpos = surf.find_non_colliding_position("character", item.position, 1024, 0.1, false)
                             if newpos then
                                 player.teleport(newpos, surf)
                             else
                                 player.teleport(item.position, surf) -- screw it
                                 UTIL_ConsolePrint(
-                                "[ERROR] send_to_surface(respawn): unable to find non_colliding_position.")
+                                    "[ERROR] send_to_surface(respawn): unable to find non_colliding_position.")
                             end
                             index = i
                             break
@@ -281,7 +278,7 @@ end
 
 function BANISH_AddBanishCommands()
     -- Damn them!
-    commands.add_command("damn", "<player>\n(sends player to hell, tfrom <player> to teleport them back out.)",
+    commands.add_command("jail", "<player>\n(Use again to unjail.)",
         function(param)
             local player
 
@@ -299,7 +296,15 @@ function BANISH_AddBanishCommands()
                 local victim = game.players[param.parameter]
 
                 if (victim and victim.valid) then
-                    BANISH_ToHell(victim)
+                    if UTIL_Is_Banished(victim) then
+                        table.insert(storage.SM_Store.sendToSurface, {
+                            victim = victim,
+                            surface = "nauvis",
+                            position = UTIL_GetDefaultSpawn()
+                        })
+                    else
+                        BANISH_ToJail(victim)
+                    end
                 else
                     UTIL_SmartPrint(player, "Couldn't find that player.")
                 end
@@ -331,7 +336,7 @@ function BANISH_AddBanishCommands()
                             -- If victim found
                             if victim and victim.valid then
                                 local count = 0
-                                for vote in ( storage.SM_Store.votes) do
+                                for vote in (storage.SM_Store.votes) do
                                     if vote and vote.victim and vote.victim.valid then
                                         if vote.victim == victim and vote.overruled == false then
                                             vote.overruled = true
@@ -342,7 +347,7 @@ function BANISH_AddBanishCommands()
                                 if count > 0 then
                                     UTIL_SmartPrint(player, "Overruled " .. count .. " votes against " .. victim.name)
                                 else
-                                    for vote in ( storage.SM_Store.votes) do
+                                    for vote in (storage.SM_Store.votes) do
                                         if vote and vote.victim and vote.victim.valid then
                                             if vote.victim == victim and vote.overruled == true then
                                                 vote.overruled = false
@@ -377,7 +382,7 @@ function BANISH_AddBanishCommands()
             local player = game.players[param.player_index]
 
             -- Only if banish data found
-            if  storage.SM_Store.votes then
+            if storage.SM_Store.votes then
                 -- Print votes
                 local pcount = 0
                 for vote in (storage.SM_Store.votes) do

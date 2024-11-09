@@ -18,7 +18,7 @@ require "utility" -- Widely used general utility
 
 function RunSetup()
 
-    storage.SM_Version = "625-11.08.2024-0833p"
+    storage.SM_Version = "625-11.08.2024-1019p"
     
     if not storage.SM_OldVersion then
         storage.SM_OldVersion = "OldVersion"
@@ -27,8 +27,10 @@ function RunSetup()
     --Only rerun on version change
     if storage.SM_OldVersion ~= storage.SM_Version then
         storage.SM_OldVersion = storage.SM_Version
+        UTIL_MsgAll("Running softmod setup.")
 
         STORAGE_CreateGlobal()
+        BANISH_MakeJail()
         TODO_Init()
         LOGO_DrawLogo(true)
         UTIL_MapPin()

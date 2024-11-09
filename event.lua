@@ -158,7 +158,6 @@ end
 
 -- New player created, insert items set perms, show players online, welcome to map.
 function EVENT_PlayerCreated(event)
-
     if not event or not event.player_index then
         return
     end
@@ -166,6 +165,7 @@ function EVENT_PlayerCreated(event)
 
     EVENT_PlayerInit(player)
     UTIL_SendToDefaultSpawn(player)
+    INFO_InfoWin(player)
     ONLINE_UpdatePlayerList()
 
     -- Cutoff-point, just becomes annoying.
