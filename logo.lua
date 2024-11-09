@@ -13,10 +13,18 @@ function LOGO_DrawLogo(force)
     if msurf then
         -- Only draw if needed
         if storage.SM_Store.redrawLogo then
-            -- Destroy if already exists
-            if storage.SM_Store.spawnLogo then
-                storage.SM_Store.spawnLogo.destroy()
+            -- Migrate old scripts
+            if storage.m45logo then
+                storage.m45logo.destroy()
             end
+            if storage.m45logo_light then
+                storage.m45logo_light.destroy()
+            end
+            if storage.servtext then
+                storage.servtext.destroy()
+            end
+
+            -- Destroy if already exists
             if storage.SM_Store.spawnLight then
                 storage.SM_Store.spawnLight.destroy()
             end
@@ -65,9 +73,9 @@ function LOGO_DrawLogo(force)
                 text = storage.SM_Store.serverName,
                 draw_on_ground = true,
                 surface = msurf,
-                target = {cpos.x - 0.125, cpos.y - 2.5},
+                target = { cpos.x - 0.125, cpos.y - 2.5 },
                 scale = 3.0,
-                color = {1, 1, 1},
+                color = { 1, 1, 1 },
                 alignment = "center",
                 scale_with_zoom = false
             }
