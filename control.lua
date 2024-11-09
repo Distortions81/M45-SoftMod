@@ -18,7 +18,7 @@ require "utility" -- Widely used general utility
 
 function RunSetup()
 
-    storage.SM_Version = "624-11.02.2024-1043p"
+    storage.SM_Version = "625-11.08.2024-0718p"
     
     if not storage.SM_OldVersion then
         storage.SM_OldVersion = "OldVersion"

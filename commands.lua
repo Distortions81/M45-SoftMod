@@ -32,10 +32,12 @@ script.on_load(function()
             for _, target in pairs(game.connected_players) do
                 if target.valid and target.gui and target.gui.top and target.gui.top.reset_clock then
                     if storage.PData and storage.PData[target.index].hideClock == true or input == "" then
-                        target.gui.top.reset_clock.caption = ">"
+                        target.gui.top.reset_clock.visible = false
                     else
                         target.gui.top.reset_clock.caption = "MAP RESET: " .. input
                         target.gui.top.reset_clock.style = "red_button"
+                        target.gui.top.reset_clock.style.size = {350,24}
+                        target.gui.top.reset_clock.visible = true
                     end
                 end
             end

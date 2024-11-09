@@ -122,8 +122,9 @@ local function makeUI(player)
     if player.gui and player.gui.top then
         INFO_MakeButton(player)
         ONLINE_MakeOnlineButton(player)
-        RESET_MakeClock(player)
         ONELIFE_MakeButton(player)
+        TODO_Setup(player)
+        RESET_MakeClock(player)
     end
 end
 

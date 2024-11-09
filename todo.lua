@@ -563,30 +563,19 @@ local function update_todo_windows()
     end
 end
 
-
-local function playerJoined(event)
-    if event and event.player_index then
-        local player = game.players[event.player_index]
-
-        -- To-Do button--
-        if player.gui.top.todo_button then
-            player.gui.top.todo_button.destroy()
-        end
-        if not player.gui.top.todo_button then
-            local todo_32 = player.gui.top.add {
-                type = "sprite-button",
-                name = "todo_button",
-                sprite = "file/img/buttons/todo-64.png",
-                tooltip = "Read or edit the To-Do list."
-            }
-            todo_32.style.size = { 64, 64 }
-        end
-
-        -- Refresh window if open
-        if player.gui.screen.m45_todo then
-            player.gui.screen.m45_todo.destroy()
-            TODO_MakeWindow(player)
-        end
+function TODO_Setup(player)
+    -- To-Do button--
+    if player.gui.top.todo_button then
+        player.gui.top.todo_button.destroy()
+    end
+    if not player.gui.top.todo_button then
+        local todo_32 = player.gui.top.add {
+            type = "sprite-button",
+            name = "todo_button",
+            sprite = "file/img/buttons/todo2-64.png",
+            tooltip = "Read or edit the To-Do list."
+        }
+        todo_32.style.size = { 64, 64 }
     end
 end
 
@@ -701,7 +690,7 @@ local function guiClick(event)
 
                 updateTodoCount()
                 update_todo_windows()
-                UTIL_ConsolePrint("[TODO] " .. player.name .. " added a new todo item: " .. storage.todo_list_id )
+                UTIL_ConsolePrint("[TODO] " .. player.name .. " added a new todo item: " .. storage.todo_list_id)
             elseif args and args[2] and args[1] == "m45_todo_hide" then
                 ----------------------------------------------------------------
                 local id = tonumber(args[2]) -- Grab passed ID
@@ -720,7 +709,7 @@ local function guiClick(event)
                             if game.tick - storage.todo_throttle[player.index] < (60 * 5) then -- 10 seconds
                                 UTIL_SmartPrintColor(player,
                                     "(SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.")
-                                    
+
                                 return
                             end
                         else
@@ -734,7 +723,7 @@ local function guiClick(event)
                         updateTodoCount()
 
                         -- Log action
-                        UTIL_ConsolePrint("[TODO] " .. player.name .. " hid todo item: " .. storage.todo_list_id )
+                        UTIL_ConsolePrint("[TODO] " .. player.name .. " hid todo item: " .. storage.todo_list_id)
 
                         -- Destroy window
                         player.gui.screen.m45_todo_submenu.destroy()
@@ -746,7 +735,8 @@ local function guiClick(event)
                         storage.todo_player_editing_id[player.index] = nil
                     else
                         -- Something is broken
-                        UTIL_SmartPrint(player, "Sorry, something went wrong, unable to delete. Please report this issue.")
+                        UTIL_SmartPrint(player,
+                            "Sorry, something went wrong, unable to delete. Please report this issue.")
                     end
                 else
                     UTIL_SmartPrint(player, "Error: Could not find note id: " .. id)
@@ -777,7 +767,6 @@ local function guiClick(event)
                         -- Only save & archive if something was changed
                         if prev_priority ~= priority or prev_subject ~= subject or prev_can_edit ~= can_edit or
                             prev_text ~= text then
-
                             if storage.todo_throttle[player.index] then
                                 if game.tick - storage.todo_throttle[player.index] < (60 * 5) then -- 5 seconds
                                     UTIL_SmartPrintColor(player,
@@ -858,9 +847,19 @@ local function guiClick(event)
     end
 end
 
+
+local function updateWindow(event)
+    local player = game.players[event.player_index]
+    -- Refresh window if open
+    if player.gui.screen.m45_todo then
+        player.gui.screen.m45_todo.destroy()
+        TODO_MakeWindow(player)
+    end
+end
+
 function TODO_EventHandler(event)
     if event.name == defines.events.on_player_joined_game then
-        playerJoined(event)
+        updateWindow(event)
     elseif event.name == defines.events.on_gui_click then
         guiClick(event)
     end

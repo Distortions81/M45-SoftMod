@@ -1042,10 +1042,12 @@ function INFO_Click(event)
                                 storage.PData[player.index].hideClock  = false
                             player.gui.top.reset_clock.caption = "Map reset: " .. storage.SM_Store.resetDuration
                             player.gui.top.reset_clock.style = "red_button"
+                            player.gui.top.reset_clock.style.size = {350,24}
                         else
                             if event.button and event.button == defines.mouse_button_type.right and event.control then
                                 storage.PData[player.index].hideClock  = true
                                 player.gui.top.reset_clock.caption = ">"
+                                player.gui.top.reset_clock.style.size = {24,24}
                             end
                         end
                     end
