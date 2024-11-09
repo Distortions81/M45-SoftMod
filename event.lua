@@ -216,11 +216,9 @@ function EVENT_PlayerDied(event)
     if event.cause and event.cause.valid then
         local cause = event.cause.name
         UTIL_MsgDiscord(player.name ..
-            " was killed by " .. cause .. " at [gps=" .. math.floor(player.position.x) .. "," ..
-            math.floor(player.position.y) .. "]")
+            " was killed by " .. cause .. " at " .. UTIL_GPSPos(player))
     else
-        UTIL_MsgDiscord(player.name .. " was killed at [gps=" .. math.floor(player.position.x) .. "," ..
-            math.floor(player.position.y) .. "]")
+        UTIL_MsgDiscord(player.name .. " was killed at " .. UTIL_GPSPos(player))
     end
     ONELIFE_Main(event)
 end
@@ -372,7 +370,7 @@ function EVENT_Loot(event)
 
             if victim and victim.valid and player and player.valid then
                 local buf = player.name ..
-                    " looted the body of " .. victim.name .. " at" .. victim.gps_tag
+                    " looted the body of " .. victim.name .. " at " .. UTIL_GPSPos(victim)
                 if victim.name ~= player.name then
                     UTIL_MsgAll(buf)
                 end

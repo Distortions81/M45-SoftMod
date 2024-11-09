@@ -138,13 +138,14 @@ end
 function BANISH_ToJail(victim)
     if victim.character and victim.character.valid then
         victim.character.die("player")
-        local newpos = game.surfaces["jail"].find_non_colliding_position("character", { 0, 0 }, 1024, 0.1, false)
-        table.insert(storage.SM_Store.sendToSurface, {
-            victim = victim,
-            surface = "jail",
-            position = newpos
-        })
     end
+
+    local newpos = game.surfaces["jail"].find_non_colliding_position("character", { 0, 0 }, 1024, 1, false)
+    table.insert(storage.SM_Store.sendToSurface, {
+        victim = victim,
+        surface = "jail",
+        position = newpos
+    })
 end
 
 function BANISH_DoBanish(player, victim, reason)
@@ -253,7 +254,7 @@ function BANISH_SendToSurface(player)
                         -- If surface is valid
                         local surf = game.surfaces[item.surface]
                         if surf and surf.valid then
-                            local newpos = surf.find_non_colliding_position("character", item.position, 1024, 0.1, false)
+                            local newpos = surf.find_non_colliding_position("character", item.position, 1024, 1, false)
                             if newpos then
                                 player.teleport(newpos, surf)
                             else
@@ -297,13 +298,11 @@ function BANISH_AddBanishCommands()
 
                 if (victim and victim.valid) then
                     if UTIL_Is_Banished(victim) then
-                        table.insert(storage.SM_Store.sendToSurface, {
-                            victim = victim,
-                            surface = "nauvis",
-                            position = UTIL_GetDefaultSpawn()
-                        })
+                       UTIL_SendToDefaultSpawn(victim)
+                        UTIL_SmartPrint(player, "Unjailed player.")
                     else
                         BANISH_ToJail(victim)
+                        UTIL_SmartPrint(player, "Jailed player.")
                     end
                 else
                     UTIL_SmartPrint(player, "Couldn't find that player.")

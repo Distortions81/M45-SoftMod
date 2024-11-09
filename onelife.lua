@@ -97,7 +97,7 @@ function ONELIFE_MakeButton(player)
         if player.controller_type == defines.controllers.spectator then
             player.set_controller {
                 type = defines.controllers.character,
-                character = game.surfaces[1].create_entity({name = "character", position = game.surfaces[1].find_non_colliding_position("character", {0,0}, 1024, 0.1, false), force = game.forces.player})
+                character = game.surfaces[1].create_entity({name = "character", position = game.surfaces[1].find_non_colliding_position("character", {0,0}, 1024, 1, false), force = game.forces.player})
             }
             UTIL_SmartPrint(player, "You have been revived!")
             ONLINE_UpdatePlayerList()

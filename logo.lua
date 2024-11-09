@@ -11,19 +11,19 @@ function LOGO_DrawLogo(force)
 
     local msurf = game.surfaces[1]
     if msurf then
+        -- Migrate old scripts
+        if storage.m45logo then
+            storage.m45logo.destroy()
+        end
+        if storage.m45logo_light then
+            storage.m45logo_light.destroy()
+        end
+        if storage.servtext then
+            storage.servtext.destroy()
+        end
+
         -- Only draw if needed
         if storage.SM_Store.redrawLogo then
-            -- Migrate old scripts
-            if storage.m45logo then
-                storage.m45logo.destroy()
-            end
-            if storage.m45logo_light then
-                storage.m45logo_light.destroy()
-            end
-            if storage.servtext then
-                storage.servtext.destroy()
-            end
-
             -- Destroy if already exists
             if storage.SM_Store.spawnLight then
                 storage.SM_Store.spawnLight.destroy()
@@ -31,12 +31,15 @@ function LOGO_DrawLogo(force)
             if storage.SM_Store.spawnText then
                 storage.SM_Store.spawnText.destroy()
             end
+            if storage.SM_Store.spawnLogo then
+                storage.SM_Store.spawnLogo.destroy()
+            end
 
             -- Get spawn position
             local cpos = UTIL_GetDefaultSpawn()
 
             -- Find nice clear area for spawn
-            local newpos = msurf.find_non_colliding_position("crash-site-spaceship", cpos, 1024, 0.1, true)
+            local newpos = msurf.find_non_colliding_position("crash-site-spaceship", cpos, 1024, 1, false)
             -- Set spawn position if we found a better spot
             if newpos then
                 cpos = newpos

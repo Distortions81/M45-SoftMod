@@ -1004,7 +1004,7 @@ script.on_load(function()
 
                     if (victim and victim.valid) then
                         local newpos = victim.surface.find_non_colliding_position("character", victim.position, 1024,
-                            0.1, false)
+                            1, false)
                         if (newpos) then
                             player.teleport(newpos, victim.surface)
                             UTIL_SmartPrint(player, "*Poof!*")
@@ -1051,7 +1051,7 @@ script.on_load(function()
                             x = xpos,
                             y = ypos
                         }
-                        local newpos = surface.find_non_colliding_position("character", position, 1024, 0.1, false)
+                        local newpos = surface.find_non_colliding_position("character", position, 1024, 1, false)
                         if newpos then
                             player.teleport(newpos, surface)
                             return
@@ -1073,7 +1073,7 @@ script.on_load(function()
 
                         if position then
                             if position.x and position.y then
-                                local newpos = surface.find_non_colliding_position("character", position, 1024, 0.1,
+                                local newpos = surface.find_non_colliding_position("character", position, 1024, 1,
                                     false)
                                 if (newpos) then
                                     player.teleport(newpos, surface)
@@ -1117,7 +1117,7 @@ script.on_load(function()
 
                     if (victim and victim.valid) then
                         local newpos = player.surface.find_non_colliding_position("character", player.position, 1024,
-                            0.1, false)
+                            1, false)
                         if (newpos) then
                             victim.teleport(newpos, player.surface)
                             UTIL_SmartPrint(player, "*Poof!*")

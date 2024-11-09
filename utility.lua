@@ -48,8 +48,14 @@ function UTIL_Area(size, area)
         " AREA: " .. size .. "sq"
 end
 
-function UTIL_GPSPos(item, sName)
+function UTIL_GPSPos(item)
     if item and item.position then
+
+        local sName = ""
+        if item and item.surface then
+            sName = item.surface.name
+        end
+
         if sName then
             return " [gps=" .. math.floor(item.position.x) .. ","
                 .. math.floor(item.position.y) .. "," .. sName .. "]"
@@ -58,11 +64,6 @@ function UTIL_GPSPos(item, sName)
                 .. math.floor(item.position.y) .. "] "
         end
     end
-end
-
-function UTIL_GPSXY(x, y)
-    return " [gps=" .. math.floor(x) .. ","
-        .. math.floor(y) .. "] "
 end
 
 function UTIL_ConsolePrint(message)
@@ -303,8 +304,8 @@ function UTIL_Is_Banished(victim)
         return false
     elseif victim.surface and victim.surface.name == "jail" then
         return true
-    elseif storage.PData[victim.index].banished then
-        return true
+    --elseif storage.PData[victim.index].banished then
+        --return true
     else
         return false
     end
@@ -322,7 +323,7 @@ function UTIL_SendToDefaultSpawn(victim)
             else
                 UTIL_ConsolePrint("[ERROR] send_to_default_spawn: victim does not have a valid force.")
             end
-            local newpos = nsurf.find_non_colliding_position("character", spawnpos, 1024, 0.1, false)
+            local newpos = nsurf.find_non_colliding_position("character", spawnpos, 1024, 1, false)
             if newpos then
                 victim.teleport(newpos, nsurf)
             else
