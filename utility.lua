@@ -20,7 +20,7 @@ function UTIL_MapPin()
             position = UTIL_GetDefaultSpawn(),
             icon = {
                 type = "item",
-                name = "heavy-armor"
+                name = "programmable-speaker"
             },
             text = label
         }

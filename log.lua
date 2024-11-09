@@ -10,7 +10,8 @@ function LOG_TagAdded(event)
     end
     local player = game.players[event.player_index]
 
-    UTIL_MsgAll(player.name .. " add-tag" .. event.tag.gps_tag .. event.tag.text)
+    UTIL_MsgAll(player.name .. " add-tag "
+    .. event.tag.position.x .. ", ".. event.tag.position.y .. " : ".. event.tag.icon.name .. " " .. event.tag.text)
 end
 
 -- Edit map tag -- log
@@ -19,7 +20,8 @@ function LOG_TagMod(event)
         return
     end
     local player = game.players[event.player_index]
-    UTIL_MsgAll(player.name .. " mod-tag" .. event.tag.gps_tag .. event.tag.text)
+    UTIL_MsgAll(player.name .. " mod-tag " 
+    .. event.tag.position.x .. ", ".. event.tag.position.y .. " : ".. event.tag.icon.name .. " " .. event.tag.text)
 end
 
 -- Delete map tag -- log
@@ -29,7 +31,8 @@ function LOG_TagDel(event)
     end
     local player = game.players[event.player_index]
 
-    UTIL_MsgAll(player.name .. " del-tag" .. event.tag.gps_tag .. event.tag.text)
+    UTIL_MsgAll(player.name .. " del-tag " 
+    .. event.tag.position.x .. ", ".. event.tag.position.y .. " : ".. event.tag.icon.name .. " " .. event.tag.text)
 end
 
 -- Player disconnect messages, with reason (Fact >= v1.1)

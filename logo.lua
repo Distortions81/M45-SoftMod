@@ -12,7 +12,7 @@ function LOGO_DrawLogo(force)
     local msurf = game.surfaces[1]
     if msurf then
         -- Only draw if needed
-        if not storage.SM_Store.redrawLogo then
+        if storage.SM_Store.redrawLogo then
             -- Destroy if already exists
             if storage.SM_Store.spawnLogo then
                 storage.SM_Store.spawnLogo.destroy()
