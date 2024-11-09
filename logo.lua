@@ -39,7 +39,7 @@ function LOGO_DrawLogo(force)
             local cpos = UTIL_GetDefaultSpawn()
 
             -- Find nice clear area for spawn
-            local newpos = msurf.find_non_colliding_position("crash-site-spaceship", cpos, 1024, 1, false)
+            local newpos = msurf.find_non_colliding_position("crash-site-spaceship", cpos, 1024, 10, false)
             -- Set spawn position if we found a better spot
             if newpos then
                 cpos = newpos

@@ -110,7 +110,7 @@ function BANISH_DoJail(victim)
 
     UTIL_MsgAllSys(victim.name .. "'s items have been dumped at spawn so they can be recovered.")
 
-    local newpos = game.surfaces["jail"].find_non_colliding_position("character", { x=0, y=0 }, 1024, 1, false)
+    local newpos = game.surfaces["jail"].find_non_colliding_position("character", { x=0, y=0 }, 1024, 0.1, false)
     table.insert(storage.SM_Store.sendToSurface, {
         victim = victim,
         surface = "jail",
@@ -257,7 +257,7 @@ function BANISH_SendToSurface(player)
                             break
                         end
                         if item.position then
-                            local newpos = surf.find_non_colliding_position("character", item.position, 1024, 1,
+                            local newpos = surf.find_non_colliding_position("character", item.position, 1024, 0.1,
                                 false)
                             if newpos then
                                 player.teleport(newpos, surf)
