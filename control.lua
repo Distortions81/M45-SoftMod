@@ -21,16 +21,23 @@ function RunSetup()
 
     storage.SM_OldVersion = storage.SM_Version
 
-    STORAGE_CreateGlobal()
-    BANISH_MakeJail()
-    TODO_Init()
-    LOGO_DrawLogo(true)
-    UTIL_MapPin()
+    if not storage.SM_OldVersion then
+        storage.SM_OldVersion = "OldVersion"
+    end
 
-    PERMS_MakeUserGroups()
-    PERMS_SetPermissions()
+    --Only rerun on version change
+    if storage.SM_OldVersion ~= storage.SM_Version then
+        STORAGE_CreateGlobal()
+        BANISH_MakeJail()
+        TODO_Init()
+        LOGO_DrawLogo(true)
+        UTIL_MapPin()
 
-    game.forces["player"].friendly_fire = false -- disable friendly fire
-    game.disable_replay()                       -- Smaller saves, prevent desync on script upgrade
-    game.surfaces[1].show_clouds = false
+        PERMS_MakeUserGroups()
+        PERMS_SetPermissions()
+
+        game.forces["player"].friendly_fire = false -- disable friendly fire
+        game.disable_replay()                   -- Smaller saves, prevent desync on script upgrade
+        game.surfaces[1].show_clouds = false
+    end
 end

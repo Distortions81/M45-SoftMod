@@ -38,7 +38,7 @@ end
 -- Player disconnect messages, with reason (Fact >= v1.1)
 function LOG_PlayerLeft(event)
 
-    if not event or not event.player_index then
+    if not event or not event.player_index or not storage.PData then
         return
     end
     storage.PData[event.player_index].lastOnline = game.tick

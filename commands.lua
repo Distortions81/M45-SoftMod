@@ -766,10 +766,7 @@ script.on_load(function()
                         math.floor(new_pos_y)))
                     UTIL_SmartPrint(victim, string.format("Force: %s", pforce.name))
 
-                    -- Set logo to be redrawn
-                    storage.drawlogo = false
-                    -- Redraw
-                    LOGO_DrawLogo()
+                    LOGO_DrawLogo(true)
                 else
                     UTIL_SmartPrint(victim, "Couldn't find force...")
                 end
