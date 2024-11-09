@@ -39,12 +39,17 @@ script.on_nth_tick(599, function(event)
     RunSetup()
     storage.SM_Store.tickDiv = storage.SM_Store.tickDiv + 1
 
-    if storage.SM_Store.tickDiv >= 6 then
-        storage.SM_Store.tickDiv = 0
+    --1 min
+    if storage.SM_Store.tickDiv % 6 == 0 then
         ONLINE_UpdatePlayerList() -- online.lua
-        UTIL_MapPin()             -- fix map pin if edit/delete
+        UTIL_MapPin()         -- fix map pin if edit/delete
+    end
+
+    --15 mins
+    if storage.SM_Store.tickDiv >= 90 then
+        storage.SM_Store.tickDiv = 0
         INFO_CheckAbandoned()
-        --LOGO_DrawLogo(true)
+        LOGO_DrawLogo(true)
     end
 
 
@@ -145,7 +150,6 @@ end
 
 -- Player connected, make variables, draw UI, set permissions, and game settings
 function EVENT_Joined(event)
-
     if not event or not event.player_index then
         return
     end
@@ -154,7 +158,6 @@ function EVENT_Joined(event)
     EVENT_PlayerInit(player)
     BANISH_SendToSurface(player)
     ONLINE_UpdatePlayerList()
-
 end
 
 -- New player created, insert items set perms, show players online, welcome to map.
