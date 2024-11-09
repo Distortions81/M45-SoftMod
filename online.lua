@@ -3,6 +3,14 @@
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
 
+local function update_online_windows()
+    for _, player in pairs(game.connected_players) do
+        if player.gui and player.gui.screen and player.gui.left.m45_online then
+            ONLINE_Window(player)
+        end
+    end
+end
+
 function ONLINE_MakeOnlineButton(player)
     -- Online button--
     if player.gui.top.online_button then
@@ -127,6 +135,7 @@ function ONLINE_UpdatePlayerList()
     storage.SM_Store.tcount = tcount
     storage.SM_Store.playerList = results
     UTIL_SendPlayers(nil)
+    update_online_windows()
 end
 
 -- Global, called from control.lua
@@ -855,3 +864,4 @@ function ONLINE_Clicks(event)
         end
     end
 end
+
