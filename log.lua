@@ -10,8 +10,8 @@ function LOG_TagAdded(event)
     end
     local player = game.players[event.player_index]
 
-    UTIL_MsgAll(player.name .. " add-tag " 
-    ..  UTIL_GPSPos(event.tag).. " : ".. event.tag.icon.name .. " " .. event.tag.text)
+    UTIL_MsgAll(player.name .. " add-tag "
+        .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.icon.name .. " " .. event.tag.text)
 end
 
 -- Edit map tag -- log
@@ -20,8 +20,8 @@ function LOG_TagMod(event)
         return
     end
     local player = game.players[event.player_index]
-    UTIL_MsgAll(player.name .. " mod-tag " 
-    ..  UTIL_GPSPos(event.tag).. " : ".. event.tag.icon.name .. " " .. event.tag.text)
+    UTIL_MsgAll(player.name .. " mod-tag "
+        .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.icon.name .. " " .. event.tag.text)
 end
 
 -- Delete map tag -- log
@@ -31,13 +31,12 @@ function LOG_TagDel(event)
     end
     local player = game.players[event.player_index]
 
-    UTIL_MsgAll(player.name .. " del-tag " 
-    ..  UTIL_GPSPos(event.tag).. " : ".. event.tag.icon.name .. " " .. event.tag.text)
+    UTIL_MsgAll(player.name .. " del-tag "
+        .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.icon.name .. " " .. event.tag.text)
 end
 
 -- Player disconnect messages, with reason (Fact >= v1.1)
 function LOG_PlayerLeft(event)
-
     if not event or not event.player_index or not storage.PData then
         return
     end
@@ -95,7 +94,7 @@ function LOG_TrainSchedule(event)
     local player = game.players[event.player_index]
 
     local msg = player.name ..
-        " changed schedule on train ID " .. event.train.id .. " at" .. event.train.gps_tag
+        " changed schedule on train ID " .. event.train.id .. " at " .. event.train.gps_tag
 
     if UTIL_Is_Regular(player) or UTIL_Is_Veteran(player) or player.admin then
         UTIL_ConsolePrint("[ACT] " .. msg)
@@ -109,7 +108,7 @@ function LOG_EntDied(event)
         if event.entity.name == "character" then
             return
         end
-        UTIL_ConsolePrint(event.entity.name .. " died at" .. event.entity.gps_tag)
+        UTIL_ConsolePrint(event.entity.name .. " died at " .. event.entity.gps_tag)
     end
 end
 
@@ -128,7 +127,7 @@ function LOG_PickedItem(event)
         end
 
         if buf ~= "" then
-            UTIL_ConsolePrint("[ACT] " .. player.name .. " picked up " .. buf .. " at" .. player.character.gps_tag)
+            UTIL_ConsolePrint("[ACT] " .. player.name .. " picked up " .. buf .. " at " .. player.character.gps_tag)
         end
     end
 end
@@ -137,7 +136,8 @@ function LOG_DroppedItem(event)
     if event and event.player_index and event.entity then
         local player = game.players[event.player_index]
 
-        UTIL_ConsolePrint("[ACT] " .. player.name .. " dropped " .. event.entity.name .. " at" .. player.character.gps_tag)
+        UTIL_ConsolePrint("[ACT] " ..
+        player.name .. " dropped " .. event.entity.name .. " at " .. player.character.gps_tag)
     end
 end
 
@@ -154,9 +154,14 @@ function LOG_Decon(event)
             if decon_size ~= 0 then
                 local msg = ""
                 if event.alt then
-                    msg = "[ACT] " .. player.name .. " at " .. player.character.gps_tag .. " is unmarking for deconstruction " .. UTIL_Area(decon_size, event.area)
+                    msg = "[ACT] " ..
+                    player.name ..
+                    " at " ..
+                    player.character.gps_tag .. " is unmarking for deconstruction " .. UTIL_Area(decon_size, event.area)
                 else
-                    msg = "[ACT] " .. player.name  .. " at " .. player.character.gps_tag .. " is deconstructing ".. UTIL_Area(decon_size, event.area)
+                    msg = "[ACT] " ..
+                    player.name ..
+                    " at " .. player.character.gps_tag .. " is deconstructing " .. UTIL_Area(decon_size, event.area)
 
                     if UTIL_Is_New(player) or UTIL_Is_Member(player) then -- Dont bother with regulars/moderators
                         if not UTIL_Is_Banished(player) then              -- Don't let bansihed players use this to spam
@@ -281,7 +286,7 @@ function LOG_Flushed(event)
                 player.name ..
                 " flushed " ..
                 obj.name ..
-                " of " .. math.floor(event.amount) .. " " .. event.fluid .. " at" .. obj.gps_tag
+                " of " .. math.floor(event.amount) .. " " .. event.fluid .. " at " .. obj.gps_tag
 
             if player.surface and player.surface.index ~= 1 then
                 msg = msg .. " (" .. player.surface.name .. ")"
@@ -306,12 +311,12 @@ function LOG_PlayerDrive(event)
                 msg = "[ACT] " ..
                     player.name ..
                     " got in of a " ..
-                    event.entity.name .. " at" .. event.entity.gps_tag
+                    event.entity.name .. " at " .. event.entity.gps_tag
             else
                 msg = "[ACT] " ..
                     player.name ..
                     " got out of a " ..
-                    event.entity.name .. " at" .. event.entity.gps_tag
+                    event.entity.name .. " at " .. event.entity.gps_tag
             end
 
             if player.surface and player.surface.index ~= 1 then
@@ -332,7 +337,7 @@ function LOG_OrderLaunch(event)
         local player = game.players[event.player_index]
 
         local msg = "[ACT] " ..
-            player.name .. " ordered a rocket launch at" .. event.rocket_silo.gps_tag
+            player.name .. " ordered a rocket launch at " .. event.rocket_silo.gps_tag
         UTIL_ConsolePrint(msg)
         UTIL_MsgAll(msg)
     end
@@ -346,10 +351,10 @@ function LOG_FastTransfered(event)
         if player and obj then
             if event.from_player then
                 UTIL_ConsolePrint("[ACT] " ..
-                    player.name .. " fast-transfered items to " .. obj.name .. " at" .. obj.gps_tag)
+                    player.name .. " fast-transfered items to " .. obj.name .. " at " .. obj.gps_tag)
             else
                 UTIL_ConsolePrint("[ACT] " ..
-                    player.name .. " fast-transfered items from " .. obj.name .. " at" .. obj.gps_tag)
+                    player.name .. " fast-transfered items from " .. obj.name .. " at " .. obj.gps_tag)
             end
         end
     end
@@ -360,7 +365,7 @@ function LOG_InvChanged(event)
         local player = game.players[event.player_index]
 
         if player then
-            UTIL_ConsolePrint("[ACT] " .. player.name .. " transfered some items at" .. player.character.gps_tag)
+            UTIL_ConsolePrint("[ACT] " .. player.name .. " transfered some items at " .. player.character.gps_tag)
         end
     end
 end
@@ -408,17 +413,17 @@ function LOG_BuiltEnt(event)
 
     if obj.name == "programmable-speaker" or
         (obj.name == "entity-ghost" and obj.ghost_name == "programmable-speaker") then
-        UTIL_MsgAll(player.name .. " placed a speaker at" .. obj.gps_tag)
+        UTIL_MsgAll(player.name .. " placed a speaker at " .. obj.gps_tag)
         return
     end
 
     if obj.name ~= "tile-ghost" and obj.name ~= "tile" then
         if obj.name ~= "entity-ghost" then
-            UTIL_ConsolePrint("[ACT] " .. player.name .. " placed " .. obj.name .. obj.gps_tag)
+            UTIL_ConsolePrint("[ACT] " .. player.name .. " placed " .. obj.name .." " ..  obj.gps_tag)
         else
             if UTIL_WarnOkay(event.player_index) then
                 UTIL_ConsolePrint("[ACT] " ..
-                    player.name .. " placed-ghost " .. obj.name .. obj.gps_tag ..
+                    player.name .. " placed-ghost " .. obj.name .. " " .. obj.gps_tag ..
                     obj.ghost_name)
             end
         end
@@ -436,7 +441,7 @@ function LOG_PreMined(event)
         if obj.name ~= "tile-ghost" and obj.name ~= "tile" then
             if obj.name ~= "entity-ghost" then
                 -- log
-                UTIL_ConsolePrint("[ACT] " .. player.name .. " mined " .. obj.name .. obj.gps_tag)
+                UTIL_ConsolePrint("[ACT] " .. player.name .. " mined " .. obj.name .. " " .. obj.gps_tag)
 
                 -- Mark player as having picked up an item, and needing to be cleaned.
                 if storage.PData[event.player_index].cleaned then
@@ -444,7 +449,7 @@ function LOG_PreMined(event)
                 end
             else
                 UTIL_ConsolePrint("[ACT] " ..
-                    player.name .. " mined-ghost " .. obj.name .. obj.gps_tag ..
+                    player.name .. " mined-ghost " .. obj.name .. " " .. obj.gps_tag ..
                     obj.ghost_name)
             end
         end
@@ -464,11 +469,11 @@ function LOG_Rotated(event)
     -- If player and object are valid
     if obj.name ~= "tile-ghost" and obj.name ~= "tile" then
         if obj.name ~= "entity-ghost" then
-            UTIL_ConsolePrint("[ACT] " .. player.name .. " rotated " .. obj.name .. obj.gps_tag)
+            UTIL_ConsolePrint("[ACT] " .. player.name .. " rotated " .. obj.name .. " " .. obj.gps_tag)
         else
             UTIL_ConsolePrint("[ACT] " ..
                 player.name .. " rotated ghost " .. obj.name .. obj.gps_tag ..
-                obj.ghost_name)
+                " " .. obj.ghost_name)
         end
     end
 end

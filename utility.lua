@@ -57,10 +57,10 @@ function UTIL_GPSPos(item)
         end
 
         if sName then
-            return " [gps=" .. math.floor(item.position.x) .. ","
+            return "[gps=" .. math.floor(item.position.x) .. ","
                 .. math.floor(item.position.y) .. "," .. sName .. "]"
         else
-            return " [gps=" .. math.floor(item.position.x) .. ","
+            return "[gps=" .. math.floor(item.position.x) .. ","
                 .. math.floor(item.position.y) .. "] "
         end
     end
