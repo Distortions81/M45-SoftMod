@@ -5,6 +5,12 @@
 -- Safe console print
 
 function UTIL_MapPin()
+    --Migrate old maps
+    if (storage.servertag and storage.servertag.valid) then
+        storage.servertag.destroy()
+        storage.servertag = nil
+    end
+
     -- Server tag
     if (storage.SM_Store.mapPin and not storage.SM_Store.mapPin.valid) then
         storage.SM_Store.mapPin = nil
