@@ -281,7 +281,7 @@ end
 -- Check if player should be considered new
 function UTIL_Is_New(victim)
     if victim and victim.valid and not victim.admin then
-        if  not UTIL_Is_Member(victim) and not UTIL_Is_Regular(victim) and not UTIL_Is_Veteran(victim) then
+        if not UTIL_Is_Member(victim) and not UTIL_Is_Regular(victim) and not UTIL_Is_Veteran(victim) then
             return true
         end
     end
@@ -303,12 +303,8 @@ function UTIL_Is_Banished(victim)
         return false
     elseif victim.surface and victim.surface.name == "jail" then
         return true
-    elseif storage.PData and storage.PData[victim.index] and storage.PData[victim.index].banished then
-        if storage.PData[victim.index].banished > 0 then
-            return true
-        else
-            return false
-        end
+    elseif storage.PData and storage.PData[victim.index] and storage.PData[victim.index].banished and storage.PData[victim.index].banished > 0 then
+        return true
     else
         return false
     end

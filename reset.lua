@@ -17,6 +17,6 @@ function RESET_MakeClock(player)
             tooltip = "Map reset schdule. Control-right-click to minimize.",
             visible = false,
         }
-        rclock.style.size = {24,24}
+        rclock.style.size = { 24, 24 }
     end
 end

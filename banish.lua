@@ -10,10 +10,10 @@ local function unbanishPlayer(victim)
         position = UTIL_GetDefaultSpawn()
     })
 
-    storage.PData[victim.index].banished = nil
+    storage.PData[victim.index].banished = 0
 
-    if victim.permission_group.name ~= storage.SM_Store.defGroup.name then
-        storage.SM_Store.defGroup.add_player(victim)
+    if victim.permission_group.name == storage.SM_Store.jailGroup.name then
+        storage.SM_Store.jailGroup.remove_player(victim)
         UTIL_MsgAll(victim.name .. " moved out of jailed group.")
     end
 
@@ -21,6 +21,10 @@ local function unbanishPlayer(victim)
     if victim and victim.gui and victim.gui.screen and victim.gui.screen.banished_inform then
         victim.gui.screen.banished_inform.destroy()
     end
+
+    BANISH_SendToSurface(victim)
+
+    ONLINE_UpdatePlayerList()
 end
 
 function BANISH_DoReport(player, report)
@@ -41,10 +45,6 @@ function BANISH_DoReport(player, report)
 end
 
 function BANISH_UpdateVotes()
-    if not storage.SM_Store then
-        return
-    end
-
     -- Reset banished list
     local banishedtemp = {}
 
@@ -75,8 +75,6 @@ function BANISH_UpdateVotes()
                                 -- was empty, init
                                 banishedtemp[vote.victim.index] = points
                             end
-                        else
-                            banishedtemp[vote.victim.index] = nil
                         end
                     end
                 end
@@ -86,23 +84,24 @@ function BANISH_UpdateVotes()
 
     -- Loop though players, look for matches
     for _, victim in pairs(game.players) do
-        local prevstate = UTIL_Is_Banished(victim)
+        local prevstate = 0
+        local newstate = 0
+        if storage.PData[victim.index].banished then
+            prevstate = storage.PData[victim.index].banished
+        end
 
-        -- Add votes to storage list, erase old votes
-        if banishedtemp[victim.index] and banishedtemp[victim.index] > 0 then
-            storage.PData[victim.index].banished = banishedtemp[victim.index]
-        else
-            storage.PData[victim.index].banished = nil -- Erase/init
+        if banishedtemp[victim.index] then
+            newstate = banishedtemp[victim.index]
         end
 
         -- Was banished, but not anymore
-        if storage.PData[victim.index].banished and prevstate  then
+        if newstate == 0 and prevstate > 0 then
             local msg = victim.name .. " is no longer banished."
             print("[REPORT] SYSTEM " .. msg)
             UTIL_MsgAllSys(msg)
 
             unbanishPlayer(victim)
-        elseif storage.PData[victim.index].banished and not prevstate then
+        elseif newstate > 0 and prevstate == 0 then
             -- Was not banished, but is now.
             local msg = victim.name .. " has been banished."
             UTIL_MsgAllSys(msg)
@@ -110,24 +109,27 @@ function BANISH_UpdateVotes()
 
             BANISH_DoJail(victim)
         end
+
+        UTIL_MsgAll("name: " ..victim.name.." newstate: "..newstate.." prevstate: ".. prevstate)
+
+        --Apply new state
+        if banishedtemp[victim.index] then
+            storage.PData[victim.index].banished = banishedtemp[victim.index]
+        else
+            storage.PData[victim.index].banished = 0
+        end
     end
 end
 
 function BANISH_DoJail(victim)
-    BANISH_InformBanished(false, victim)
+    BANISH_InformBanished(victim)
 
     if victim.permission_group.name ~= storage.SM_Store.jailGroup.name then
         storage.SM_Store.jailGroup.add_player(victim)
         UTIL_MsgAll(victim.name .. " moved to jailed group.")
     end
 
-    -- Kill them, so items are left behind
-    if victim.character and victim.character.valid then
-        UTIL_SendToDefaultSpawn(victim)
-        victim.character.die("player")
-    else
-        INFO_DumpInv(victim, true)
-    end
+    INFO_DumpInv(victim, true)
 
     UTIL_MsgAllSys(victim.name .. "'s items have been dumped at spawn so they can be recovered.")
 
@@ -137,6 +139,8 @@ function BANISH_DoJail(victim)
         surface = "jail",
         position = newpos
     })
+    BANISH_SendToSurface(victim)
+    ONLINE_UpdatePlayerList()
 end
 
 function BANISH_MakeJail()
@@ -230,7 +234,6 @@ function BANISH_DoBanish(player, victim, reason)
                                     "[color=red](WARNING) If you withdraw a vote, you CAN NOT reintroduce it.[/color]")
                                 UTIL_SmartPrint(player, "You have used " .. votecount .. " of your 5 available votes.")
                             end
-
 
                             table.insert(storage.SM_Store.votes, 0, {
                                 voter = player,
@@ -330,7 +333,7 @@ function BANISH_AddBanishCommands()
 
                 if (victim) then
                     if UTIL_Is_Banished(victim) then
-                        storage.PData[victim.index].banished = nil
+                        storage.PData[victim.index].banished = 0
                         for _, vote in pairs(storage.SM_Store.votes) do
                             if vote and vote.victim then
                                 if vote.victim.index == victim.index then
@@ -449,7 +452,7 @@ function BANISH_AddBanishCommands()
                 -- Print accused
                 if storage.PData then
                     for _, victim in pairs(game.players) do
-                        if storage.PData[victim.index].banished and storage.PData[victim.index].banished > 1 then
+                        if storage.PData[victim.index].banished and storage.PData[victim.index].banished > 0 then
                             UTIL_SmartPrint(player, victim.name .. " has had " .. storage.PData[victim.index].banished ..
                                 " complaints against them.")
                             pcount = pcount + 1
@@ -506,6 +509,10 @@ function BANISH_AddBanishCommands()
                                 for _, vote in pairs(storage.SM_Store.votes) do
                                     if vote and vote.voter and vote.victim then
                                         if vote.voter == player and vote.victim == victim then
+                                            if vote.withdrawn then
+                                                UTIL_SmartPrint(player, "You've already withdrawn your vote.")
+                                                return
+                                            end
                                             -- Send report to discord and withdraw vote
                                             local message = player.name .. " WITHDREW their vote to banish: " ..
                                                 victim.name
@@ -584,7 +591,7 @@ function BANISH_AddBanishCommands()
     end)
 end
 
-function BANISH_InformBanished(close, victim)
+function BANISH_InformBanished(victim)
     if victim and victim.gui and victim.gui.screen then
         if victim.gui.screen.banished_inform then
             victim.gui.screen.banished_inform.destroy()
@@ -618,13 +625,13 @@ function BANISH_InformBanished(close, victim)
             pusher.style.horizontally_stretchable = true
             pusher.drag_target = main_flow
 
-            --banished_titlebar.add {
-            --   type = "sprite-button",
-            --   name = "banished_inform_close",
-            --   sprite = "utility/close",
-            --   style = "frame_action_button",
-            --   tooltip = "Close this window"
-            --}
+            banished_titlebar.add {
+               type = "sprite-button",
+               name = "banished_inform_close",
+               sprite = "utility/close",
+               style = "frame_action_button",
+               tooltip = "Close this window"
+            }
 
             local banished_main = main_flow.add {
                 type = "frame",

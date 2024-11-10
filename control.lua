@@ -17,7 +17,7 @@ require "todo"     -- To-Do-list
 require "utility"  -- Widely used general utility
 
 function RunSetup()
-    storage.SM_Version = "626-11.09.2024-1213"
+    storage.SM_Version = "626-11.10.2024-1224"
 
     storage.SM_OldVersion = storage.SM_Version
 
@@ -37,7 +37,7 @@ function RunSetup()
         PERMS_SetPermissions()
 
         game.forces["player"].friendly_fire = false -- disable friendly fire
-        game.disable_replay()                   -- Smaller saves, prevent desync on script upgrade
+        game.disable_replay()                       -- Smaller saves, prevent desync on script upgrade
         game.surfaces[1].show_clouds = false
     end
 end

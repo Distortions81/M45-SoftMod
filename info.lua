@@ -262,11 +262,11 @@ function INFO_InfoWin(player)
                     caption = "[color=purple]SUPPORTERS:[/color]"
                 }
                 local i = 1
-                while storage.SM_Store.patreonCredits[i]  do
-                    if storage.SM_Store.patreonCredits[i + 1]  then
+                while storage.SM_Store.patreonCredits[i] do
+                    if storage.SM_Store.patreonCredits[i + 1] then
                         tab1_lframe.add {
                             type = "label",
-                            caption = "[color=purple]" .. storage.SM_Store.patreonCredits[i] .. ", " .. storage.SM_Store.patreonCredits[i+1] ..
+                            caption = "[color=purple]" .. storage.SM_Store.patreonCredits[i] .. ", " .. storage.SM_Store.patreonCredits[i + 1] ..
                                 "[/color]"
                         }
                         i = i + 1
@@ -286,7 +286,7 @@ function INFO_InfoWin(player)
             }
 
             -- NITRO
-            if storage.SM_Store.nitroCredits[1]then
+            if storage.SM_Store.nitroCredits[1] then
                 tab1_lframe.add {
                     type = "label",
                     caption = "[color=cyan]DISCORD NITRO:[/color]"
@@ -1035,15 +1035,15 @@ function INFO_Click(event)
                     if storage.PData then
                         if storage.PData[player.index].hideClock and
                             storage.SM_Store.resetDuration ~= "" then
-                                storage.PData[player.index].hideClock  = false
-                            player.gui.top.reset_clock.caption = "Map reset: " .. storage.SM_Store.resetDuration
-                            player.gui.top.reset_clock.style = "red_button"
-                            player.gui.top.reset_clock.style.size = {350,24}
+                            storage.PData[player.index].hideClock = false
+                            player.gui.top.reset_clock.caption    = "Map reset: " .. storage.SM_Store.resetDuration
+                            player.gui.top.reset_clock.style      = "red_button"
+                            player.gui.top.reset_clock.style.size = { 350, 24 }
                         else
                             if event.button and event.button == defines.mouse_button_type.right and event.control then
-                                storage.PData[player.index].hideClock  = true
-                                player.gui.top.reset_clock.caption = ">"
-                                player.gui.top.reset_clock.style.size = {24,24}
+                                storage.PData[player.index].hideClock = true
+                                player.gui.top.reset_clock.caption    = ">"
+                                player.gui.top.reset_clock.style.size = { 24, 24 }
                             end
                         end
                     end

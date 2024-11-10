@@ -561,7 +561,7 @@ script.on_load(function()
                             UTIL_SmartPrint(player, "Player given regulars status.")
                             UTIL_MsgAll(victim.name .. " is now a regular!")
                         end
-                        storage.SM_Store.regGroup .add_player(victim)
+                        storage.SM_Store.regGroup.add_player(victim)
                         ONLINE_UpdatePlayerList() -- online.lua
                         return
                     end

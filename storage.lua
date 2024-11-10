@@ -139,5 +139,4 @@ function STORAGE_MakePlayerStorage(player)
     if not storage.PData[player.index].onlineShowOffline then
         storage.PData[player.index].online_show_offline = false
     end
-    
 end

@@ -11,11 +11,11 @@ function LOG_TagAdded(event)
     local player = game.players[event.player_index]
 
     if event.tag.icon and event.tag.icon.name then
-    UTIL_MsgAll(player.name .. " add-tag "
-        .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.icon.name .. " " .. event.tag.text)
+        UTIL_MsgAll(player.name .. " add-tag "
+            .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.icon.name .. " " .. event.tag.text)
     else
         UTIL_MsgAll(player.name .. " add-tag "
-        .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.text)
+            .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.text)
     end
 end
 
@@ -28,10 +28,10 @@ function LOG_TagMod(event)
     if event.tag.icon and event.tag.icon.name then
         UTIL_MsgAll(player.name .. " edit-tag "
             .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.icon.name .. " " .. event.tag.text)
-        else
-            UTIL_MsgAll(player.name .. " edit-tag "
+    else
+        UTIL_MsgAll(player.name .. " edit-tag "
             .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.text)
-        end
+    end
 end
 
 -- Delete map tag -- log
@@ -44,10 +44,10 @@ function LOG_TagDel(event)
     if event.tag.icon and event.tag.icon.name then
         UTIL_MsgAll(player.name .. " delete-tag "
             .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.icon.name .. " " .. event.tag.text)
-        else
-            UTIL_MsgAll(player.name .. " delete-tag "
+    else
+        UTIL_MsgAll(player.name .. " delete-tag "
             .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.text)
-        end
+    end
 end
 
 -- Player disconnect messages, with reason (Fact >= v1.1)
@@ -152,7 +152,7 @@ function LOG_DroppedItem(event)
         local player = game.players[event.player_index]
 
         UTIL_ConsolePrint("[ACT] " ..
-        player.name .. " dropped " .. event.entity.name .. " at " .. player.character.gps_tag)
+            player.name .. " dropped " .. event.entity.name .. " at " .. player.character.gps_tag)
     end
 end
 
@@ -170,13 +170,14 @@ function LOG_Decon(event)
                 local msg = ""
                 if event.alt then
                     msg = "[ACT] " ..
-                    player.name ..
-                    " at " ..
-                    player.character.gps_tag .. " is unmarking for deconstruction " .. UTIL_Area(decon_size, event.area)
+                        player.name ..
+                        " at " ..
+                        player.character.gps_tag ..
+                        " is unmarking for deconstruction " .. UTIL_Area(decon_size, event.area)
                 else
                     msg = "[ACT] " ..
-                    player.name ..
-                    " at " .. player.character.gps_tag .. " is deconstructing " .. UTIL_Area(decon_size, event.area)
+                        player.name ..
+                        " at " .. player.character.gps_tag .. " is deconstructing " .. UTIL_Area(decon_size, event.area)
 
                     if UTIL_Is_New(player) or UTIL_Is_Member(player) then -- Dont bother with regulars/moderators
                         if not UTIL_Is_Banished(player) then              -- Don't let bansihed players use this to spam
@@ -434,7 +435,7 @@ function LOG_BuiltEnt(event)
 
     if obj.name ~= "tile-ghost" and obj.name ~= "tile" then
         if obj.name ~= "entity-ghost" then
-            UTIL_ConsolePrint("[ACT] " .. player.name .. " placed " .. obj.name .." " ..  obj.gps_tag)
+            UTIL_ConsolePrint("[ACT] " .. player.name .. " placed " .. obj.name .. " " .. obj.gps_tag)
         else
             if UTIL_WarnOkay(event.player_index) then
                 UTIL_ConsolePrint("[ACT] " ..

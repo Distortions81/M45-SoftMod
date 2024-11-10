@@ -69,18 +69,18 @@ function ONELIFE_Clicks(event)
     if event.element and event.element.valid and event.element.name == "spec_button" then
         -- Otherwise confirm
         if storage.PData[player.index].permDeath then
-            if storage.PData[player.index].permDeath  >= 2 then
+            if storage.PData[player.index].permDeath >= 2 then
                 storage.PData[player.index].permDeath = nil
                 player.character.die("player")
                 ONELIFE_Main(event)
                 return
-            elseif storage.PData[player.index].permDeath  < 2 then
+            elseif storage.PData[player.index].permDeath < 2 then
                 UTIL_SmartPrintColor(player,
-                    "[color=red](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.PData[player.index].permDeath  ..
+                    "[color=red](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.PData[player.index].permDeath ..
                     " more times to confirm.[/color]")
             end
 
-            storage.PData[player.index].permDeath  = storage.PData[player.index].permDeath  + 1
+            storage.PData[player.index].permDeath = storage.PData[player.index].permDeath + 1
         end
     end
 end
@@ -97,7 +97,7 @@ function ONELIFE_MakeButton(player)
         if player.controller_type == defines.controllers.spectator then
             player.set_controller {
                 type = defines.controllers.character,
-                character = game.surfaces[1].create_entity({name = "character", position = game.surfaces[1].find_non_colliding_position("character", {x = 0, y = 0}, 1024, 1, false), force = game.forces.player})
+                character = game.surfaces[1].create_entity({ name = "character", position = game.surfaces[1].find_non_colliding_position("character", { x = 0, y = 0 }, 1024, 1, false), force = game.forces.player })
             }
             UTIL_SmartPrint(player, "You have been revived!")
             ONLINE_UpdatePlayerList()

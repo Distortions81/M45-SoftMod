@@ -42,7 +42,7 @@ script.on_nth_tick(599, function(event)
     --1 min
     if storage.SM_Store.tickDiv % 6 == 0 then
         ONLINE_UpdatePlayerList() -- online.lua
-        UTIL_MapPin()         -- fix map pin if edit/delete
+        UTIL_MapPin()             -- fix map pin if edit/delete
     end
 
     --15 mins
