@@ -38,7 +38,6 @@ function BANISH_DoReport(player, report)
     end
 end
 
--- Process banish votes
 function BANISH_UpdateVotes()
     if not storage.SM_Store then
         return
@@ -310,7 +309,6 @@ function BANISH_SendToSurface(player)
 end
 
 function BANISH_AddBanishCommands()
-    -- Damn them!
     commands.add_command("jail", "<player>\n(Use again to unjail.)",
         function(param)
             local player
@@ -574,6 +572,9 @@ end
 
 function BANISH_InformBanished(close, victim)
     if victim and victim.gui and victim.gui.screen then
+        if victim.gui.screen.banished_inform then
+            victim.gui.screen.banished_inform.destroy()
+        end
         if not victim.gui.screen.banished_inform then
             local main_flow = victim.gui.screen.add {
                 type = "frame",
@@ -603,13 +604,13 @@ function BANISH_InformBanished(close, victim)
             pusher.style.horizontally_stretchable = true
             pusher.drag_target = main_flow
 
-            banished_titlebar.add {
-                type = "sprite-button",
-                name = "banished_inform_close",
-                sprite = "utility/close",
-                style = "frame_action_button",
-                tooltip = "Close this window"
-            }
+            --banished_titlebar.add {
+            --   type = "sprite-button",
+            --   name = "banished_inform_close",
+            --   sprite = "utility/close",
+            --   style = "frame_action_button",
+            --   tooltip = "Close this window"
+            --}
 
             local banished_main = main_flow.add {
                 type = "frame",
@@ -686,11 +687,6 @@ function BANISH_InformBanished(close, victim)
                 type = "label",
                 caption = "[font=default-large]Before you suffer real-world consequences for this type of behavior elsewhere.[/font]"
             }
-        else
-            -- Close button
-            if close then
-                victim.gui.screen.banished_inform.destroy()
-            end
         end
     end
 end
