@@ -586,6 +586,10 @@ local function guiClick(event)
         local args = UTIL_SplitStr(event.element.name, ",")
 
         if player and player.valid then
+            if UTIL_Is_Banished(player) then
+                return
+            end
+
             -- Grab target if we have one
             if event.element.name == "m45_todo_submenu_close_button" then
                 ----------------------------------------------------------------
@@ -651,6 +655,7 @@ local function guiClick(event)
                 end
             elseif event.element.name == "m45_todo_add" then
                 ----------------------------------------------------------------
+                ---
                 -- edit/create throttle
                 if storage.todo_throttle[player.index] then
                     if game.tick - storage.todo_throttle[player.index] < (60 * 5) then -- 10 seconds
