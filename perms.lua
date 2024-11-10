@@ -43,7 +43,15 @@ function PERMS_MakeUserGroups()
     storage.SM_Store.vetGroup  = game.permissions.get_group("Veterans")
     storage.SM_Store.modGroup  = game.permissions.get_group("Moderators")
 
-    local actionList           = {
+    --Always disabled
+    -- Added 10-2024
+    storage.SM_Store.defGroup.set_allows_action(defines.input_action.deconstruct, false)
+    storage.SM_Store.defGroup.set_allows_action(defines.input_action.activate_paste, false)
+    -- Added 11-2024
+    storage.SM_Store.defGroup.set_allows_action(defines.input_action.copy_large_opened_item, false)
+    storage.SM_Store.defGroup.set_allows_action(defines.input_action.copy_large_opened_blueprint, false)
+
+    local actionList = {
         defines.input_action.activate_interrupt,
         defines.input_action.activate_paste,
         defines.input_action.add_decider_combinator_condition,
@@ -310,10 +318,9 @@ function PERMS_MakeUserGroups()
         defines.input_action.use_item,
         defines.input_action.wire_dragging,
     }
-    for _, item in pairs (actionList) do
+    for _, item in pairs(actionList) do
         storage.SM_Store.jailGroup.set_allows_action(item, false)
     end
-
 end
 
 function PERMS_SetBlueprintsAllowed(group, option)
@@ -374,14 +381,6 @@ function PERMS_SetPermissions()
         storage.SM_Store.defGroup.set_allows_action(defines.input_action.import_blueprints_filtered, option)
         storage.SM_Store.defGroup.set_allows_action(defines.input_action.reassign_blueprint, option)
         storage.SM_Store.defGroup.set_allows_action(defines.input_action.cancel_deconstruct, option)
-
-        --Always on area
-        -- Added 10-2024
-        storage.SM_Store.defGroup.set_allows_action(defines.input_action.deconstruct, false)
-        storage.SM_Store.defGroup.set_allows_action(defines.input_action.activate_paste, false)
-        -- Added 11-2024
-        storage.SM_Store.defGroup.set_allows_action(defines.input_action.copy_large_opened_item, false)
-        storage.SM_Store.defGroup.set_allows_action(defines.input_action.copy_large_opened_blueprint, false)
     end
 end
 
