@@ -408,6 +408,14 @@ function PERMS_PromotePlayer(player)
     if not storage.SM_Store then
         return
     end
+
+    if not player.permission_group then
+        --Fix nil permissions
+        if storage.SM_Store.defGroup then
+            storage.SM_Store.defGroup.add_player(player)
+        end
+    end
+    
     -- Check if groups are valid
     if player.permission_group then
         if UTIL_Is_Banished(player) and

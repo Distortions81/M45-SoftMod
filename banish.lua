@@ -12,10 +12,10 @@ local function unbanishPlayer(victim)
 
     storage.PData[victim.index].banished = 0
 
-    if victim and victim.permission_group and  victim.permission_group.name == storage.SM_Store.jailGroup.name then
-        storage.SM_Store.jailGroup.remove_player(victim)
+    if victim and victim.permission_group.name ~= storage.SM_Store.defGroup.name then
         UTIL_MsgAll(victim.name .. " moved out of jailed group.")
     end
+    storage.SM_Store.defGroup.add_player(victim)
 
     --Close banished window
     if victim and victim.gui and victim.gui.screen and victim.gui.screen.banished_inform then
@@ -121,14 +121,14 @@ end
 function BANISH_DoJail(victim)
     BANISH_InformBanished(victim)
 
-    if victim and victim.permission_group then
+    if victim then
         storage.SM_Store.jailGroup.add_player(victim)
         UTIL_MsgAll(victim.name .. " moved to jailed group.")
     end
 
+    storage.PData[victim.index].playScore = 0
     INFO_DumpInv(victim, true)
-
-    UTIL_MsgAllSys(victim.name .. "'s items have been dumped at spawn so they can be recovered.")
+    UTIL_MsgAllSys(victim.name .. "'s inventory has been dumped at "..UTIL_GPSPos(victim).." so the items can be recovered.")
 
     local newpos = game.surfaces["jail"].find_non_colliding_position("character", { x = 0, y = 0 }, 1024, 1, false)
     table.insert(storage.SM_Store.sendToSurface, {
