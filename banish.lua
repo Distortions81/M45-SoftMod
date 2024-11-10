@@ -12,7 +12,7 @@ local function unbanishPlayer(victim)
 
     storage.PData[victim.index].banished = 0
 
-    if victim.permission_group.name == storage.SM_Store.jailGroup.name then
+    if victim and victim.permission_group and  victim.permission_group.name == storage.SM_Store.jailGroup.name then
         storage.SM_Store.jailGroup.remove_player(victim)
         UTIL_MsgAll(victim.name .. " moved out of jailed group.")
     end
@@ -124,7 +124,7 @@ end
 function BANISH_DoJail(victim)
     BANISH_InformBanished(victim)
 
-    if victim.permission_group.name ~= storage.SM_Store.jailGroup.name then
+    if victim and victim.permission_group then
         storage.SM_Store.jailGroup.add_player(victim)
         UTIL_MsgAll(victim.name .. " moved to jailed group.")
     end
