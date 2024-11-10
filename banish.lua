@@ -23,7 +23,6 @@ local function unbanishPlayer(victim)
     end
 
     BANISH_SendToSurface(victim)
-
     ONLINE_UpdatePlayerList()
 end
 
@@ -109,8 +108,6 @@ function BANISH_UpdateVotes()
 
             BANISH_DoJail(victim)
         end
-
-        UTIL_MsgAll("name: " ..victim.name.." newstate: "..newstate.." prevstate: ".. prevstate)
 
         --Apply new state
         if banishedtemp[victim.index] then
@@ -316,7 +313,7 @@ function BANISH_SendToSurface(player)
 end
 
 function BANISH_AddBanishCommands()
-    commands.add_command("jail", "<player>\n(Use again to unjail.)",
+    commands.add_command("jail", "<player> (/unjail to unjail)",
         function(param)
             local player
             if param and param.player_index then
@@ -326,12 +323,48 @@ function BANISH_AddBanishCommands()
                 return
             end
 
+            -- Only if name provided
+            if param.parameter then
+                local victim = game.players[param.parameter]
+
+                if (victim) then
+                    if victim.index == player.index then
+                        UTIL_SmartPrint(player, "You can't put yourself in jail. Seek therapy.")
+                        return
+                    end
+                    if not UTIL_Is_Banished(victim) then
+                        storage.PData[victim.index].banished = 1000
+                        BANISH_DoJail(victim)
+                        UTIL_SmartPrint(player, "Jailed player.")
+                    else
+                        UTIL_SmartPrint(player, "They are already in jail.")
+                    end
+                else
+                    UTIL_SmartPrint(player, "Couldn't find that player.")
+                end
+            else
+                UTIL_SmartPrint(player, "Who do you want to jail?")
+            end
+        end)
+        commands.add_command("unjail", "<player>",
+        function(param)
+            local player
+            if param and param.player_index then
+                player = game.players[param.player_index]
+            end
+            if ModsOnly(param) then
+                return
+            end
 
             -- Only if name provided
             if param.parameter then
                 local victim = game.players[param.parameter]
 
                 if (victim) then
+                    if victim.index == player.index then
+                        UTIL_SmartPrint(player, "You unjail yourself.")
+                        return
+                    end
                     if UTIL_Is_Banished(victim) then
                         storage.PData[victim.index].banished = 0
                         for _, vote in pairs(storage.SM_Store.votes) do
@@ -345,15 +378,13 @@ function BANISH_AddBanishCommands()
                         UTIL_SmartPrint(player, "Unjailed player.")
                         unbanishPlayer(victim)
                     else
-                        storage.PData[victim.index].banished = 1000
-                        BANISH_DoJail(victim)
-                        UTIL_SmartPrint(player, "Jailed player.")
+                        UTIL_SmartPrint(player, "They aren't in jail.")
                     end
                 else
                     UTIL_SmartPrint(player, "Couldn't find that player.")
                 end
             else
-                UTIL_SmartPrint(player, "Who do you want to jail or unjail?")
+                UTIL_SmartPrint(player, "Who do you want unjail?")
             end
         end)
     -- Mod vote overrrule
@@ -607,7 +638,6 @@ function BANISH_InformBanished(victim)
                 type = "frame",
                 direction = "horizontal"
             }
-            banished_titlebar.drag_target = main_flow
             banished_titlebar.style.horizontal_align = "center"
             banished_titlebar.style.horizontally_stretchable = true
 
@@ -615,22 +645,6 @@ function BANISH_InformBanished(victim)
                 type = "label",
                 style = "frame_title",
                 caption = "YOU HAVE BEEN BANISHED!"
-            }
-
-            local pusher = banished_titlebar.add {
-                type = "empty-widget",
-                style = "draggable_space_header"
-            }
-            pusher.style.vertically_stretchable = true
-            pusher.style.horizontally_stretchable = true
-            pusher.drag_target = main_flow
-
-            banished_titlebar.add {
-               type = "sprite-button",
-               name = "banished_inform_close",
-               sprite = "utility/close",
-               style = "frame_action_button",
-               tooltip = "Close this window"
             }
 
             local banished_main = main_flow.add {

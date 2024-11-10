@@ -1012,6 +1012,10 @@ script.on_load(function()
             -- Argument required
             if param.parameter then
                 local victim = game.players[param.parameter]
+                if UTIL_Is_Banished(victim) then
+                    UTIL_SmartPrint(player, "They are in jail, use /unjail")
+                    return
+                end
 
                 if (victim and victim.valid) then
                     local newpos = player.surface.find_non_colliding_position("character", player.position, 1024,
