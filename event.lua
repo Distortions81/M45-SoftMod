@@ -138,7 +138,6 @@ function EVENT_PlayerInit(player)
     STORAGE_MakePlayerStorage(player)
     PERMS_PromotePlayer(player)
     makeUI(player)
-    ONLINE_UpdatePlayerList()
 
     if storage.PData then
         storage.PData[player.index].lastOnline = game.tick
