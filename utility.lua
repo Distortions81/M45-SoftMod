@@ -56,7 +56,7 @@ function UTIL_Area(size, area)
     return "from: " ..
         util_gpsXY(area.left_top.x, area.left_top.y) ..
         " to " .. util_gpsXY(area.right_bottom.x, area.right_bottom.y) ..
-        " AREA: " .. size .. "sq"
+        " AREA: " .. math.floor(size) .. "sq"
 end
 
 function UTIL_GPSPos(item)

@@ -166,7 +166,7 @@ function LOG_Decon(event)
             local decon_size = UTIL_Distance(area.left_top, area.right_bottom)
 
             -- Don't bother if selection is zero.
-            if decon_size > 0 then
+            if decon_size >= 1 then
                 local msg = ""
                 if event.alt then
                     msg = "[ACT] " ..
