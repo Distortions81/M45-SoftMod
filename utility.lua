@@ -41,6 +41,11 @@ function UTIL_WarnOkay(player_index)
     return false
 end
 
+local function UTIL_GPSXY(x, y)
+    return "[gps=" .. math.floor(x) .. ","
+                .. math.floor(y) .. "] "
+end
+
 function UTIL_Area(size, area)
     return "from: " ..
         UTIL_GPSXY(area.left_top.x, area.left_top.y) ..

@@ -934,6 +934,7 @@ script.on_load(function()
 
         -- Teleport x,y
         commands.add_command("tp", "Moderators only: <x,y> -- teleport to <x,y> or <surface>", function(param)
+            local player
             if param and param.player_index then
                 player = game.players[param.player_index]
             end
@@ -1002,6 +1003,7 @@ script.on_load(function()
 
         -- Teleport player to me
         commands.add_command("tfrom", "Moderators only: <player> -- teleport <player> to me", function(param)
+            local player
             if param and param.player_index then
                 player = game.players[param.player_index]
             end
