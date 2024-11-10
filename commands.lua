@@ -1015,7 +1015,7 @@ script.on_load(function()
             if param.parameter then
                 local victim = game.players[param.parameter]
                 if UTIL_Is_Banished(victim) then
-                    UTIL_SmartPrint(player, "They are in jail, use /unjail")
+                    UTIL_SmartPrint(player, "They are in jail, use /unjail <name>")
                     return
                 end
 
