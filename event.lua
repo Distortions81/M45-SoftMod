@@ -136,7 +136,6 @@ end
 
 function EVENT_PlayerInit(player)
     STORAGE_MakePlayerStorage(player)
-    PERMS_PromotePlayer(player)
     makeUI(player)
     ONLINE_UpdatePlayerList()
 
