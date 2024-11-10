@@ -415,13 +415,14 @@ function PERMS_PromotePlayer(player)
             storage.SM_Store.defGroup.add_player(player)
         end
     end
-    
+
     -- Check if groups are valid
     if player.permission_group then
-        if UTIL_Is_Banished(player) and
-            player.permission_group.name ~= storage.SM_Store.jailGroup.name then
-            storage.SM_Store.jailGroup.add_player(player)
-            UTIL_MsgAll(player.name .. " moved to jailed group.")
+        if UTIL_Is_Banished(player) then
+            if player.permission_group.name ~= storage.SM_Store.jailGroup.name then
+                storage.SM_Store.jailGroup.add_player(player)
+                UTIL_MsgAll(player.name .. " moved to jailed group.")
+            end
         elseif (player.admin and player.permission_group.name ~= storage.SM_Store.modGroup.name) then
             -- (REGULARS) Check if they are in the right group, including se-remote-view
             storage.SM_Store.modGroup.add_player(player)
