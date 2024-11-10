@@ -173,6 +173,7 @@ function BANISH_MakeJail()
             starting_area = "none"
         }
         game.create_surface("jail", my_map_gen_settings)
+        game.surfaces["jail"].show_clouds = false
     end
 end
 
