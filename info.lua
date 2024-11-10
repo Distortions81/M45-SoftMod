@@ -999,7 +999,7 @@ function INFO_InfoWin(player)
 end
 
 -- GUI clicks
-function INFO_Click(event)
+function INFO_Clicks(event)
     if event and event.element and event.element.valid and event.player_index then
         local player = game.players[event.player_index]
 

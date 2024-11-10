@@ -31,7 +31,7 @@ function ONELIFE_Main(event)
         return
     end
     local character = player.character
-    -- Stop player states, just in case
+    -- Stop player states, or they will continue forever
     character.walking_state = {
         walking = false,
         direction = defines.direction.south

@@ -3,7 +3,7 @@
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
 
-function NoBanished(player)
+function CMD_NoBanished(player)
     if player and UTIL_Is_Banished(player) then
         UTIL_SmartPrint(player, "No. You are banished.")
         return true
@@ -11,10 +11,10 @@ function NoBanished(player)
     return false
 end
 
-function ModsOnly(param)
+function CMD_ModsOnly(param)
     if param and param.player_index then
         local player = game.players[param.player_index]
-        if NoBanished(player) then
+        if CMD_NoBanished(player) then
             return true
         end
         if player and not player.admin then
@@ -25,7 +25,7 @@ function ModsOnly(param)
     return false
 end
 
-function SysOnly(param)
+function CMD_SysOnly(param)
     if param and param.player_index then
         local player = game.players[param.player_index]
         UTIL_SmartPrint(player, "That command is for system use only.")
@@ -34,10 +34,10 @@ function SysOnly(param)
     return false
 end
 
-function NoSys(param)
+function CMD_NoSys(param)
     if param and param.player_index then
         local player = game.players[param.player_index]
-        if NoBanished(player) then
+        if CMD_NoBanished(player) then
             return true
         end
         if not player.character then
@@ -57,7 +57,7 @@ script.on_load(function()
 
         -- Reset interval message
         commands.add_command("resetdur", "System use only.", function(param)
-            if SysOnly(param) then
+            if CMD_SysOnly(param) then
                 return
             end
 
@@ -93,7 +93,7 @@ script.on_load(function()
 
         -- Reset interval message
         commands.add_command("resetint", "System use only.", function(param)
-            if SysOnly(param) then
+            if CMD_SysOnly(param) then
                 return
             end
 
@@ -107,7 +107,7 @@ script.on_load(function()
         -- Enable / disable friendly fire
         commands.add_command("friendlyfire", "System use only.", function(param)
             local player
-            if SysOnly(param) then
+            if CMD_SysOnly(param) then
                 return
             end
 
@@ -131,7 +131,7 @@ script.on_load(function()
         -- Enable / disable blueprints
         commands.add_command("blueprints", "System use only.", function(param)
             local player
-            if SysOnly(param) then
+            if CMD_SysOnly(param) then
                 return
             end
 
@@ -165,7 +165,7 @@ script.on_load(function()
         -- Enable / disable cheat mode
         commands.add_command("enablecheats", "System use only.", function(param)
             local player
-            if SysOnly(param) then
+            if CMD_SysOnly(param) then
                 return
             end
 
@@ -201,7 +201,7 @@ script.on_load(function()
                 if param and param.player_index then
                     player = game.players[param.player_index]
                 end
-                if ModsOnly(param) then
+                if CMD_ModsOnly(param) then
                     return
                 end
 
@@ -249,7 +249,7 @@ script.on_load(function()
             if param and param.player_index then
                 player = game.players[param.player_index]
             end
-            if ModsOnly(param) then
+            if CMD_ModsOnly(param) then
                 return
             end
 
@@ -290,7 +290,7 @@ script.on_load(function()
                 if param and param.player_index then
                     player = game.players[param.player_index]
                 end
-                if ModsOnly(param) then
+                if CMD_ModsOnly(param) then
                     return
                 end
 
@@ -324,7 +324,7 @@ script.on_load(function()
         -- change new player restrictions
         commands.add_command("restrict", "System Use Only.", function(param)
             local player
-            if SysOnly(param) then
+            if CMD_SysOnly(param) then
                 return
             end
 
@@ -353,7 +353,7 @@ script.on_load(function()
             if param and param.player_index then
                 player = game.players[param.player_index]
             end
-            if NoSys(param) then
+            if CMD_NoSys(param) then
                 return
             end
 
@@ -392,7 +392,7 @@ script.on_load(function()
         -- softmod version
         commands.add_command("sversion", "System use only.", function(param)
             local player
-            if SysOnly(param) then
+            if CMD_SysOnly(param) then
                 return
             end
 
@@ -411,7 +411,7 @@ script.on_load(function()
 
         -- Server name
         commands.add_command("cname", "Systen use only.", function(param)
-            if SysOnly(param) then
+            if CMD_SysOnly(param) then
                 return
             end
 
@@ -424,7 +424,7 @@ script.on_load(function()
 
         -- Server chat
         commands.add_command("cchat", "System use only.", function(param)
-            if SysOnly(param) then
+            if CMD_SysOnly(param) then
                 return
             end
 
@@ -435,7 +435,7 @@ script.on_load(function()
 
         -- Server whisper
         commands.add_command("cwhisper", "System use only.", function(param)
-            if SysOnly(param) then
+            if CMD_SysOnly(param) then
                 return
             end
 
@@ -464,7 +464,7 @@ script.on_load(function()
             if param and param.player_index then
                 player = game.players[param.player_index]
             end
-            if ModsOnly(param) then
+            if CMD_ModsOnly(param) then
                 return
             end
 
@@ -494,7 +494,7 @@ script.on_load(function()
             if param and param.player_index then
                 player = game.players[param.player_index]
             end
-            if ModsOnly(param) then
+            if CMD_ModsOnly(param) then
                 return
             end
 
@@ -521,7 +521,7 @@ script.on_load(function()
         commands.add_command("veteran", "System use only.", function(param)
             local player
 
-            if SysOnly(param) then
+            if CMD_SysOnly(param) then
                 return
             end
 
@@ -547,7 +547,7 @@ script.on_load(function()
         -- Set player to regular
         commands.add_command("regular", "System use only.", function(param)
             local player
-            if SysOnly(param) then
+            if CMD_SysOnly(param) then
                 return
             end
 
@@ -573,7 +573,7 @@ script.on_load(function()
         -- Set player to patreon
         commands.add_command("patreon", "System use only.", function(param)
             local player
-            if SysOnly(param) then
+            if CMD_SysOnly(param) then
                 return
             end
 
@@ -601,7 +601,7 @@ script.on_load(function()
         -- Set player to nitro
         commands.add_command("nitro", "System use only.", function(param)
             local player
-            if SysOnly(param) then
+            if CMD_SysOnly(param) then
                 return
             end
 
@@ -629,7 +629,7 @@ script.on_load(function()
         -- Add player to patreon credits
         commands.add_command("patreonlist", "System use only.", function(param)
             local player
-            if SysOnly(param) then
+            if CMD_SysOnly(param) then
                 return
             end
 
@@ -642,7 +642,7 @@ script.on_load(function()
         -- Add player to nitro credits
         commands.add_command("nitrolist", "System use only.", function(param)
             local player
-            if SysOnly(param) then
+            if CMD_SysOnly(param) then
                 return
             end
 
@@ -664,7 +664,7 @@ script.on_load(function()
                 if param and param.player_index then
                     victim = game.players[param.player_index]
                 end
-                if ModsOnly(param) then
+                if CMD_ModsOnly(param) then
                     return
                 end
 
@@ -714,7 +714,7 @@ script.on_load(function()
                 if param and param.player_index then
                     victim = game.players[param.player_index]
                 end
-                if ModsOnly(param) then
+                if CMD_ModsOnly(param) then
                     return
                 end
                 -- Get surface and force
@@ -775,7 +775,7 @@ script.on_load(function()
             if param and param.player_index then
                 victim = game.players[param.player_index]
             end
-            if ModsOnly(param) then
+            if CMD_ModsOnly(param) then
                 return
             end
 
@@ -819,7 +819,7 @@ script.on_load(function()
                 if param and param.player_index then
                     player = game.players[param.player_index]
                 end
-                if ModsOnly(param) then
+                if CMD_ModsOnly(param) then
                     return
                 end
 
@@ -853,7 +853,7 @@ script.on_load(function()
                 if param and param.player_index then
                     player = game.players[param.player_index]
                 end
-                if ModsOnly(param) then
+                if CMD_ModsOnly(param) then
                     return
                 end
 
@@ -908,7 +908,7 @@ script.on_load(function()
             if param and param.player_index then
                 player = game.players[param.player_index]
             end
-            if NoSys(param) or ModsOnly(param) then
+            if CMD_NoSys(param) or CMD_ModsOnly(param) then
                 return
             end
 
@@ -938,7 +938,7 @@ script.on_load(function()
             if param and param.player_index then
                 player = game.players[param.player_index]
             end
-            if NoSys(param) or ModsOnly(param) then
+            if CMD_NoSys(param) or CMD_ModsOnly(param) then
                 return
             end
 
@@ -1007,7 +1007,7 @@ script.on_load(function()
             if param and param.player_index then
                 player = game.players[param.player_index]
             end
-            if NoSys(param) or ModsOnly(param) then
+            if CMD_NoSys(param) or CMD_ModsOnly(param) then
                 return
             end
 

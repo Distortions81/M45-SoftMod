@@ -756,8 +756,7 @@ function ONLINE_Clicks(event)
                     end
                 end
             elseif event.element.name == "send_whisper" then
-                if UTIL_Is_Banished(player) then
-                    UTIL_SmartPrint(player,"No, you are in jail.")
+                if CMD_NoBanished(player) then
                     return
                 end
                 ----------------------------------------------------------------
@@ -832,8 +831,7 @@ function ONLINE_Clicks(event)
                     UTIL_ConsolePrint("[ERROR] send_whisper: text-box not found")
                 end
             elseif event.element.name == "find_on_map" then
-                if UTIL_Is_Banished(player) then
-                    UTIL_SmartPrint(player,"No, you are in jail.")
+                if CMD_NoBanished(player) then
                     return
                 end
                 if victim and victim.valid then

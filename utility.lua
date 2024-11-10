@@ -47,15 +47,15 @@ function UTIL_WarnOkay(player_index)
     return false
 end
 
-local function UTIL_GPSXY(x, y)
+local function util_gpsXY(x, y)
     return "[gps=" .. math.floor(x) .. ","
                 .. math.floor(y) .. "] "
 end
 
 function UTIL_Area(size, area)
     return "from: " ..
-        UTIL_GPSXY(area.left_top.x, area.left_top.y) ..
-        " to " .. UTIL_GPSXY(area.right_bottom.x, area.right_bottom.Y) ..
+        util_gpsXY(area.left_top.x, area.left_top.y) ..
+        " to " .. util_gpsXY(area.right_bottom.x, area.right_bottom.y) ..
         " AREA: " .. size .. "sq"
 end
 
@@ -221,7 +221,7 @@ function UTIL_Dump(o)
 end
 
 -- Cut off extra precision
-function UTIL_Round(number, precision)
+function UTIL_Quantize(number, precision)
     local fmtStr = string.format("%%0.%sf", precision)
     number = string.format(fmtStr, number)
     return number

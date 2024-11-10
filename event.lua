@@ -105,12 +105,12 @@ script.on_nth_tick(599, function(event)
         end
     end
 
-    PERMS_AutoPromotePlayer() -- See if player qualifies now
+    PERMS_PromoteAllPlayers() -- See if player qualifies now
 end)
 
 
 -- Handle killing, and teleporting users to other surfaces
-function EVENT_Respawn(event)
+local function e_respawn(event)
     if not event or not event.player_index then
         return
     end
@@ -149,7 +149,7 @@ function EVENT_PlayerInit(player)
 end
 
 -- Player connected, make variables, draw UI, set permissions, and game settings
-function EVENT_Joined(event)
+local function e_joined(event)
     if not event or not event.player_index then
         return
     end
@@ -161,8 +161,9 @@ function EVENT_Joined(event)
 end
 
 -- New player created, insert items set perms, show players online, welcome to map.
-function EVENT_PlayerCreated(event)
+local function e_playerCreated(event)
 
+    RunSetup()
     if not event or not event.player_index then
         return
     end
@@ -209,7 +210,7 @@ function EVENT_PlayerCreated(event)
     UTIL_MsgAll("[color=green](SYSTEM) Welcome " .. player.name .. " to the map![/color]")
 end
 
-function EVENT_PlayerDied(event)
+local function e_playerDied(event)
     if not event or not event.player_index then
         return
     end
@@ -274,14 +275,14 @@ script.on_event(
 
         -- Player join/leave respawn
         if event.name == defines.events.on_player_created then
-            EVENT_PlayerCreated(event)
+            e_playerCreated(event)
         elseif event.name == defines.events.on_pre_player_died then
-            EVENT_PlayerDied(event)
+            e_playerDied(event)
         elseif event.name == defines.events.on_player_respawned then
             --
-            EVENT_Respawn(event)
+            e_respawn(event)
         elseif event.name == defines.events.on_player_joined_game then
-            EVENT_Joined(event)
+            e_joined(event)
         elseif event.name == defines.events.on_player_left_game then
             -- activity
             -- changed-position
@@ -291,7 +292,7 @@ script.on_event(
             -- gui
             LOG_PlayerLeft(event)
         elseif event.name == defines.events.on_gui_click then
-            INFO_Click(event)
+            INFO_Clicks(event)
             ONLINE_Clicks(event)  -- online.lua
             ONELIFE_Clicks(event) --onelife.lua
         elseif event.name == defines.events.on_gui_text_changed then

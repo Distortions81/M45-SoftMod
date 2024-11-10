@@ -28,8 +28,7 @@ end
 
 function BANISH_DoReport(player, report)
     if player and player.valid and report then
-        if UTIL_Is_Banished(player) then
-            UTIL_SmartPrint(player, "No, you are in jail.")
+        if CMD_NoBanished(player) then
             return
         end
 
@@ -123,8 +122,112 @@ function BANISH_UpdateVotes()
     end
 end
 
+local function informBanished(victim)
+    if victim and victim.gui and victim.gui.screen then
+        if victim.gui.screen.banished_inform then
+            victim.gui.screen.banished_inform.destroy()
+        end
+        if not victim.gui.screen.banished_inform then
+            local main_flow = victim.gui.screen.add {
+                type = "frame",
+                name = "banished_inform",
+                direction = "vertical"
+            }
+            main_flow.force_auto_center()
+            local banished_titlebar = main_flow.add {
+                type = "frame",
+                direction = "horizontal"
+            }
+            banished_titlebar.style.horizontal_align = "center"
+            banished_titlebar.style.horizontally_stretchable = true
+
+            banished_titlebar.add {
+                type = "label",
+                style = "frame_title",
+                caption = "YOU HAVE BEEN BANISHED!"
+            }
+
+            local banished_main = main_flow.add {
+                type = "frame",
+                name = "main",
+                direction = "vertical"
+            }
+            banished_main.style.horizontal_align = "center"
+
+            banished_main.add {
+                type = "sprite",
+                sprite = "file/img/world/turd.png"
+            }
+            banished_main.add {
+                type = "label",
+                caption = ""
+            }
+            banished_main.add {
+                type = "label",
+                caption = "[font=default-large]Moderators will review the public action-logs on m45sci.xyz and perm-ban you if the vote-banish was for good a reason.[/font]"
+            }
+            banished_main.add {
+                type = "label",
+                caption = ""
+            }
+            banished_main.add {
+                type = "label",
+                caption = "[font=default-large]We share our ban list with many other factorio communities. We put the reason, date and a link to the log file in the ban.[/font]"
+            }
+            banished_main.add {
+                type = "label",
+                caption = ""
+            }
+            banished_main.add {
+                type = "label",
+                caption = "[font=default-large]Any items you took have been left at the spawn area so they can be retrieved.[/font]"
+            }
+            banished_main.add {
+                type = "label",
+                caption = ""
+            }
+            banished_main.add {
+                type = "label",
+                caption = "[font=default-large]Players can simply vote to rewind to the previous autosave... or moderators can do it with a single command.[/font]"
+            }
+            banished_main.add {
+                type = "label",
+                caption = ""
+            }
+            banished_main.add {
+                type = "label",
+                caption = "[font=default-large]If you were griefing, I hope you think carefully about why you were doing this.[/font]"
+            }
+            banished_main.add {
+                type = "label",
+                caption = ""
+            }
+            banished_main.add {
+                type = "label",
+                caption = "[font=default-large]It seems most of you are like a little kid kicking a sand castle... angry because you do not have the skills to contribute.[/font]"
+            }
+            banished_main.add {
+                type = "label",
+                caption = ""
+            }
+            banished_main.add {
+                type = "label",
+                caption = "[font=default-large]I hope you learn from this, and eventually become a functioning adult...[/font]"
+            }
+            banished_main.add {
+                type = "label",
+                caption = ""
+            }
+            banished_main.add {
+                type = "label",
+                caption = "[font=default-large]Before you suffer real-world consequences for this type of behavior elsewhere.[/font]"
+            }
+        end
+    end
+end
+
 function BANISH_DoJail(victim)
-    BANISH_InformBanished(victim)
+    informBanished(victim)
 
     if victim then
         storage.SM_Store.jailGroup.add_player(victim)
@@ -179,8 +282,7 @@ end
 
 function BANISH_DoBanish(player, victim, reason)
     if player and player.valid then
-        if UTIL_Is_Banished(player) then
-            UTIL_SmartPrint(player, "No, you are in jail.")
+        if CMD_NoBanished(player) then
             return
         end
 
@@ -330,7 +432,7 @@ function BANISH_AddBanishCommands()
             if param and param.player_index then
                 player = game.players[param.player_index]
             end
-            if ModsOnly(param) then
+            if CMD_ModsOnly(param) then
                 return
             end
 
@@ -363,7 +465,7 @@ function BANISH_AddBanishCommands()
             if param and param.player_index then
                 player = game.players[param.player_index]
             end
-            if ModsOnly(param) then
+            if CMD_ModsOnly(param) then
                 return
             end
 
@@ -406,7 +508,7 @@ function BANISH_AddBanishCommands()
             if param and param.player_index then
                 player = game.players[param.player_index]
             end
-            if ModsOnly(param) then
+            if CMD_ModsOnly(param) then
                 return
             end
 
@@ -469,8 +571,7 @@ function BANISH_AddBanishCommands()
         if param and param.player_index then
             local player = game.players[param.player_index]
 
-            if UTIL_Is_Banished(player) then
-                UTIL_SmartPrint(player, "No, you are in jail.")
+            if CMD_NoBanished(player) then
                 return
             end
 
@@ -539,8 +640,7 @@ function BANISH_AddBanishCommands()
     commands.add_command("unbanish", "<player>\n(Withdraws a banish vote)", function(param)
         if param and param.player_index then
             local player = game.players[param.player_index]
-            if UTIL_Is_Banished(player) then
-                UTIL_SmartPrint(player, "No, you are in jail.")
+            if CMD_NoBanished(player) then
                 return
             end
 
@@ -636,8 +736,7 @@ function BANISH_AddBanishCommands()
     commands.add_command("report", "<detailed report here>\n(Sends in a report to the moderators)", function(param)
         if param and param.player_index then
             local player = game.players[param.player_index]
-            if UTIL_Is_Banished(player) then
-                UTIL_SmartPrint(player, "No, you are in jail.")
+            if CMD_NoBanished(player) then
                 return
             end
             BANISH_DoReport(player, param.parameter)
@@ -647,106 +746,3 @@ function BANISH_AddBanishCommands()
     end)
 end
 
-function BANISH_InformBanished(victim)
-    if victim and victim.gui and victim.gui.screen then
-        if victim.gui.screen.banished_inform then
-            victim.gui.screen.banished_inform.destroy()
-        end
-        if not victim.gui.screen.banished_inform then
-            local main_flow = victim.gui.screen.add {
-                type = "frame",
-                name = "banished_inform",
-                direction = "vertical"
-            }
-            main_flow.force_auto_center()
-            local banished_titlebar = main_flow.add {
-                type = "frame",
-                direction = "horizontal"
-            }
-            banished_titlebar.style.horizontal_align = "center"
-            banished_titlebar.style.horizontally_stretchable = true
-
-            banished_titlebar.add {
-                type = "label",
-                style = "frame_title",
-                caption = "YOU HAVE BEEN BANISHED!"
-            }
-
-            local banished_main = main_flow.add {
-                type = "frame",
-                name = "main",
-                direction = "vertical"
-            }
-            banished_main.style.horizontal_align = "center"
-
-            banished_main.add {
-                type = "sprite",
-                sprite = "file/img/world/turd.png"
-            }
-            banished_main.add {
-                type = "label",
-                caption = ""
-            }
-            banished_main.add {
-                type = "label",
-                caption = "[font=default-large]Moderators will review the public action-logs on m45sci.xyz and perm-ban you if the vote-banish was for good a reason.[/font]"
-            }
-            banished_main.add {
-                type = "label",
-                caption = ""
-            }
-            banished_main.add {
-                type = "label",
-                caption = "[font=default-large]We share our ban list with many other factorio communities. We put the reason, date and a link to the log file in the ban.[/font]"
-            }
-            banished_main.add {
-                type = "label",
-                caption = ""
-            }
-            banished_main.add {
-                type = "label",
-                caption = "[font=default-large]Any items you took have been left at the spawn area so they can be retrieved.[/font]"
-            }
-            banished_main.add {
-                type = "label",
-                caption = ""
-            }
-            banished_main.add {
-                type = "label",
-                caption = "[font=default-large]Players can simply vote to rewind to the previous autosave... or moderators can do it with a single command.[/font]"
-            }
-            banished_main.add {
-                type = "label",
-                caption = ""
-            }
-            banished_main.add {
-                type = "label",
-                caption = "[font=default-large]If you were griefing, I hope you think carefully about why you were doing this.[/font]"
-            }
-            banished_main.add {
-                type = "label",
-                caption = ""
-            }
-            banished_main.add {
-                type = "label",
-                caption = "[font=default-large]It seems most of you are like a little kid kicking a sand castle... angry because you do not have the skills to contribute.[/font]"
-            }
-            banished_main.add {
-                type = "label",
-                caption = ""
-            }
-            banished_main.add {
-                type = "label",
-                caption = "[font=default-large]I hope you learn from this, and eventually become a functioning adult...[/font]"
-            }
-            banished_main.add {
-                type = "label",
-                caption = ""
-            }
-            banished_main.add {
-                type = "label",
-                caption = "[font=default-large]Before you suffer real-world consequences for this type of behavior elsewhere.[/font]"
-            }
-        end
-    end
-end

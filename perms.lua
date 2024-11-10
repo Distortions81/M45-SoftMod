@@ -448,7 +448,7 @@ function PERMS_PromotePlayer(player)
 end
 
 -- Automatically promote users to higher levels
-function PERMS_AutoPromotePlayer()
+function PERMS_PromoteAllPlayers()
     PERMS_MakeUserGroups()
 
     -- Check all connected players
