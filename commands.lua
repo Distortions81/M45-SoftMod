@@ -501,13 +501,13 @@ script.on_load(function()
             if param.parameter then
                 local victim = game.players[param.parameter]
 
-                if (victim) then
-                    if victim and victim.valid and storage.membersgroup then
+                if victim then
+                    if victim and victim.valid and storage.SM_Store.memGroup then
                         if player then
                             UTIL_SmartPrint(player, "Player given members status.")
                             UTIL_MsgAll(victim.name .. " is now a member!")
                         end
-                        storage.membersgroup.add_player(victim)
+                        storage.SM_Store.memGroup.add_player(victim)
                         ONLINE_UpdatePlayerList() -- online.lua
                         return
                     end
@@ -529,12 +529,12 @@ script.on_load(function()
                 local victim = game.players[param.parameter]
 
                 if (victim) then
-                    if victim and victim.valid and storage.veteransgroup then
+                    if victim and victim.valid and storage.SM_Store.vetGroup then
                         if player then
                             UTIL_SmartPrint(player, "Player given veterans status.")
                             UTIL_MsgAll(victim.name .. " is now a veteran!")
                         end
-                        storage.veteransgroup.add_player(victim)
+                        storage.SM_Store.vetGroup.add_player(victim)
                         ONLINE_UpdatePlayerList() -- online.lua
                         return
                     end
@@ -555,12 +555,12 @@ script.on_load(function()
                 local victim = game.players[param.parameter]
 
                 if (victim) then
-                    if victim and victim.valid and storage.regularsgroup then
+                    if victim and victim.valid and storage.SM_Store.regGroup then
                         if player then
                             UTIL_SmartPrint(player, "Player given regulars status.")
                             UTIL_MsgAll(victim.name .. " is now a regular!")
                         end
-                        storage.regularsgroup.add_player(victim)
+                        storage.SM_Store.regGroup .add_player(victim)
                         ONLINE_UpdatePlayerList() -- online.lua
                         return
                     end
@@ -582,8 +582,8 @@ script.on_load(function()
 
                 if (victim) then
                     if victim and victim.valid then
-                        if not storage.patreons[victim.index] then
-                            storage.patreons[victim.index] = true
+                        if not storage.PData[victim.index].patreon then
+                            storage.PData[victim.index].patreon = true
                             UTIL_SmartPrint(player, "Player given patreon status.")
                             ONLINE_UpdatePlayerList() -- online.lua
                         else
@@ -610,11 +610,8 @@ script.on_load(function()
 
                 if (victim) then
                     if victim and victim.valid then
-                        if not storage.nitros then
-                            storage.nitros = {}
-                        end
-                        if not storage.nitros[victim.index] then
-                            storage.nitros[victim.index] = true
+                        if not storage.PData[victim.index].nitro then
+                            storage.PData[victim.index].nitro = true
                             UTIL_SmartPrint(player, "Player given nitro status.")
                             ONLINE_UpdatePlayerList() -- online.lua
                         else
@@ -637,7 +634,7 @@ script.on_load(function()
 
             -- Argument required
             if param.parameter then
-                storage.patreonList = UTIL_SplitStr(param.parameter, ",")
+                storage.SM_Store.patreonCredits = UTIL_SplitStr(param.parameter, ",")
             end
         end)
 
@@ -650,7 +647,7 @@ script.on_load(function()
 
             -- Argument required
             if param.parameter then
-                storage.nitroList = UTIL_SplitStr(param.parameter, ",")
+                storage.SM_Store.nitroCredits = UTIL_SplitStr(param.parameter, ",")
             end
         end)
 

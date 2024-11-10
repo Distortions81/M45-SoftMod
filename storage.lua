@@ -94,9 +94,6 @@ function STORAGE_MakePlayerStorage(player)
     if not storage.PData[player.index].score then
         storage.PData[player.index].score = 0
     end
-    if not storage.PData[player.index].banished then
-        storage.PData[player.index].banished = nil
-    end
     if not storage.PData[player.index].lastOnline then
         storage.PData[player.index].lastOnline = game.tick
     end

@@ -6,14 +6,14 @@
 
 function UTIL_MapPin()
     -- Server tag
-    if (storage.servertag and not storage.servertag.valid) then
-        storage.servertag = nil
+    if (storage.SM_Store.mapPin and not storage.SM_Store.mapPin.valid) then
+        storage.SM_Store.mapPin = nil
     end
-    if (storage.servertag and storage.servertag.valid) then
-        storage.servertag.destroy()
-        storage.servertag = nil
+    if (storage.SM_Store.mapPin and storage.SM_Store.mapPin.valid) then
+        storage.SM_Store.mapPin.destroy()
+        storage.SM_Store.mapPin = nil
     end
-    if (not storage.servertag) then
+    if (not storage.SM_Store.mapPin) then
         local label = "https://discord.gg/rQANzBheVh"
 
         local chartTag = {
@@ -28,7 +28,7 @@ function UTIL_MapPin()
         local psurface = game.surfaces[1]
 
         if pforce and psurface then
-            storage.servertag = pforce.add_chart_tag(psurface, chartTag)
+            storage.SM_Store.mapPin = pforce.add_chart_tag(psurface, chartTag)
         end
     end
 end
@@ -142,8 +142,8 @@ function UTIL_SendPlayers(victim)
         end
 
         -- Don't send unless there is a change
-        if storage.onlinePlayersCache ~= buf then
-            storage.onlinePlayersCache = buf
+        if storage.SM_Store.onlineCache ~= buf then
+            storage.SM_Store.onlineCache = buf
             print(buf)
         end
         return
@@ -160,10 +160,10 @@ function UTIL_SendPlayers(victim)
     end
 
     -- No one is online
-    if not storage.player_count or storage.player_count == 0 then
+    if not storage.SM_Store.pcount or storage.SM_Store.pcount == 0 then
         UTIL_SmartPrint(victim, "No players online.")
     else
-        UTIL_SmartPrint(victim, "Players Online: " .. storage.player_count .. "\n" .. buf)
+        UTIL_SmartPrint(victim, "Players Online: " .. storage.SM_Store.pcount .. "\n" .. buf)
     end
 end
 
@@ -240,8 +240,8 @@ end
 function UTIL_Is_Veteran(victim)
     if victim and victim.valid and not victim.admin then
         -- If in group
-        if victim.permission_group and storage.veteransgroup then
-            if victim.permission_group.name == storage.veteransgroup.name then
+        if victim.permission_group and storage.SM_Store.vetGroup then
+            if victim.permission_group.name == storage.SM_Store.vetGroup.name then
                 return true
             end
         end
@@ -255,8 +255,8 @@ end
 function UTIL_Is_Regular(victim)
     if victim and victim.valid and not victim.admin then
         -- If in group
-        if victim.permission_group and storage.regularsgroup then
-            if victim.permission_group.name == storage.regularsgroup.name then
+        if victim.permission_group and storage.SM_Store.regGroup then
+            if victim.permission_group.name == storage.SM_Store.regGroup.name then
                 return true
             end
         end
@@ -269,8 +269,8 @@ end
 function UTIL_Is_Member(victim)
     if victim and victim.valid and not victim.admin then
         -- If in group
-        if victim.permission_group and storage.membersgroup then
-            if victim.permission_group.name == storage.membersgroup.name then
+        if victim.permission_group and storage.SM_Store.memGroup then
+            if victim.permission_group.name == storage.SM_Store.memGroup.name then
                 return true
             end
         end

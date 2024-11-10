@@ -312,7 +312,7 @@ end
 
 local function handleOnlineSubmenu(player, target_name)
     if player and player.valid and target_name then
-        storage.m45_online_submenu_target[player.index] = target_name
+        storage.PData[player.index].online_sub_target = target_name
         destoryOnlineSub(player)
         ONLINE_MakeM45OnlineSub(player, target_name)
     end
@@ -751,8 +751,8 @@ function ONLINE_Clicks(event)
                 -- Close online submenu
                 if player.gui and player.gui.screen and player.gui.screen.m45_online_submenu then
                     player.gui.screen.m45_online_submenu.destroy()
-                    if storage.m45_online_submenu_target then
-                        storage.m45_online_submenu_target[player.index] = nil
+                    if storage.PData and storage.PData[player.index] then
+                        storage.PData[player.index].online_sub_target = nil
                     end
                 end
             elseif event.element.name == "send_whisper" then

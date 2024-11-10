@@ -16,7 +16,7 @@ local function unbanishPlayer(victim)
     end
 
     --Close banished window
-    if victim and victim.gui and victim.gui.screen and victim.gui.screeb.banished_inform then
+    if victim and victim.gui and victim.gui.screen and victim.gui.screen.banished_inform then
         victim.gui.screen.banished_inform.destroy()
     end
 end
@@ -111,6 +111,14 @@ end
 
 function BANISH_DoJail(victim)
     BANISH_InformBanished(false, victim)
+
+    if victim and victim.index and storage.PData then
+        if storage.PData[victim.index] then
+            storage.PData[victim.index].banished = storage.PData[victim.index].banished + 1
+        else
+            storage.PData[victim.index].banished = 1
+        end
+    end
 
     if victim.permission_group.name ~= storage.SM_Store.jailGroup.name then
         storage.SM_Store.jailGroup.add_player(victim)

@@ -595,11 +595,7 @@ function INFO_InfoWin(player)
 
             tab2_main_frame.add {
                 type = "label",
-                caption = "[font=default-large-bold]New players DO NOT have the following permissions:[/font]"
-            }
-            tab2_main_frame.add {
-                type = "label",
-                caption = "[font=default-large]deconstruction planner, landfill, speakers, launch rocket, cancel research, artillery remote or delete blueprints.[/font]"
+                caption = "[font=default-large-bold]New players do not have full game permissions.[/font]"
             }
             tab2_main_frame.add {
                 type = "label",

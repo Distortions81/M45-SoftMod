@@ -359,7 +359,7 @@ function PERMS_SetPermissions()
         -- If new user restrictions are on, then disable all permissions
         -- Otherwise undo
         local option = true
-        if storage.newRestrict then
+        if storage.SM_Store.restrictNew then
             option = false
         end
 
@@ -369,7 +369,7 @@ function PERMS_SetPermissions()
             option)
         storage.SM_Store.defGroup.set_allows_action(defines.input_action.change_programmable_speaker_parameters, option)
         storage.SM_Store.defGroup.set_allows_action(defines.input_action.launch_rocket, option)
-        storage.SM_Store.defGroup.set_allows_action(defines.input_action.cancel_research, option)
+        --storage.SM_Store.defGroup.set_allows_action(defines.input_action.cancel_research, option)
         storage.SM_Store.defGroup.set_allows_action(defines.input_action.cancel_upgrade, option)
         storage.SM_Store.defGroup.set_allows_action(defines.input_action.upgrade, option)
 
@@ -441,13 +441,10 @@ end
 function PERMS_AutoPromotePlayer()
     PERMS_MakeUserGroups()
 
-    -- Skip if permissions are disabled
-    if game.connected_players and storage.disableperms == false then
-        -- Check all connected players
-        for _, player in pairs(game.connected_players) do
-            if (player and player.valid) then
-                PERMS_PromotePlayer(player)
-            end
+    -- Check all connected players
+    for _, player in pairs(game.connected_players) do
+        if (player and player.valid) then
+            PERMS_PromotePlayer(player)
         end
     end
 end
