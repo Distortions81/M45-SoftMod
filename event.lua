@@ -3,7 +3,7 @@
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
 
-local function InsWeapons(player, ammo_amount)
+local function insWeapons(player, ammo_amount)
     if player.force.technologies["military"].researched then
         player.insert {
             name = "submachine-gun",
@@ -120,7 +120,7 @@ function EVENT_Respawn(event)
 
     -- Cutoff-point, just becomes annoying.
     if not player.force.technologies["military-science-pack"].researched then
-        InsWeapons(player, 10)
+        insWeapons(player, 10)
     end
 end
 
@@ -204,7 +204,7 @@ function EVENT_PlayerCreated(event)
         count = 1
     }
 
-    InsWeapons(player, 50) -- research-based
+    insWeapons(player, 50) -- research-based
 
     UTIL_MsgAll("[color=green](SYSTEM) Welcome " .. player.name .. " to the map![/color]")
 end
