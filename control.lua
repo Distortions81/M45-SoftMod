@@ -26,7 +26,7 @@ function RunSetup()
     end
 
     --Only rerun on version change
-    if storage.SM_OldVersion ~= storage.SM_Version then
+    if not storage.SM_Store or storage.SM_OldVersion ~= storage.SM_Version then
         STORAGE_CreateGlobal()
         BANISH_MakeJail()
         TODO_Init()

@@ -374,7 +374,7 @@ function EVENT_Loot(event)
 
             if victim and victim.valid and player and player.valid then
                 local buf = player.name ..
-                    " looted the body of " .. victim.name .. " at " .. UTIL_GPSPos(victim)
+                    " looted the body of " .. victim.name .. " at " .. UTIL_GPSPos(ent)
                 if victim.name ~= player.name then
                     UTIL_MsgAll(buf)
                 end
