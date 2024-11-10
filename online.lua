@@ -362,7 +362,7 @@ function ONLINE_Window(player)
 
             local bcheckstate = false
             if storage.PData[player.index].onlineBrief then
-                if storage.PData[player.index].onlineBrief == true then
+                if storage.PData[player.index].onlineBrief then
                     bcheckstate = true
                 else
                     bcheckstate = false
@@ -395,7 +395,7 @@ function ONLINE_Window(player)
 
             local checkstate = false
             if storage.PData[player.index].onlineShowOffline then
-                if storage.PData[player.index].onlineShowOffline == true then
+                if storage.PData[player.index].onlineShowOffline then
                     checkstate = true
                 else
                     checkstate = false

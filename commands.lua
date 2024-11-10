@@ -6,8 +6,9 @@
 function NoBanished(player)
     if player and UTIL_Is_Banished(player) then
         UTIL_SmartPrint(player, "No. You are banished.")
-        return
+        return true
     end
+    return false
 end
 
 function ModsOnly(param)
@@ -16,7 +17,7 @@ function ModsOnly(param)
         if NoBanished(player) then
             return true
         end
-        if player and player.admin == false then
+        if player and not player.admin then
             UTIL_SmartPrint(player, "That command is for moderators only.")
             return true
         end
@@ -68,7 +69,7 @@ script.on_load(function()
             --Update clock
             for _, target in pairs(game.connected_players) do
                 if target.valid and target.gui and target.gui.top and target.gui.top.reset_clock then
-                    if storage.PData and storage.PData[target.index].hideClock == true or input == "" then
+                    if storage.PData and storage.PData[target.index].hideClock or input == "" then
                         target.gui.top.reset_clock.visible = false
                     else
                         target.gui.top.reset_clock.caption = "MAP RESET: " .. input

@@ -186,7 +186,7 @@ local function makeTodoSubmenu(player, i, edit_mode)
                             local whoedit = ""
                             local c = 0
                             for _, victim in pairs(game.players) do
-                                if victim.name ~= player.name and storage.todo_player_editing_id[victim.index] ==
+                                if victim.index ~= player.index and storage.todo_player_editing_id[victim.index] ==
                                     storage.todo_player_editing_id[player.index] then
                                     c = c + 1
                                     if c > 1 then

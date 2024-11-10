@@ -10,6 +10,8 @@ local function unbanishPlayer(victim)
         position = UTIL_GetDefaultSpawn()
     })
 
+    storage.PData[victim.index].banished = nil
+
     if victim.permission_group.name ~= storage.SM_Store.defGroup.name then
         storage.SM_Store.defGroup.add_player(victim)
         UTIL_MsgAll(victim.name .. " moved out of jailed group.")
@@ -53,11 +55,11 @@ function BANISH_UpdateVotes()
             -- only if data exists
             if vote.voter.valid and vote.victim.valid then
                 -- valid defendant
-                if UTIL_Is_New(vote.victim) or UTIL_Is_Member(vote.victim) then
+                if not vote.victim.admin then
                     -- valid voter
                     if UTIL_Is_Regular(vote.voter) or UTIL_Is_Veteran(vote.voter) or vote.voter.admin then
                         -- vote isn't overruled or withdrawn
-                        if vote.withdrawn == false and vote.overruled == false then
+                        if not vote.withdrawn and not vote.overruled then
                             local points = 1
 
                             if vote.voter.admin then
@@ -73,6 +75,8 @@ function BANISH_UpdateVotes()
                                 -- was empty, init
                                 banishedtemp[vote.victim.index] = points
                             end
+                        else
+                            banishedtemp[vote.victim.index] = nil
                         end
                     end
                 end
@@ -85,20 +89,20 @@ function BANISH_UpdateVotes()
         local prevstate = UTIL_Is_Banished(victim)
 
         -- Add votes to storage list, erase old votes
-        if banishedtemp[victim.index] then
-            storage.SM_Store.votes[victim.index] = banishedtemp[victim.index]
+        if banishedtemp[victim.index] and banishedtemp[victim.index] > 0 then
+            storage.PData[victim.index].banished = banishedtemp[victim.index]
         else
-            storage.SM_Store.votes[victim.index] = {} -- Erase/init
+            storage.PData[victim.index].banished = nil -- Erase/init
         end
 
         -- Was banished, but not anymore
-        if UTIL_Is_Banished(victim) == false and prevstate == true then
+        if storage.PData[victim.index].banished and prevstate  then
             local msg = victim.name .. " is no longer banished."
             print("[REPORT] SYSTEM " .. msg)
             UTIL_MsgAllSys(msg)
 
             unbanishPlayer(victim)
-        elseif UTIL_Is_Banished(victim) == true and prevstate == false then
+        elseif storage.PData[victim.index].banished and not prevstate then
             -- Was not banished, but is now.
             local msg = victim.name .. " has been banished."
             UTIL_MsgAllSys(msg)
@@ -111,14 +115,6 @@ end
 
 function BANISH_DoJail(victim)
     BANISH_InformBanished(false, victim)
-
-    if victim and victim.index and storage.PData then
-        if storage.PData[victim.index] then
-            storage.PData[victim.index].banished = storage.PData[victim.index].banished + 1
-        else
-            storage.PData[victim.index].banished = 1
-        end
-    end
 
     if victim.permission_group.name ~= storage.SM_Store.jailGroup.name then
         storage.SM_Store.jailGroup.add_player(victim)
@@ -180,7 +176,7 @@ function BANISH_DoBanish(player, victim, reason)
         if UTIL_Is_Regular(player) or UTIL_Is_Veteran(player) or player.admin then
             -- Must have arguments
             if victim and reason then
-                if victim.name == player.name then
+                if victim.index == player.index then
                     UTIL_SmartPrint(player, "You can't banish yourself. Have you considered therapy?")
                     return
                 end
@@ -275,7 +271,7 @@ function BANISH_SendToSurface(player)
                 -- Check if item is valid
                 if item and item.victim and item.victim.character then
                     -- Check if names match
-                    if item.victim.name == player.name then
+                    if item.victim.index == player.index then
                         -- If surface is valid
                         local surf = game.surfaces[item.surface]
                         if not surf then
@@ -327,16 +323,26 @@ function BANISH_AddBanishCommands()
                 return
             end
 
+
             -- Only if name provided
             if param.parameter then
                 local victim = game.players[param.parameter]
 
                 if (victim) then
                     if UTIL_Is_Banished(victim) then
+                        storage.PData[victim.index].banished = nil
+                        for _, vote in pairs(storage.SM_Store.votes) do
+                            if vote and vote.victim then
+                                if vote.victim.index == victim.index then
+                                    vote.overruled = true
+                                    break
+                                end
+                            end
+                        end
                         UTIL_SmartPrint(player, "Unjailed player.")
-
                         unbanishPlayer(victim)
                     else
+                        storage.PData[victim.index].banished = 1000
                         BANISH_DoJail(victim)
                         UTIL_SmartPrint(player, "Jailed player.")
                     end
@@ -379,7 +385,7 @@ function BANISH_AddBanishCommands()
                         local count = 0
                         for _, vote in pairs(storage.SM_Store.votes) do
                             if vote and vote.victim and vote.victim.valid then
-                                if vote.victim == victim and vote.overruled == false then
+                                if vote.victim == victim and not vote.overruled then
                                     vote.overruled = true
                                     count = count + 1
                                 end
@@ -390,7 +396,7 @@ function BANISH_AddBanishCommands()
                         else
                             for _, vote in pairs(storage.SM_Store.votes) do
                                 if vote and vote.victim and vote.victim.valid then
-                                    if vote.victim == victim and vote.overruled == true then
+                                    if vote.victim == victim and vote.overruled then
                                         vote.overruled = false
                                         count = count + 1
                                     end

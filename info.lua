@@ -13,7 +13,7 @@ function INFO_DumpInv(player, force)
 
     if not force then
         if storage.PData[player.index].cleaned then
-            if storage.PData[player.index].cleaned == true then
+            if storage.PData[player.index].cleaned then
                 return false
             end
         end
@@ -444,7 +444,7 @@ function INFO_InfoWin(player)
             if player.force.friendly_fire then
                 friendly_fire.caption = "Friendly fire is currently ON (normally off)."
             end
-            if storage.SM_Store.restrictNew == false then
+            if not storage.SM_Store.restrictNew then
                 restrictions.caption = ""
             end
 
@@ -1033,7 +1033,7 @@ function INFO_Click(event)
                 -- reset-clock-close
                 if player.gui and player.gui.top and player.gui.top.reset_clock then
                     if storage.PData then
-                        if storage.PData[player.index].hideClock == true and
+                        if storage.PData[player.index].hideClock and
                             storage.SM_Store.resetDuration ~= "" then
                                 storage.PData[player.index].hideClock  = false
                             player.gui.top.reset_clock.caption = "Map reset: " .. storage.SM_Store.resetDuration

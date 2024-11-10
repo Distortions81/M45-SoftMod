@@ -81,6 +81,9 @@ end
 
 -- Create player storage, if needed
 function STORAGE_MakePlayerStorage(player)
+    if not storage.PData then
+        storage.PData = {}
+    end
     if not storage.PData[player.index] then
         storage.PData[player.index] = {}
     end

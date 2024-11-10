@@ -388,7 +388,7 @@ end
 function PERMS_SetPlayerMoving(player)
     if (player and player.connected) then
         -- banished players don't get move score
-        if UTIL_Is_Banished(player) == false then
+        if not UTIL_Is_Banished(player) then
             storage.PData[player.index].moving = true
         end
     end
@@ -398,13 +398,16 @@ end
 function PERMS_SetPlayerActive(player)
     if (player and player.connected) then
         -- banished players don't get activity score
-        if UTIL_Is_Banished(player) == false then
+        if not UTIL_Is_Banished(player) then
             storage.PData[player.index].active = true
         end
     end
 end
 
 function PERMS_PromotePlayer(player)
+    if not storage.SM_Store then
+        return
+    end
     -- Check if groups are valid
     if player.permission_group then
         if UTIL_Is_Banished(player) and
@@ -427,8 +430,7 @@ function PERMS_PromotePlayer(player)
         elseif (storage.PData[player.index].score and
                 storage.PData[player.index].score > (30 * 60 * 60) and not player.admin) then
             -- Check if player has hours for members status, but isn't a in member group.
-            if UTIL_Is_Veteran(player) == false and UTIL_Is_Regular(player) == false and UTIL_Is_Member(player) ==
-                false and UTIL_Is_New(player) == true then
+            if not UTIL_Is_Veteran(player) and not UTIL_Is_Regular(player) and not UTIL_Is_Member(player) and UTIL_Is_New(player) then
                 storage.SM_Store.memGroup.add_player(player)
                 UTIL_MsgAll(player.name .. " is now a member!")
                 PERMS_WelcomeMember(player)

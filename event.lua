@@ -61,7 +61,7 @@ script.on_nth_tick(599, function(event)
 
             -- Player active?
             if storage.PData[player.index].active then
-                if storage.PData[player.index].active == true then
+                if storage.PData[player.index].active then
                     storage.PData[player.index].active = false -- Turn back off
 
                     if storage.PData[player.index].score then
@@ -83,7 +83,7 @@ script.on_nth_tick(599, function(event)
 
             -- Player moving?
             if storage.PData[player.index].moving then
-                if storage.PData[player.index].moving == true then
+                if storage.PData[player.index].moving then
                     storage.PData[player.index].moving = false -- Turn back off
 
                     if storage.PData[player.index].score then
@@ -256,7 +256,7 @@ script.on_event(
                 -- Only mark active on movement if walking
                 if event.name == defines.events.on_player_changed_position then
                     if player.walking_state then
-                        if player.walking_state.walking == true and
+                        if player.walking_state.walking and
                             (player.walking_state.direction == defines.direction.north or player.walking_state.direction ==
                                 defines.direction.northeast or player.walking_state.direction == defines.direction.east or
                                 player.walking_state.direction == defines.direction.southeast or
@@ -375,7 +375,7 @@ function EVENT_Loot(event)
             if victim and victim.valid and player and player.valid then
                 local buf = player.name ..
                     " looted the body of " .. victim.name .. " at " .. UTIL_GPSPos(ent)
-                if victim.name ~= player.name then
+                if victim.index ~= player.index then
                     UTIL_MsgAll(buf)
                 end
             end

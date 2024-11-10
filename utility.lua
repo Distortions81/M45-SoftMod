@@ -43,14 +43,13 @@ end
 
 function UTIL_Area(size, area)
     return "from: " ..
-    UTIL_GPSXY(area.left_top.x, area.left_top.y) ..
+        UTIL_GPSXY(area.left_top.x, area.left_top.y) ..
         " to " .. UTIL_GPSXY(area.right_bottom.x, area.right_bottom.Y) ..
         " AREA: " .. size .. "sq"
 end
 
 function UTIL_GPSPos(item)
     if item and item.position then
-
         local sName = ""
         if item and item.surface then
             sName = item.surface.name
@@ -219,11 +218,11 @@ end
 
 -- Check if player is flagged patreon
 function UTIL_Is_Patreon(victim)
-        if storage.PData[victim.index].patreon then
-            return storage.PData[victim.index].patreon
-        else
-            return false
-        end
+    if storage.PData[victim.index].patreon then
+        return storage.PData[victim.index].patreon
+    else
+        return false
+    end
 end
 
 -- Check if player is flagged nitro
@@ -282,7 +281,7 @@ end
 -- Check if player should be considered new
 function UTIL_Is_New(victim)
     if victim and victim.valid and not victim.admin then
-        if UTIL_Is_Member(victim) == false and UTIL_Is_Regular(victim) == false and UTIL_Is_Veteran(victim) == false then
+        if  not UTIL_Is_Member(victim) and not UTIL_Is_Regular(victim) and not UTIL_Is_Veteran(victim) then
             return true
         end
     end
@@ -291,9 +290,9 @@ function UTIL_Is_New(victim)
 end
 
 function UTIL_SmartPrintColor(victim, message)
-    UTIL_SmartPrint(victim, "[color=red]"..message.."[/color]")
-    UTIL_SmartPrint(victim, "[color=cyan]"..message.."[/color]")
-    UTIL_SmartPrint(victim, "[color=black]"..message.."[/color]")
+    UTIL_SmartPrint(victim, "[color=red]" .. message .. "[/color]")
+    UTIL_SmartPrint(victim, "[color=cyan]" .. message .. "[/color]")
+    UTIL_SmartPrint(victim, "[color=black]" .. message .. "[/color]")
 end
 
 -- Check if player should be considered banished
@@ -304,8 +303,12 @@ function UTIL_Is_Banished(victim)
         return false
     elseif victim.surface and victim.surface.name == "jail" then
         return true
-    --elseif storage.PData[victim.index].banished then
-        --return true
+    elseif storage.PData and storage.PData[victim.index] and storage.PData[victim.index].banished then
+        if storage.PData[victim.index].banished > 0 then
+            return true
+        else
+            return false
+        end
     else
         return false
     end
