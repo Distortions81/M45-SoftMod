@@ -17,6 +17,10 @@ function ONELIFE_Main(event)
         return
     end
 
+    if UTIL_Is_Banished(player) then
+        return
+    end
+
     player.set_controller {
         type = defines.controllers.spectator
     }
@@ -60,6 +64,9 @@ function ONELIFE_Clicks(event)
     end
     local player = game.players[event.player_index]
     if not player or not player.valid then
+        return
+    end
+    if UTIL_Is_Banished(player) then
         return
     end
     if not player.character or not player.character.valid then
