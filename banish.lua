@@ -3,6 +3,24 @@
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
 
+local function unbanishPlayer(victim)
+    table.insert(storage.SM_Store.sendToSurface, {
+        victim = victim,
+        surface = "nauvis",
+        position = UTIL_GetDefaultSpawn()
+    })
+
+    if victim.permission_group.name ~= storage.SM_Store.defGroup.name then
+        storage.SM_Store.defGroup.add_player(victim)
+        UTIL_MsgAll(victim.name .. " moved out of jailed group.")
+    end
+
+    --Close banished window
+    if victim and victim.gui and victim.gui.screen and victim.gui.screeb.banished_inform then
+        victim.gui.screen.banished_inform.destroy()
+    end
+end
+
 function BANISH_DoReport(player, report)
     if player and player.valid and report then
         storage.PData[player.index].reports = storage.PData[player.index].reports + 1
@@ -22,11 +40,15 @@ end
 
 -- Process banish votes
 function BANISH_UpdateVotes()
+    if not storage.SM_Store then
+        return
+    end
+
     -- Reset banished list
     local banishedtemp = {}
 
     -- Loop through votes, tally them
-    for vote in (storage.SM_Store.votes) do
+    for _, vote in pairs(storage.SM_Store.votes) do
         -- only if everything seems to exist
         if vote and vote.voter and vote.victim then
             -- only if data exists
@@ -65,9 +87,9 @@ function BANISH_UpdateVotes()
 
         -- Add votes to storage list, erase old votes
         if banishedtemp[victim.index] then
-            storage.SM_Store.votes = banishedtemp[victim.index]
+            storage.SM_Store.votes[victim.index] = banishedtemp[victim.index]
         else
-            storage.SM_Store.votes = 0 -- Erase/init
+            storage.SM_Store.votes[victim.index] = {} -- Erase/init
         end
 
         -- Was banished, but not anymore
@@ -76,16 +98,7 @@ function BANISH_UpdateVotes()
             print("[REPORT] SYSTEM " .. msg)
             UTIL_MsgAllSys(msg)
 
-            -- Kill them, so items are left behind
-            if victim.character and victim.character.valid then
-                victim.character.die("player")
-            end
-
-            table.insert(storage.SM_Store.sendToSurface, {
-                victim = victim,
-                surface = "nauvis",
-                position = UTIL_GetDefaultSpawn()
-            })
+            unbanishPlayer(victim)
         elseif UTIL_Is_Banished(victim) == true and prevstate == false then
             -- Was not banished, but is now.
             local msg = victim.name .. " has been banished."
@@ -104,7 +117,7 @@ function BANISH_DoJail(victim)
         storage.SM_Store.jailGroup.add_player(victim)
         UTIL_MsgAll(victim.name .. " moved to jailed group.")
     end
-    
+
     -- Kill them, so items are left behind
     if victim.character and victim.character.valid then
         UTIL_SendToDefaultSpawn(victim)
@@ -115,7 +128,7 @@ function BANISH_DoJail(victim)
 
     UTIL_MsgAllSys(victim.name .. "'s items have been dumped at spawn so they can be recovered.")
 
-    local newpos = game.surfaces["jail"].find_non_colliding_position("character", { x=0, y=0 }, 1024, 1, false)
+    local newpos = game.surfaces["jail"].find_non_colliding_position("character", { x = 0, y = 0 }, 1024, 1, false)
     table.insert(storage.SM_Store.sendToSurface, {
         victim = victim,
         surface = "jail",
@@ -123,8 +136,7 @@ function BANISH_DoJail(victim)
     })
 end
 
-function BANISH_MakeJail() 
-
+function BANISH_MakeJail()
     --Migrate old maps
     if game.surfaces["hell"] ~= nil then
         game.delete_surface("hell")
@@ -181,7 +193,7 @@ function BANISH_DoBanish(player, victim, reason)
                             -- Check if we already voted against them
                             if storage.SM_Store.votes and storage.SM_Store.votes ~= {} then
                                 local votecount = 1
-                                for vote in (storage.SM_Store.votes) do
+                                for _, vote in pairs(storage.SM_Store.votes) do
                                     if vote and vote.voter and vote.victim then
                                         -- Count player's total votes, cap them
                                         if vote.voter == player then
@@ -261,9 +273,9 @@ function BANISH_SendToSurface(player)
                         local surf = game.surfaces[item.surface]
                         if not surf then
                             UTIL_ConsolePrint(
-                                    "[ERROR] send_to_surface(respawn): INVALID SURFACE")
+                                "[ERROR] send_to_surface(respawn): INVALID SURFACE")
 
-                            index = i 
+                            index = i
                             break
                         end
                         if item.position then
@@ -272,7 +284,7 @@ function BANISH_SendToSurface(player)
                             if newpos then
                                 player.teleport(newpos, surf)
                             else
-                                player.teleport(item.position, surf)     -- screw it
+                                player.teleport(item.position, surf) -- screw it
                                 UTIL_ConsolePrint(
                                     "[ERROR] send_to_surface(respawn): unable to find non_colliding_position.")
                             end
@@ -302,14 +314,11 @@ function BANISH_AddBanishCommands()
     commands.add_command("jail", "<player>\n(Use again to unjail.)",
         function(param)
             local player
-
-            -- Mods only
             if param and param.player_index then
                 player = game.players[param.player_index]
-                if player and player.admin == false then
-                    UTIL_SmartPrint(player, "Moderators only.")
-                    return
-                end
+            end
+            if ModsOnly(param) then
+                return
             end
 
             -- Only if name provided
@@ -318,13 +327,9 @@ function BANISH_AddBanishCommands()
 
                 if (victim) then
                     if UTIL_Is_Banished(victim) then
-                        UTIL_SendToDefaultSpawn(victim)
                         UTIL_SmartPrint(player, "Unjailed player.")
 
-                        if victim.permission_group.name ~= storage.SM_Store.defGroup.name then
-                            storage.SM_Store.defGroup.add_player(victim)
-                            UTIL_MsgAll(victim.name .. " moved out of jailed group.")
-                        end
+                        unbanishPlayer(victim)
                     else
                         BANISH_DoJail(victim)
                         UTIL_SmartPrint(player, "Jailed player.")
@@ -332,71 +337,73 @@ function BANISH_AddBanishCommands()
                 else
                     UTIL_SmartPrint(player, "Couldn't find that player.")
                 end
+            else
+                UTIL_SmartPrint(player, "Who do you want to jail or unjail?")
             end
         end)
     -- Mod vote overrrule
     commands.add_command("overrule",
-        "<defendant>\n(overrule votes against defendant)\n<clear>\n(clear all votes, will unbanish all)",
+        "Moderators only: <defendant>\n(overrule votes against defendant)\n<clear>\n(clear all votes, will unbanish all)",
         function(param)
+            local player
             if param and param.player_index then
-                local player = game.players[param.player_index]
+                player = game.players[param.player_index]
+            end
+            if ModsOnly(param) then
+                return
+            end
 
-                -- Moderator only
-                if (player and player.admin) then
-                    if storage.SM_Store.votes then
-                        -- get arguments
-                        local args = UTIL_SplitStr(param.parameter, " ")
+            -- Moderator only
+            if storage.SM_Store and storage.SM_Store.votes then
+                -- get arguments
+                local args = UTIL_SplitStr(param.parameter, " ")
 
-                        -- Must have arguments
-                        if args ~= {} and args[1] then
-                            if args[1] == "clear" then
-                                storage.SM_Store.votes = {}
-                                UTIL_SmartPrint(player, "All votes cleared.")
-                                BANISH_UpdateVotes()
-                                return
-                            end
-                            local victim = game.players[args[1]]
+                -- Must have arguments
+                if args ~= {} and args[1] then
+                    if args[1] == "clear" then
+                        storage.SM_Store.votes = {}
+                        UTIL_SmartPrint(player, "All votes cleared.")
+                        BANISH_UpdateVotes()
+                        return
+                    end
+                    local victim = game.players[args[1]]
 
-                            -- If victim found
-                            if victim and victim.valid then
-                                local count = 0
-                                for vote in (storage.SM_Store.votes) do
-                                    if vote and vote.victim and vote.victim.valid then
-                                        if vote.victim == victim and vote.overruled == false then
-                                            vote.overruled = true
-                                            count = count + 1
-                                        end
-                                    end
+                    -- If victim found
+                    if victim and victim.valid then
+                        local count = 0
+                        for _, vote in pairs(storage.SM_Store.votes) do
+                            if vote and vote.victim and vote.victim.valid then
+                                if vote.victim == victim and vote.overruled == false then
+                                    vote.overruled = true
+                                    count = count + 1
                                 end
-                                if count > 0 then
-                                    UTIL_SmartPrint(player, "Overruled " .. count .. " votes against " .. victim.name)
-                                else
-                                    for vote in (storage.SM_Store.votes) do
-                                        if vote and vote.victim and vote.victim.valid then
-                                            if vote.victim == victim and vote.overruled == true then
-                                                vote.overruled = false
-                                                count = count + 1
-                                            end
-                                        end
-                                    end
-                                    UTIL_SmartPrint(player,
-                                        "Withdrew " .. count .. " overrulings, against " .. victim.name)
-                                end
-                                BANISH_UpdateVotes()
-                                return
-                            else
-                                UTIL_SmartPrint(player, "Couldn't find a player by that name.")
                             end
-                        else
-                            UTIL_SmartPrint(player,
-                                "Who do you want to overrule votes against? <player> or <clear> (clears/unbanishes all)")
                         end
+                        if count > 0 then
+                            UTIL_SmartPrint(player, "Overruled " .. count .. " votes against " .. victim.name)
+                        else
+                            for _, vote in pairs(storage.SM_Store.votes) do
+                                if vote and vote.victim and vote.victim.valid then
+                                    if vote.victim == victim and vote.overruled == true then
+                                        vote.overruled = false
+                                        count = count + 1
+                                    end
+                                end
+                            end
+                            UTIL_SmartPrint(player,
+                                "Withdrew " .. count .. " overrulings, against " .. victim.name)
+                        end
+                        BANISH_UpdateVotes()
+                        return
                     else
-                        UTIL_SmartPrint(player, "There are no votes to overrule.")
+                        UTIL_SmartPrint(player, "Couldn't find a player by that name.")
                     end
                 else
-                    UTIL_SmartPrint(player, "Moderators only.")
+                    UTIL_SmartPrint(player,
+                        "Who do you want to overrule votes against? <player> or <clear> (clears/unbanishes all)")
                 end
+            else
+                UTIL_SmartPrint(player, "There are no votes to overrule.")
             end
         end)
 
@@ -406,10 +413,10 @@ function BANISH_AddBanishCommands()
             local player = game.players[param.player_index]
 
             -- Only if banish data found
-            if storage.SM_Store.votes then
+            if storage.SM_Store and storage.SM_Store.votes then
                 -- Print votes
                 local pcount = 0
-                for vote in (storage.SM_Store.votes) do
+                for _, vote in pairs(storage.SM_Store.votes) do
                     if vote and vote.voter and vote.voter.valid and vote.victim and vote.victim.valid then
                         local notes = ""
                         if vote.withdrawn then
@@ -441,7 +448,7 @@ function BANISH_AddBanishCommands()
                 if storage.SM_Store.votes then
                     for _, victim in pairs(game.players) do
                         local votecount = 0
-                        for vote in (storage.SM_Store.votes) do
+                        for _, vote in pairs(storage.SM_Store.votes) do
                             if victim == vote.voter then
                                 votecount = votecount + 1
                             end
@@ -484,7 +491,7 @@ function BANISH_AddBanishCommands()
                         if victim and victim.valid and victim.character and victim.character.valid then
                             -- Check if we voted against them
                             if storage.SM_Store.votes and storage.SM_Store.votes ~= {} then
-                                for vote in (storage.SM_Store.votes) do
+                                for _, vote in pairs(storage.SM_Store.votes) do
                                     if vote and vote.voter and vote.victim then
                                         if vote.voter == player and vote.victim == victim then
                                             -- Send report to discord and withdraw vote
