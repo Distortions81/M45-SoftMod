@@ -503,7 +503,7 @@ function ONLINE_Window(player)
                     skip = true
                 end
 
-                if skip and storage.PData[player.index].onlineBrief and storage.show_offline_state[player.index] then
+                if skip and storage.PData[player.index].onlineBrief and storage.PData[player.index].onlineBrief then
                     skip = false
                     is_offline = true
                 end
