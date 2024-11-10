@@ -23,13 +23,12 @@ function ONLINE_MakeOnlineButton(player)
             sprite = "file/img/buttons/online-64.png",
             tooltip = "See players online!"
         }
-        online_32.style.size = {64, 64}
+        online_32.style.size = { 64, 64 }
     end
 end
 
 -- Count online players, store
 function ONLINE_UpdatePlayerList()
-
     -- Sort by active time
     local results = {}
     local count = 0
@@ -38,7 +37,6 @@ function ONLINE_UpdatePlayerList()
 
     -- Make a table with active time, handle missing data
     for i, victim in pairs(game.players) do
-
         local utag
 
         -- Catch all
@@ -83,19 +81,19 @@ function ONLINE_UpdatePlayerList()
         -- Show last online in minutes
         local isafk = "   "
 
-            if storage.PData[victim.index].lastOnline then
-                local time = ((game.tick - storage.PData[victim.index].lastOnline) / 60)
-                local days = math.floor(time / 60 / 60 / 24)
-                local hours = math.floor(time / 60 / 60)
-                local minutes = math.floor(time / 60)
-                if days > 0 then
-                    isafk = string.format("%3.2fd", time / 60 / 60 / 24)
-                elseif hours > 0 then
-                    isafk = string.format("%3.2fh", time / 60 / 60)
-                elseif minutes > 2 then
-                    isafk = minutes .. "m"
-                end
+        if storage.PData[victim.index].lastOnline then
+            local time = ((game.tick - storage.PData[victim.index].lastOnline) / 60)
+            local days = math.floor(time / 60 / 60 / 24)
+            local hours = math.floor(time / 60 / 60)
+            local minutes = math.floor(time / 60)
+            if days > 0 then
+                isafk = string.format("%3.2fd", time / 60 / 60 / 24)
+            elseif hours > 0 then
+                isafk = string.format("%3.2fh", time / 60 / 60)
+            elseif minutes > 2 then
+                isafk = minutes .. "m"
             end
+        end
 
         if storage.PData[victim.index].score then
             table.insert(results, {
@@ -119,7 +117,6 @@ function ONLINE_UpdatePlayerList()
         if victim.connected then
             count = count + 1
         end
-
     end
 
     table.sort(results, function(k1, k2)
@@ -365,7 +362,7 @@ function ONLINE_Window(player)
 
             local bcheckstate = false
             if storage.PData[player.index].onlineBrief then
-                if storage.PData[player.index].onlineBrief  == true then
+                if storage.PData[player.index].onlineBrief == true then
                     bcheckstate = true
                 else
                     bcheckstate = false
@@ -374,7 +371,7 @@ function ONLINE_Window(player)
                 storage.PData[player.index].onlineBrief = false
             end
 
-            if not storage.PData[player.index].onlineBrief  then
+            if not storage.PData[player.index].onlineBrief then
                 online_titlebar.add {
                     type = "label",
                     name = "online_title",
@@ -434,7 +431,7 @@ function ONLINE_Window(player)
                 sprite = "utility/close",
                 tooltip = "Close this window"
             }
-            
+
 
             local online_main = main_flow.add {
                 type = "scroll-pane",
@@ -545,7 +542,7 @@ function ONLINE_Window(player)
                                 tooltip = "Additional options, such as whisper, banish and find-on-map."
                             }
                         end
-                        submenu.style.size = {24, 24}
+                        submenu.style.size = { 24, 24 }
 
                         local gps_spacer = pframe.add {
                             type = "empty-widget"
@@ -777,7 +774,8 @@ function ONLINE_Clicks(event)
                         player.gui.screen.m45_online_submenu.main.whisper_frame.whisper_textbox.text = ""
 
                         if not victim.connected then
-                            UTIL_SmartPrint(player, "They aren't online right now, but message will appear in chat history.")
+                            UTIL_SmartPrint(player,
+                                "They aren't online right now, but message will appear in chat history.")
                         end
                     else
                         UTIL_SmartPrint(player, "(SYSTEM) That player does not exist.")
@@ -830,23 +828,14 @@ function ONLINE_Clicks(event)
                     UTIL_ConsolePrint("[ERROR] send_whisper: text-box not found")
                 end
             elseif event.element.name == "find_on_map" then
-                ----------------------------------------------------------------
                 if victim and victim.valid then
-                    player.set_controller{type=defines.controllers.remote, position=victim.position}
+                    player.set_controller { type = defines.controllers.remote, position = victim.position }
                 else
                     UTIL_SmartPrint(player, "Invalid target.")
                 end
             elseif event.element.name == "online_button" then
-                ----------------------------------------------------------------
-                -- Online window close
-                if player.gui and player.gui.left and player.gui.left.m45_online then
-                    player.gui.left.m45_online.destroy()
-                else
                     ONLINE_Window(player)
-                end
             elseif event.element.name == "m45_online_close_button" then
-                ----------------------------------------------------------------
-                -- Close online window
                 if player.gui and player.gui.left and player.gui.left.m45_online then
                     player.gui.left.m45_online.destroy()
                 end
@@ -857,11 +846,10 @@ function ONLINE_Clicks(event)
                 storage.PData[player.index].onlineBrief = event.element.state
                 ONLINE_Window(player)
             elseif event.element.name == "m45_member_welcome_close" then
-                PERMS_WelcomeMember(player)
-            elseif event.element.name == "banished_inform_close" then
-                BANISH_InformBanished(true,player)
+                if player and player.gui and player.gui.screen and player.gui.screen.member_welcome then
+                    player.gui.screen.member_welcome.destroy()
+                end
             end
         end
     end
 end
-
