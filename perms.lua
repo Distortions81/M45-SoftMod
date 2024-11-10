@@ -375,9 +375,13 @@ function PERMS_SetPermissions()
         storage.SM_Store.defGroup.set_allows_action(defines.input_action.reassign_blueprint, option)
         storage.SM_Store.defGroup.set_allows_action(defines.input_action.cancel_deconstruct, option)
 
+        --Always on area
         -- Added 10-2024
         storage.SM_Store.defGroup.set_allows_action(defines.input_action.deconstruct, false)
         storage.SM_Store.defGroup.set_allows_action(defines.input_action.activate_paste, false)
+        -- Added 11-2024
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.copy_large_opened_item, false)
+        storage.SM_Store.defGroup.set_allows_action(defines.input_action.copy_large_opened_blueprint, false)
     end
 end
 
