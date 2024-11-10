@@ -424,7 +424,6 @@ function PERMS_PromotePlayer(player)
                 UTIL_MsgAll(player.name .. " moved to jailed group.")
             end
         elseif (player.admin and player.permission_group.name ~= storage.SM_Store.modGroup.name) then
-            -- (REGULARS) Check if they are in the right group, including se-remote-view
             storage.SM_Store.modGroup.add_player(player)
             UTIL_MsgAll(player.name .. " moved to moderators group")
         elseif (storage.PData[player.index].score and
