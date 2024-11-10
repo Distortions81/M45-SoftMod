@@ -168,11 +168,10 @@ function EVENT_PlayerCreated(event)
         return
     end
     local player = game.players[event.player_index]
-    
+
     EVENT_PlayerInit(player)
     UTIL_SendToDefaultSpawn(player)
     INFO_InfoWin(player)
-    ONLINE_UpdatePlayerList()
 
     -- Cutoff-point, just becomes annoying.
     if not player.force.technologies["military-2"].researched then
