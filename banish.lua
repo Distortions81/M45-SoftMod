@@ -28,6 +28,11 @@ end
 
 function BANISH_DoReport(player, report)
     if player and player.valid and report then
+        if UTIL_Is_Banished(player) then
+            UTIL_SmartPrint(player, "No, you are in jail.")
+            return
+        end
+
         storage.PData[player.index].reports = storage.PData[player.index].reports + 1
 
         -- Limit and list number of reports
@@ -173,6 +178,11 @@ end
 
 function BANISH_DoBanish(player, victim, reason)
     if player and player.valid then
+        if UTIL_Is_Banished(player) then
+            UTIL_SmartPrint(player, "No, you are in jail.")
+            return
+        end
+
         -- Regulars/mods only
         if UTIL_Is_Regular(player) or UTIL_Is_Veteran(player) or player.admin then
             -- Must have arguments
@@ -458,6 +468,11 @@ function BANISH_AddBanishCommands()
         if param and param.player_index then
             local player = game.players[param.player_index]
 
+            if UTIL_Is_Banished(player) then
+                UTIL_SmartPrint(player, "No, you are in jail.")
+                return
+            end
+
             -- Only if banish data found
             if storage.SM_Store and storage.SM_Store.votes then
                 -- Print votes
@@ -523,6 +538,11 @@ function BANISH_AddBanishCommands()
     commands.add_command("unbanish", "<player>\n(Withdraws a banish vote)", function(param)
         if param and param.player_index then
             local player = game.players[param.player_index]
+            if UTIL_Is_Banished(player) then
+                UTIL_SmartPrint(player, "No, you are in jail.")
+                return
+            end
+
             if player and param.parameter then
                 -- regulars/moderators players only
                 if UTIL_Is_Regular(player) or UTIL_Is_Veteran(player) or player.admin then
@@ -615,6 +635,10 @@ function BANISH_AddBanishCommands()
     commands.add_command("report", "<detailed report here>\n(Sends in a report to the moderators)", function(param)
         if param and param.player_index then
             local player = game.players[param.player_index]
+            if UTIL_Is_Banished(player) then
+                UTIL_SmartPrint(player, "No, you are in jail.")
+                return
+            end
             BANISH_DoReport(player, param.parameter)
         else
             UTIL_SmartPrint(nil, "The console doesn't need to send in reports this way.")

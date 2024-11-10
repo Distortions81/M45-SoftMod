@@ -756,6 +756,10 @@ function ONLINE_Clicks(event)
                     end
                 end
             elseif event.element.name == "send_whisper" then
+                if UTIL_Is_Banished(player) then
+                    UTIL_SmartPrint(player,"No, you are in jail.")
+                    return
+                end
                 ----------------------------------------------------------------
                 if player.gui and player.gui.screen and player.gui.screen.m45_online_submenu and
                     player.gui.screen.m45_online_submenu.main and
@@ -828,6 +832,10 @@ function ONLINE_Clicks(event)
                     UTIL_ConsolePrint("[ERROR] send_whisper: text-box not found")
                 end
             elseif event.element.name == "find_on_map" then
+                if UTIL_Is_Banished(player) then
+                    UTIL_SmartPrint(player,"No, you are in jail.")
+                    return
+                end
                 if victim and victim.valid then
                     player.set_controller { type = defines.controllers.remote, position = victim.position }
                 else
