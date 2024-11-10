@@ -223,7 +223,7 @@ end
 
 -- Check if player is flagged patreon
 function UTIL_Is_Patreon(victim)
-    if storage.PData[victim.index].patreon then
+    if victim and storage.PData[victim.index] and storage.PData[victim.index].patreon then
         return storage.PData[victim.index].patreon
     else
         return false
@@ -232,7 +232,7 @@ end
 
 -- Check if player is flagged nitro
 function UTIL_Is_Nitro(victim)
-    if storage.PData[victim.index].nitro then
+    if victim and storage.PData[victim.index]and storage.PData[victim.index].nitro then
         return storage.PData[victim.index].nitro
     else
         return false
