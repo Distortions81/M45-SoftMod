@@ -815,7 +815,7 @@ function INFO_InfoWin(player)
             }
             tab4_main_frame.add {
                 type = "label",
-                caption = "[font=default-large]You can bookmark servers, by clicking the gear icon in the server browser![/font]"
+                caption = "[font=default-large]You can bookmark servers, by clicking the star icon in the server browser![/font]"
             }
             local tab4_img2_frame = tab4_main_frame.add {
                 type = "frame",
