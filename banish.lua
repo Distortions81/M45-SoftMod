@@ -373,7 +373,7 @@ function BANISH_AddBanishCommands()
 
                 if (victim) then
                     if victim.index == player.index then
-                        UTIL_SmartPrint(player, "You unjail yourself.")
+                        UTIL_SmartPrint(player, "You can't unjail yourself.")
                         return
                     end
                     if UTIL_Is_Banished(victim) then
