@@ -135,6 +135,7 @@ local function makeUI(player)
 end
 
 function EVENT_PlayerInit(player)
+    STORAGE_CreateGlobal()
     STORAGE_MakePlayerStorage(player)
     PERMS_PromotePlayer(player)
     makeUI(player)
@@ -161,7 +162,6 @@ end
 
 -- New player created, insert items set perms, show players online, welcome to map.
 function EVENT_PlayerCreated(event)
-    STORAGE_CreateGlobal()
 
     if not event or not event.player_index then
         return
