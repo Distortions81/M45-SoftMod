@@ -136,6 +136,7 @@ end
 
 function EVENT_PlayerInit(player)
     STORAGE_MakePlayerStorage(player)
+    PERMS_PromotePlayer(player)
     makeUI(player)
     ONLINE_UpdatePlayerList()
 
@@ -167,7 +168,7 @@ function EVENT_PlayerCreated(event)
         return
     end
     local player = game.players[event.player_index]
-
+    
     EVENT_PlayerInit(player)
     UTIL_SendToDefaultSpawn(player)
     INFO_InfoWin(player)
