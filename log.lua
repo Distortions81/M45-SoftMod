@@ -12,10 +12,10 @@ function LOG_TagAdded(event)
 
     if event.tag.icon and event.tag.icon.name then
         UTIL_MsgAll(player.name .. " add-tag "
-            .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.icon.name .. " " .. event.tag.text)
+            .. UTIL_GPSObj(event.tag) .. " : " .. event.tag.icon.name .. " " .. event.tag.text)
     else
         UTIL_MsgAll(player.name .. " add-tag "
-            .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.text)
+            .. UTIL_GPSObj(event.tag) .. " : " .. event.tag.text)
     end
 end
 
@@ -27,10 +27,10 @@ function LOG_TagMod(event)
     local player = game.players[event.player_index]
     if event.tag.icon and event.tag.icon.name then
         UTIL_MsgAll(player.name .. " edit-tag "
-            .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.icon.name .. " " .. event.tag.text)
+            .. UTIL_GPSObj(event.tag) .. " : " .. event.tag.icon.name .. " " .. event.tag.text)
     else
         UTIL_MsgAll(player.name .. " edit-tag "
-            .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.text)
+            .. UTIL_GPSObj(event.tag) .. " : " .. event.tag.text)
     end
 end
 
@@ -43,10 +43,10 @@ function LOG_TagDel(event)
 
     if event.tag.icon and event.tag.icon.name then
         UTIL_MsgAll(player.name .. " delete-tag "
-            .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.icon.name .. " " .. event.tag.text)
+            .. UTIL_GPSObj(event.tag) .. " : " .. event.tag.icon.name .. " " .. event.tag.text)
     else
         UTIL_MsgAll(player.name .. " delete-tag "
-            .. UTIL_GPSPos(event.tag) .. " : " .. event.tag.text)
+            .. UTIL_GPSObj(event.tag) .. " : " .. event.tag.text)
     end
 end
 

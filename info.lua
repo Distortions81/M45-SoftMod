@@ -48,7 +48,7 @@ function INFO_DumpInv(player, force)
     local position = player.position
     local corpse = player.surface.create_entity {
         name = "character-corpse",
-        position = UTIL_GetDefaultSpawn(),
+        position = player.surface.find_non_colliding_position("character", UTIL_GetDefaultSpawn(), 8192, 1, false),
         inventory_size = inv_corpse_size,
         player_index = player.index
     }

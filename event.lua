@@ -43,13 +43,13 @@ script.on_nth_tick(599, function(event)
     if storage.SM_Store.tickDiv % 6 == 0 then
         ONLINE_UpdatePlayerList() -- online.lua
         UTIL_MapPin()             -- fix map pin if edit/delete
+        LOGO_DrawLogo(true) --Move spawn if blocked
     end
 
     --15 mins
     if storage.SM_Store.tickDiv >= 90 then
         storage.SM_Store.tickDiv = 0
         INFO_CheckAbandoned()
-        LOGO_DrawLogo(true)
     end
 
 
@@ -162,7 +162,6 @@ end
 
 -- New player created, insert items set perms, show players online, welcome to map.
 local function e_playerCreated(event)
-
     RunSetup()
     if not event or not event.player_index then
         return
@@ -221,9 +220,9 @@ local function e_playerDied(event)
     if event.cause and event.cause.valid then
         local cause = event.cause.name
         UTIL_MsgDiscord(player.name ..
-            " was killed by " .. cause .. " at " .. UTIL_GPSPos(player))
+            " was killed by " .. cause .. " at " .. UTIL_GPSObj(player))
     else
-        UTIL_MsgDiscord(player.name .. " was killed at " .. UTIL_GPSPos(player))
+        UTIL_MsgDiscord(player.name .. " was killed at " .. UTIL_GPSObj(player))
     end
     ONELIFE_Main(event)
 end
@@ -375,7 +374,7 @@ function EVENT_Loot(event)
 
             if victim and victim.valid and player and player.valid then
                 local buf = player.name ..
-                    " looted the body of " .. victim.name .. " at " .. UTIL_GPSPos(ent)
+                    " looted the body of " .. victim.name .. " at " .. UTIL_GPSObj(ent)
                 if victim.index ~= player.index then
                     UTIL_MsgAll(buf)
                 end

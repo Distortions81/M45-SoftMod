@@ -47,19 +47,36 @@ function UTIL_WarnOkay(player_index)
     return false
 end
 
-local function util_gpsXY(x, y)
+function UTIL_GPSPos(pos)
+    if pos and pos.x and pos.y then
+    return "[gps=" .. math.floor(pos.x) .. ","
+                .. math.floor(pos.y) .. "] "
+    else
+        return "[Invalid position]"
+    end
+end
+
+function UTIL_GPSXY(x, y)
+    if x and y then
     return "[gps=" .. math.floor(x) .. ","
                 .. math.floor(y) .. "] "
+    else
+        return "[Invalid xy]"
+    end
 end
 
 function UTIL_Area(size, area)
+    if size and area and area.left_top and area.right_bottom then
     return "from: " ..
-        util_gpsXY(area.left_top.x, area.left_top.y) ..
-        " to " .. util_gpsXY(area.right_bottom.x, area.right_bottom.y) ..
+        UTIL_GPSXY(area.left_top.x, area.left_top.y) ..
+        " to " .. UTIL_GPSXY(area.right_bottom.x, area.right_bottom.y) ..
         " AREA: " .. math.floor(size) .. "sq"
+    else
+        return "[Invalid area]"
+    end
 end
 
-function UTIL_GPSPos(item)
+function UTIL_GPSObj(item)
     if item and item.position then
         local sName = ""
         if item and item.surface then
@@ -74,7 +91,8 @@ function UTIL_GPSPos(item)
                 .. math.floor(item.position.y) .. "] "
         end
     end
-end
+    return "[Invalid Object]"
+end 
 
 function UTIL_ConsolePrint(message)
     if message then
