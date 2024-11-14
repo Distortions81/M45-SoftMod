@@ -2,29 +2,63 @@
 -- carlotto81@gmail.com
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
-require "utility"
-require "banish"
-require "logo"
+
+function CMD_NoBanished(player)
+    if player and UTIL_Is_Banished(player) then
+        UTIL_SmartPrint(player, "No. You are banished.")
+        return true
+    end
+    return false
+end
+
+function CMD_ModsOnly(param)
+    if param and param.player_index then
+        local player = game.players[param.player_index]
+        if CMD_NoBanished(player) then
+            return true
+        end
+        if player and not player.admin then
+            UTIL_SmartPrint(player, "That command is for moderators only.")
+            return true
+        end
+    end
+    return false
+end
+
+function CMD_SysOnly(param)
+    if param and param.player_index then
+        local player = game.players[param.player_index]
+        UTIL_SmartPrint(player, "That command is for system use only.")
+        return true
+    end
+    return false
+end
+
+function CMD_NoSys(param)
+    if param and param.player_index then
+        local player = game.players[param.player_index]
+        if CMD_NoBanished(player) then
+            return true
+        end
+        if not player.character then
+            UTIL_SmartPrint(player, "This command can only be used in-game (requires a character body).")
+            return true
+        end
+    end
+    return false
+end
 
 -- Custom commands
 script.on_load(function()
     -- Only add if no commands yet
     if (not commands.commands.server_interface) then
-        add_banish_commands()
+        BANISH_AddBanishCommands()
         -- banish.lua
 
         -- Reset interval message
-        commands.add_command("resetdur", "server use only", function(param)
-            local player
-            local victim
-
-            -- Moderators only
-            if param and param.player_index then
-                player = game.players[param.player_index]
-                if player and player.admin == false then
-                    smart_print(player, "moderators only.")
-                    return
-                end
+        commands.add_command("resetdur", "System use only.", function(param)
+            if CMD_SysOnly(param) then
+                return
             end
 
             local input = ""
@@ -32,66 +66,50 @@ script.on_load(function()
                 input = param.parameter
             end
 
-            create_groups()
+            --Update clock
             for _, target in pairs(game.connected_players) do
                 if target.valid and target.gui and target.gui.top and target.gui.top.reset_clock then
-                    if storage.hide_clock and storage.hide_clock[target.index] == true or input == "" then
-                        target.gui.top.reset_clock.caption = ">"
+                    if storage.PData and storage.PData[target.index].hideClock or input == "" then
+                        target.gui.top.reset_clock.visible = false
                     else
                         target.gui.top.reset_clock.caption = "MAP RESET: " .. input
                         target.gui.top.reset_clock.style = "red_button"
+                        target.gui.top.reset_clock.style.size = { 350, 24 }
+                        target.gui.top.reset_clock.visible = true
                     end
                 end
             end
             -- Refresh open info windows
-            if storage.resetdur ~= input then
-                storage.resetdur = input
+            if storage.SM_Store.resetDuration ~= input then
+                storage.SM_Store.resetDuration = input
                 for _, victim in pairs(game.connected_players) do
                     if victim and victim.valid and victim.gui and victim.gui.screen and
                         victim.gui.screen.m45_info_window then
-                        make_m45_info_window(victim)
+                        INFO_InfoWin(victim)
                     end
                 end
             end
         end)
 
         -- Reset interval message
-        commands.add_command("resetint", "server use only", function(param)
-            local player
-            local victim
-
-            -- Moderators only
-            if param and param.player_index then
-                player = game.players[param.player_index]
-                if player and player.admin == false then
-                    smart_print(player, "Moderators only.")
-                    return
-                end
+        commands.add_command("resetint", "System use only.", function(param)
+            if CMD_SysOnly(param) then
+                return
             end
 
             local input = ""
             if param.parameter then
                 input = param.parameter
             end
-            create_groups()
-            storage.resetint = input
+            storage.SM_Store.resetDate = input
         end)
 
         -- Enable / disable friendly fire
-        commands.add_command("friendlyfire", "on/off", function(param)
+        commands.add_command("friendlyfire", "System use only.", function(param)
             local player
-            local victim
-
-            -- Moderators only
-            if param and param.player_index then
-                player = game.players[param.player_index]
-                if player and player.admin == false then
-                    smart_print(player, "Moderators only.")
-                    return
-                end
+            if CMD_SysOnly(param) then
+                return
             end
-
-            create_groups()
 
             if param and param.parameter then
                 local pforce = game.forces["player"]
@@ -99,163 +117,140 @@ script.on_load(function()
                 if pforce then
                     if string.lower(param.parameter) == "off" then
                         pforce.friendly_fire = false
-                        smart_print(player, "friendly fire disabled.")
+                        UTIL_SmartPrint(player, "friendly fire disabled.")
                     elseif string.lower(param.parameter) == "on" then
                         pforce.friendly_fire = true
-                        smart_print(player, "friendly fire enabled.")
+                        UTIL_SmartPrint(player, "friendly fire enabled.")
                     end
                 end
             else
-                smart_print(player, "on or off?")
+                UTIL_SmartPrint(player, "on or off?")
             end
         end)
 
         -- Enable / disable blueprints
-        commands.add_command("blueprints", "on/off", function(param)
+        commands.add_command("blueprints", "System use only.", function(param)
             local player
-            local victim
-
-            -- Moderators only
-            if param and param.player_index then
-                player = game.players[param.player_index]
-                if player and player.admin == false then
-                    smart_print(player, "Moderators only.")
-                    return
-                end
+            if CMD_SysOnly(param) then
+                return
             end
-
-            create_groups()
 
             if param and param.parameter then
                 local pforce = game.forces["player"]
 
                 if pforce then
                     if string.lower(param.parameter) == "off" then
-                        storage.noBlueprints = false
-                        set_blueprints_enabled(storage.defaultgroup, false)
-                        set_blueprints_enabled(storage.membersgroup, false)
-                        set_blueprints_enabled(storage.regularsgroup, false)
-                        set_blueprints_enabled(storage.veteransgroup, false)
-                        set_blueprints_enabled(storage.modsgroup, false)
-                        smart_print(player, "blueprints disabled...")
+                        storage.SM_Store.noBlueprints = false
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.defGroup, false)
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.memGroup, false)
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.regGroup, false)
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.vetGroup, false)
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.modGroup, false)
+                        UTIL_SmartPrint(player, "blueprints disabled...")
                     elseif string.lower(param.parameter) == "on" then
-                        storage.noBlueprints = true
-                        set_blueprints_enabled(storage.defaultgroup, true)
-                        set_blueprints_enabled(storage.membersgroup, true)
-                        set_blueprints_enabled(storage.regularsgroup, true)
-                        set_blueprints_enabled(storage.modsgroup, true)
-                        set_blueprints_enabled(storage.veteransgroup, true)
-                        smart_print(player, "blueprints enabled...")
+                        storage.SM_Store.noBlueprints = true
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.defGroup, true)
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.memGroup, true)
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.regGroup, true)
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.vetGroup, true)
+                        PERMS_SetBlueprintsAllowed(storage.SM_Store.modGroup, true)
+                        UTIL_SmartPrint(player, "blueprints enabled...")
                     end
                 end
             else
-                smart_print(player, "on or off?")
+                UTIL_SmartPrint(player, "on or off?")
             end
         end)
 
         -- Enable / disable cheat mode
-        commands.add_command("enablecheats", "on/off", function(param)
+        commands.add_command("enablecheats", "System use only.", function(param)
             local player
-            local victim
-
-            -- Moderators only
-            if param and param.player_index then
-                player = game.players[param.player_index]
-                if player and player.admin == false then
-                    smart_print(player, "Moderators only.")
-                    return
-                end
+            if CMD_SysOnly(param) then
+                return
             end
-
-            create_groups()
 
             if param and param.parameter then
                 local pforce = game.forces["player"]
 
                 if pforce then
                     if string.lower(param.parameter) == "off" then
-                        storage.cheatson = false
+                        storage.SM_Store.cheats = false
                         for _, player in pairs(game.players) do
                             player.cheat_mode = false
                         end
-                        smart_print(player, "cheats disabled...")
+                        UTIL_SmartPrint(player, "cheats disabled...")
                     elseif string.lower(param.parameter) == "on" then
-                        storage.cheatson = true
+                        storage.SM_Store.cheats = true
                         for _, player in pairs(game.players) do
                             player.cheat_mode = true
                         end
                         pforce.research_all_technologies()
-                        smart_print(player, "cheats enabled...")
+                        UTIL_SmartPrint(player, "cheats enabled...")
                     end
                 end
             else
-                smart_print(player, "on or off?")
+                UTIL_SmartPrint(player, "on or off?")
             end
         end)
 
         -- Enable / disable cheat mode
-        commands.add_command("onelife", "One life mode on/off or <playerName>", function(param)
-            local player
-            local victim
+        commands.add_command("onelife", "Moderators Only: One life mode on/off or <playerName> for revive.",
+            function(param)
+                local player
 
-            -- Moderators only
-            if param and param.player_index then
-                player = game.players[param.player_index]
-                if player and player.admin == false then
-                    smart_print(player, "Moderators only.")
+                if param and param.player_index then
+                    player = game.players[param.player_index]
+                end
+                if CMD_ModsOnly(param) then
                     return
                 end
-            end
 
-            if param and param.parameter then
-                if param.parameter == "on" and not storage.oneLifeMode then
-                    storage.oneLifeMode = true
-                    smart_print(player,"One-life mode enabled.")
-                    message_all("One-life mode enabled.")
-                    for _, victim in pairs(game.players) do
-                        make_onelife_button(victim)
-                    end
-                elseif param.parameter == "off" and storage.oneLifeMode then
-                    storage.oneLifeMode = false
-                    smart_print(player,"One-life mode disabled.")
-                    message_all("One-life mode disabled.")
-                    for _, victim in pairs(game.players) do
-                        make_onelife_button(victim)
-                    end
-                elseif storage.oneLifeMode then
-                    local victim = game.players[param.parameter]
-
-                    if victim then
-                        if victim.controller_type == defines.controllers.spectator then
-                            storage.oneLifeMode = false
-                            make_onelife_button(victim)
-                            storage.oneLifeMode = true
-                            make_onelife_button(victim)
-
-                            message_all(victim.name .. " was revived!")
-                            smart_print(player, victim.name .. " was revived!")
-                        else
-                            smart_print(player, victim.name .. " is already alive!!!")
+                if param and param.parameter then
+                    if param.parameter == "on" and not storage.SM_Store.oneLifeMode then
+                        storage.SM_Store.oneLifeMode = true
+                        UTIL_SmartPrint(player, "One-life mode enabled.")
+                        UTIL_MsgAll("One-life mode enabled.")
+                        for _, victim in pairs(game.players) do
+                            ONELIFE_MakeButton(victim)
                         end
-                    else
-                        smart_print(player, "I don't see a player by that name.")
+                    elseif param.parameter == "off" and storage.SM_Store.oneLifeMode then
+                        storage.SM_Store.oneLifeMode = false
+                        UTIL_SmartPrint(player, "One-life mode disabled.")
+                        UTIL_MsgAll("One-life mode disabled.")
+                        for _, victim in pairs(game.players) do
+                            ONELIFE_MakeButton(victim)
+                        end
+                    elseif storage.SM_Store.oneLifeMode then
+                        local victim = game.players[param.parameter]
+
+                        if victim then
+                            if storage.PData[victim.index].permDeath then
+                                storage.SM_Store.oneLifeMode = false
+                                ONELIFE_MakeButton(victim)
+                                storage.SM_Store.oneLifeMode = true
+                                ONELIFE_MakeButton(victim)
+
+                                UTIL_MsgAll(victim.name .. " was revived!")
+                                UTIL_SmartPrint(player, victim.name .. " was revived!")
+                            else
+                                UTIL_SmartPrint(player, victim.name .. " is already alive!!!")
+                            end
+                        else
+                            UTIL_SmartPrint(player, "I don't see a player by that name.")
+                        end
                     end
                 end
-            end
-        end)
+            end)
 
         -- adjust run speed
-        commands.add_command("run", "speed: -1 to 100, 0 = normal speed", function(param)
+        commands.add_command("run", "Moderators only: speed: -1 to 100, 0 = normal speed", function(param)
             local player
-            local victim
 
-            -- Moderators only
             if param and param.player_index then
                 player = game.players[param.player_index]
-                if player and player.admin == false then
-                    smart_print(player, "Moderators only.")
-                    return
-                end
+            end
+            if CMD_ModsOnly(param) then
+                return
             end
 
             if player and player.valid then
@@ -274,230 +269,179 @@ script.on_load(function()
                         end
 
                         player.character.character_running_speed_modifier = speed
+                        UTIL_SmartPrint(player, "Walk speed set to " .. speed)
                     else
-                        smart_print(player, "Numbers only.")
+                        UTIL_SmartPrint(player, "Numbers only.")
                     end
                 else
-                    smart_print(player, "Can't set walk speed, because you don't have a body.")
+                    UTIL_SmartPrint(player, "Can't set walk speed, because you don't have a body.")
                 end
             else
-                smart_print(player, "The console can't walk...")
+                UTIL_SmartPrint(player, "The console can't walk...")
             end
         end)
 
         -- turn invincible
-        commands.add_command("immortal", "optional: <name> (toggle player immortality, default self)", function(param)
-            local player
-            local victim
+        commands.add_command("immortal", "Moderators only: optional: <name> (toggle player immortality, default self)",
+            function(param)
+                local player
+                local victim
 
-            -- Moderators only
-            if param and param.player_index then
-                player = game.players[param.player_index]
-                if player and player.admin == false then
-                    smart_print(player, "Moderators only.")
+                if param and param.player_index then
+                    player = game.players[param.player_index]
+                end
+                if CMD_ModsOnly(param) then
                     return
                 end
-            end
 
-            local target = player
+                local target = player
 
-            if param and param.parameter then
-                victim = game.players[param.parameter]
-            end
+                if param and param.parameter then
+                    victim = game.players[param.parameter]
+                end
 
-            if victim and victim.valid then
-                target = victim
-            end
+                if victim and victim.valid then
+                    target = victim
+                end
 
-            if target and target.valid then
-                if target.character and target.character.valid then
-                    if target.character.destructible then
-                        target.character.destructible = false
-                        smart_print(player, target.name .. " is now immortal.")
+                if target and target.valid then
+                    if target.character and target.character.valid then
+                        if target.character.destructible then
+                            target.character.destructible = false
+                            UTIL_SmartPrint(player, target.name .. " is now immortal.")
+                        else
+                            target.character.destructible = true
+                            UTIL_SmartPrint(player, target.name .. " is now mortal.")
+                        end
                     else
-                        target.character.destructible = true
-                        smart_print(player, target.name .. " is now mortal.")
+                        UTIL_SmartPrint(player, "They don't have a character body right now.")
                     end
                 else
-                    smart_print(player, "They don't have a body right now.")
+                    UTIL_SmartPrint(player, "Couldn't find a player by that name.")
                 end
-            else
-                smart_print(player, "Couldn't find a player by that name.")
-            end
-        end)
+            end)
 
         -- change new player restrictions
-        commands.add_command("restrict", "change player restrictions: on/off", function(param)
+        commands.add_command("restrict", "System Use Only.", function(param)
             local player
-
-            -- Moderators only
-            if param and param.player_index then
-                player = game.players[param.player_index]
-                if player and player.admin == false then
-                    smart_print(player, "Moderators only.")
-                    return
-                end
+            if CMD_SysOnly(param) then
+                return
             end
-
-            create_groups()
 
             -- Process argument
             if not param.parameter then
-                smart_print(player, "options: on, off")
+                UTIL_SmartPrint(player, "options: on, off")
                 return
             elseif string.lower(param.parameter) == "off" then
-                storage.restrict = false
-                set_perms()
-                smart_print(player, "New player restrictions disabled.")
+                storage.SM_Store.restrictNew = false
+                PERMS_SetPermissions()
+                UTIL_SmartPrint(player, "New player restrictions disabled.")
                 return
             elseif string.lower(param.parameter) == "on" then
-                storage.restrict = true
-                set_perms()
-                smart_print(player, "New player restrictions enabled.")
+                storage.SM_Store.restrictNew = true
+                PERMS_SetPermissions()
+                UTIL_SmartPrint(player, "New player restrictions enabled.")
                 return
             end
-            create_player_storage()
-        end)
-
-        -- game tick
-        commands.add_command("gt", "Show current game tick number", function(param)
-            local player
-
-            if param and param.player_index then
-                player = game.players[param.player_index]
-            end
-
-            if player then
-                smart_print(player, "Game tick: " .. game.tick)
-                return
-            else
-                print("[GT] " .. game.tick)
-            end
-
-            if param.parameter == "debug" then
-                print(die.debug)
-            end
+            STORAGE_MakePlayerStorage()
         end)
 
         -- register command
         commands.add_command("register", "<code> (Requires a registration code from discord)", function(param)
-            -- This command is disabled
+            local player
+
             if param and param.player_index then
-                local player = game.players[param.player_index]
-
-                -- Only if arguments
-                if param.parameter and player and player.valid then
-                    -- Init storage if needed
-                    if not storage.access_count then
-                        storage.access_count = {}
-                    end
-
-                    -- Init player if needed, else add to
-                    if not storage.access_count[player.index] then
-                        storage.access_count[player.index] = 1
-                    else
-                        if storage.access_count[player.index] > 3 then
-                            smart_print(player, "You have exhausted your registration attempts.")
-                            return
-                        end
-                        storage.access_count[player.index] = storage.access_count[player.index] + 1
-                    end
-
-                    local ptype = "Error"
-
-                    if player.admin then
-                        ptype = "moderator"
-                    elseif is_veteran(player) then
-                        ptype = "veteran"
-                    elseif is_regular(player) then
-                        ptype = "regular"
-                    elseif is_member(player) then
-                        ptype = "member"
-                    else
-                        ptype = "normal"
-                    end
-
-                    -- Send to ChatWire
-                    print("[ACCESS] " .. ptype .. " " .. player.name .. " " .. param.parameter)
-                    smart_print(player, "Sending registration code...")
-                    return
-                end
-                smart_print(player, "You need to provide a registration code!")
+                player = game.players[param.player_index]
+            end
+            if CMD_NoSys(param) then
                 return
             end
-            smart_print(nil, "I don't think the console needs to use this command...")
+
+            -- Only if arguments
+            if param.parameter and player and player.valid then
+                -- Init player if needed, else add to
+
+                if storage.PData[player.index].regAttempts > 3 then
+                    UTIL_SmartPrint(player, "You have exhausted your registration attempts.")
+                    return
+                end
+                storage.PData[player.index].regAttempts = storage.PData[player.index].regAttempts + 1
+
+                local ptype = "Error"
+
+                if player.admin then
+                    ptype = "moderator"
+                elseif UTIL_Is_Veteran(player) then
+                    ptype = "veteran"
+                elseif UTIL_Is_Regular(player) then
+                    ptype = "regular"
+                elseif UTIL_Is_Member(player) then
+                    ptype = "member"
+                else
+                    ptype = "normal"
+                end
+
+                -- Send to ChatWire
+                print("[ACCESS] " .. ptype .. " " .. player.name .. " " .. param.parameter)
+                UTIL_SmartPrint(player, "Sending registration code...")
+                return
+            end
+            UTIL_SmartPrint(player, "You need to provide a registration code!")
         end)
 
         -- softmod version
-        commands.add_command("sversion", "server use only", function(param)
+        commands.add_command("sversion", "System use only.", function(param)
             local player
+            if CMD_SysOnly(param) then
+                return
+            end
 
-            create_mystorage()
+            RunSetup()
 
             if param and param.player_index then
                 player = game.players[param.player_index]
             end
 
             if player then
-                smart_print(player, "[SVERSION] " .. storage.svers)
+                UTIL_SmartPrint(player, "[SVERSION] " .. storage.SM_Version)
             else
-                print("[SVERSION] " .. storage.svers)
+                print("[SVERSION] " .. storage.SM_Version)
             end
         end)
 
         -- Server name
-        commands.add_command("cname", "server use only", function(param)
-            -- Moderators only
-            if param and param.player_index then
-                local player = game.players[param.player_index]
-                if not player.admin then
-                    smart_print(player, "This command is for system and moderator use only.")
-                    return
-                end
-            end
-
-            create_groups()
-
-            if param.parameter then
-                storage.servname = param.parameter
-
-                -- Set logo to be redrawn
-                storage.drawlogo = false
-                -- Redraw
-                dodrawlogo()
-
-                storage.servers = nil
-                storage.ports = nil
-                create_mystorage()
-            end
-        end)
-
-        -- Server chat
-        commands.add_command("cchat", "server use only", function(param)
-            -- Console only, no players
-            if param and param.player_index then
-                local player = game.players[param.player_index]
-                smart_print(player, "This command is for system use only.")
+        commands.add_command("cname", "Systen use only.", function(param)
+            if CMD_SysOnly(param) then
                 return
             end
 
             if param.parameter then
-                message_allp(param.parameter)
+                storage.SM_Store.serverName = param.parameter
+
+                LOGO_DrawLogo(true)
+            end
+        end)
+
+        -- Server chat
+        commands.add_command("cchat", "System use only.", function(param)
+            if CMD_SysOnly(param) then
+                return
+            end
+
+            if param.parameter then
+                UTIL_MsgPlayers(param.parameter)
             end
         end)
 
         -- Server whisper
-        commands.add_command("cwhisper", "server use only", function(param)
-            -- Console only, no players
-            if param and param.player_index then
-                local player = game.players[param.player_index]
-                smart_print(player, "This command is for system use only.")
+        commands.add_command("cwhisper", "System use only.", function(param)
+            if CMD_SysOnly(param) then
                 return
             end
 
             -- Must have arguments
             if param.parameter then
-                local args = mysplit(param.parameter, " ")
+                local args = UTIL_SplitStr(param.parameter, " ")
 
                 -- Require two args
                 if args ~= {} and args[1] and args[2] then
@@ -505,7 +449,7 @@ script.on_load(function()
                     for _, player in pairs(game.connected_players) do
                         if player.name == args[1] then
                             args[1] = ""
-                            smart_print(player, table.concat(args, " "))
+                            UTIL_SmartPrint(player, table.concat(args, " "))
                             return
                         end
                     end
@@ -514,16 +458,14 @@ script.on_load(function()
         end)
 
         -- Reset players's time and status
-        commands.add_command("reset", "<player> -- (Set player to NEW)", function(param)
+        commands.add_command("reset", "Moderators only: <player> -- (Set player to NEW)", function(param)
             local player
 
-            -- Moderators only
             if param and param.player_index then
                 player = game.players[param.player_index]
-                if player and player.admin == false then
-                    smart_print(player, "Moderators only.")
-                    return
-                end
+            end
+            if CMD_ModsOnly(param) then
+                return
             end
 
             -- Argument needed
@@ -531,241 +473,199 @@ script.on_load(function()
                 local victim = game.players[param.parameter]
 
                 if victim and victim.valid then
-                    if storage.active_playtime and storage.active_playtime[victim.index] then
-                        storage.active_playtime[victim.index] = 0
-                        if victim and victim.valid and storage.defaultgroup then
-                            storage.defaultgroup.add_player(victim)
-                        end
-                        if player then
-                            smart_print(player, "Player set to 0.")
-                            message_all(victim.name .. " is now reset!")
-                        end
-                        return
+                    storage.PData[victim.index].playScore = 0
+                    if victim and victim.valid and storage.SM_Store.defGroup then
+                        storage.SM_Store.defGroup.add_player(victim)
                     end
+                    if player then
+                        UTIL_SmartPrint(player, "Player set to 0.")
+                        UTIL_MsgAll(victim.name .. " is now reset!")
+                    end
+                    return
                 end
             end
-            smart_print(player, "Player not found.")
+            UTIL_SmartPrint(player, "Player not found.")
         end)
 
         -- Trust player
-        commands.add_command("member", "<player> -- (Makes the player a member)", function(param)
+        commands.add_command("member", "Moderators only: <player> -- (Makes the player a member)", function(param)
             local player
 
-            -- Moderators only
             if param and param.player_index then
                 player = game.players[param.player_index]
-                if player.admin == false then
-                    smart_print(player, "Moderators only.")
-                    return
-                end
             end
-
-            -- Argument required
-            if param.parameter then
-                local victim = game.players[param.parameter]
-
-                if (victim) then
-                    if victim and victim.valid and storage.membersgroup then
-                        if player then
-                            smart_print(player, "Player given members status.")
-                            message_all(victim.name .. " is now a member!")
-                        end
-                        storage.membersgroup.add_player(victim)
-                        update_player_list() -- online.lua
-                        return
-                    end
-                end
-            end
-            smart_print(player, "Player not found.")
-        end)
-
-        -- Set player to veteran
-        commands.add_command("veteran", "<player> -- (Makes the player a veteran)", function(param)
-            local player
-
-            -- Moderators only
-            if param and param.player_index then
-                player = game.players[param.player_index]
-                if player and player.admin == false then
-                    smart_print(player, "Moderators only.")
-                    return
-                end
-            end
-
-            -- Argument required
-            if param.parameter then
-                local victim = game.players[param.parameter]
-
-                if (victim) then
-                    if victim and victim.valid and storage.veteransgroup then
-                        if player then
-                            smart_print(player, "Player given veterans status.")
-                            message_all(victim.name .. " is now a veteran!")
-                        end
-                        storage.veteransgroup.add_player(victim)
-                        update_player_list() -- online.lua
-                        return
-                    end
-                end
-            end
-            smart_print(player, "Player not found.")
-        end)
-
-        -- Set player to regular
-        commands.add_command("regular", "<player> -- (Makes the player a regular)", function(param)
-            local player
-
-            -- Moderators only
-            if param and param.player_index then
-                player = game.players[param.player_index]
-                if player and player.admin == false then
-                    smart_print(player, "Moderators only.")
-                    return
-                end
-            end
-
-            -- Argument required
-            if param.parameter then
-                local victim = game.players[param.parameter]
-
-                if (victim) then
-                    if victim and victim.valid and storage.regularsgroup then
-                        if player then
-                            smart_print(player, "Player given regulars status.")
-                            message_all(victim.name .. " is now a regular!")
-                        end
-                        storage.regularsgroup.add_player(victim)
-                        update_player_list() -- online.lua
-                        return
-                    end
-                end
-            end
-            smart_print(player, "Player not found.")
-        end)
-
-        -- Set player to patreon
-        commands.add_command("patreon", "<player> -- (Makes the player a patreon)", function(param)
-            local player
-
-            -- Moderators only
-            if param and param.player_index then
-                player = game.players[param.player_index]
-                if player and player.admin == false then
-                    smart_print(player, "Moderators only.")
-                    return
-                end
-            end
-
-            -- Argument required
-            if param.parameter then
-                local victim = game.players[param.parameter]
-
-                if (victim) then
-                    if victim and victim.valid then
-                        if not storage.patreons then
-                            storage.patreons = {}
-                        end
-                        if not storage.patreons[victim.index] then
-                            storage.patreons[victim.index] = true
-                            smart_print(player, "Player given patreon status.")
-                            update_player_list() -- online.lua
-                        else
-                            smart_print(player, "Player already has patreon status.")
-                        end
-
-                        return
-                    end
-                end
-            end
-            smart_print(player, "Player not found.")
-        end)
-
-        -- Set player to nitro
-        commands.add_command("nitro", "<player> -- (Makes the player a nitro booster)", function(param)
-            local player
-
-            -- Moderators only
-            if param and param.player_index then
-                player = game.players[param.player_index]
-                if player and player.admin == false then
-                    smart_print(player, "Moderators only.")
-                    return
-                end
-            end
-
-            -- Argument required
-            if param.parameter then
-                local victim = game.players[param.parameter]
-
-                if (victim) then
-                    if victim and victim.valid then
-                        if not storage.nitros then
-                            storage.nitros = {}
-                        end
-                        if not storage.nitros[victim.index] then
-                            storage.nitros[victim.index] = true
-                            smart_print(player, "Player given nitro status.")
-                            update_player_list() -- online.lua
-                        else
-                            smart_print(player, "Player already has nitro status.")
-                        end
-
-                        return
-                    end
-                end
-            end
-            smart_print(player, "Player not found.")
-        end)
-
-        -- Add player to patreon credits
-        commands.add_command("patreonlist", "server use only", function(param)
-            local player
-
-            -- Console only, no players
-            if param and param.player_index then
-                local player = game.players[param.player_index]
-                smart_print(player, "This command is for system use only.")
+            if CMD_ModsOnly(param) then
                 return
             end
 
             -- Argument required
             if param.parameter then
-                storage.patreonlist = mysplit(param.parameter, ",")
+                local victim = game.players[param.parameter]
+
+                if victim then
+                    if victim and victim.valid and storage.SM_Store.memGroup then
+                        if player then
+                            UTIL_SmartPrint(player, "Player given members status.")
+                            UTIL_MsgAll(victim.name .. " is now a member!")
+                        end
+                        storage.SM_Store.memGroup.add_player(victim)
+                        ONLINE_UpdatePlayerList() -- online.lua
+                        return
+                    end
+                end
+            end
+            UTIL_SmartPrint(player, "Player not found.")
+        end)
+
+        -- Set player to veteran
+        commands.add_command("veteran", "System use only.", function(param)
+            local player
+
+            if CMD_SysOnly(param) then
+                return
+            end
+
+            -- Argument required
+            if param.parameter then
+                local victim = game.players[param.parameter]
+
+                if (victim) then
+                    if victim and victim.valid and storage.SM_Store.vetGroup then
+                        if player then
+                            UTIL_SmartPrint(player, "Player given veterans status.")
+                            UTIL_MsgAll(victim.name .. " is now a veteran!")
+                        end
+                        storage.SM_Store.vetGroup.add_player(victim)
+                        ONLINE_UpdatePlayerList() -- online.lua
+                        return
+                    end
+                end
+            end
+            UTIL_SmartPrint(player, "Player not found.")
+        end)
+
+        -- Set player to regular
+        commands.add_command("regular", "System use only.", function(param)
+            local player
+            if CMD_SysOnly(param) then
+                return
+            end
+
+            -- Argument required
+            if param.parameter then
+                local victim = game.players[param.parameter]
+
+                if (victim) then
+                    if victim and victim.valid and storage.SM_Store.regGroup then
+                        if player then
+                            UTIL_SmartPrint(player, "Player given regulars status.")
+                            UTIL_MsgAll(victim.name .. " is now a regular!")
+                        end
+                        storage.SM_Store.regGroup.add_player(victim)
+                        ONLINE_UpdatePlayerList() -- online.lua
+                        return
+                    end
+                end
+            end
+            UTIL_SmartPrint(player, "Player not found.")
+        end)
+
+        -- Set player to patreon
+        commands.add_command("patreon", "System use only.", function(param)
+            local player
+            if CMD_SysOnly(param) then
+                return
+            end
+
+            -- Argument required
+            if param.parameter then
+                local victim = game.players[param.parameter]
+
+                if (victim) then
+                    if victim and victim.valid then
+                        if not storage.PData[victim.index].patreon then
+                            storage.PData[victim.index].patreon = true
+                            UTIL_SmartPrint(player, "Player given patreon status.")
+                            ONLINE_UpdatePlayerList() -- online.lua
+                        else
+                            UTIL_SmartPrint(player, "Player already has patreon status.")
+                        end
+
+                        return
+                    end
+                end
+            end
+            UTIL_SmartPrint(player, "Player not found.")
+        end)
+
+        -- Set player to nitro
+        commands.add_command("nitro", "System use only.", function(param)
+            local player
+            if CMD_SysOnly(param) then
+                return
+            end
+
+            -- Argument required
+            if param.parameter then
+                local victim = game.players[param.parameter]
+
+                if (victim) then
+                    if victim and victim.valid then
+                        if not storage.PData[victim.index].nitro then
+                            storage.PData[victim.index].nitro = true
+                            UTIL_SmartPrint(player, "Player given nitro status.")
+                            ONLINE_UpdatePlayerList() -- online.lua
+                        else
+                            UTIL_SmartPrint(player, "Player already has nitro status.")
+                        end
+
+                        return
+                    end
+                end
+            end
+            UTIL_SmartPrint(player, "Player not found.")
+        end)
+
+        -- Add player to patreon credits
+        commands.add_command("patreonlist", "System use only.", function(param)
+            local player
+            if CMD_SysOnly(param) then
+                return
+            end
+
+            -- Argument required
+            if param.parameter then
+                storage.SM_Store.patreonCredits = UTIL_SplitStr(param.parameter, ",")
             end
         end)
 
         -- Add player to nitro credits
-        commands.add_command("nitrolist", "server use only", function(param)
+        commands.add_command("nitrolist", "System use only.", function(param)
             local player
-
-            -- Console only, no players
-            if param and param.player_index then
-                local player = game.players[param.player_index]
-                smart_print(player, "This command is for system use only.")
+            if CMD_SysOnly(param) then
                 return
             end
 
             -- Argument required
             if param.parameter then
-                storage.nitrolist = mysplit(param.parameter, ",")
+                storage.SM_Store.nitroCredits = UTIL_SplitStr(param.parameter, ",")
             end
         end)
 
         -- Change default spawn point
-        commands.add_command("cspawn", "<x,y> -- (OPTIONAL) (Sets spawn point to <x,y>, or where you stand by default)",
+        commands.add_command("cspawn",
+            "Moderators only: <x,y> -- (OPTIONAL) (Sets spawn point to <x,y>, or where you stand by default)",
             function(param)
                 local victim
-                local new_pos_x = 0.0
-                local new_pos_y = 0.0
+                local new_pos_x
+                local new_pos_y
 
-                -- Moderators only
+
                 if param and param.player_index then
                     victim = game.players[param.player_index]
-
-                    if victim and victim.admin == false then
-                        smart_print(victim, "Moderators only.")
-                        return
-                    end
+                end
+                if CMD_ModsOnly(param) then
+                    return
                 end
 
                 local psurface = game.surfaces[1]
@@ -781,14 +681,12 @@ script.on_load(function()
 
                 -- Location supplied
                 if param.parameter then
-                    local xytable = mysplit(param.parameter, ",")
+                    local xytable = UTIL_SplitStr(param.parameter, ",")
                     if xytable ~= {} and tonumber(xytable[1]) and tonumber(xytable[2]) then
-                        local argx = xytable[1]
-                        local argy = xytable[2]
-                        new_pos_x = argx
-                        new_pos_y = argy
+                        new_pos_x = tonumber(xytable[1])
+                        new_pos_y = tonumber(xytable[2])
                     else
-                        smart_print(victim, "Invalid argument. /cspawn x,y. No argument uses your current location.")
+                        UTIL_SmartPrint(victim, "Invalid argument. /cspawn x,y. No argument uses your current location.")
                         return
                     end
                 end
@@ -796,43 +694,36 @@ script.on_load(function()
                 -- Set new spawn spot
                 if pforce and psurface and new_pos_x and new_pos_y then
                     pforce.set_spawn_position({ new_pos_x, new_pos_y }, psurface)
-                    smart_print(victim, string.format("New spawn point set: %d,%d", math.floor(new_pos_x),
+                    UTIL_SmartPrint(victim, string.format("New spawn point set: %d,%d", math.floor(new_pos_x),
                         math.floor(new_pos_y)))
-                    smart_print(victim, string.format("Force: %s", pforce.name))
+                    UTIL_SmartPrint(victim, string.format("Force: %s", pforce.name))
 
-                    -- Set logo to be redrawn
-                    storage.drawlogo = false
-                    -- Redraw
-                    dodrawlogo()
+                    LOGO_DrawLogo(true)
                 else
-                    smart_print(victim, "Couldn't find force...")
+                    UTIL_SmartPrint(victim, "Couldn't find force...")
                 end
             end)
 
         -- Reveal map
         commands.add_command("reveal",
-            "<size> -- (OPTIONAL) Reveals <size> units of the map from map center, or 1024 by default. Min 128, Max 8192)",
+            "Moderators only: <size> -- (OPTIONAL) Reveals <size> units of the map from map center, or 1024 by default. Min 128, Max 8192)",
             function(param)
+                local size = tonumber(1024)
                 local victim
 
-                -- Moderators only
                 if param and param.player_index then
                     victim = game.players[param.player_index]
-                    if victim and victim.admin == false then
-                        smart_print(victim, "Moderators only.")
-                        return
-                    end
                 end
-
+                if CMD_ModsOnly(param) then
+                    return
+                end
                 -- Get surface and force
                 local psurface = game.surfaces[1]
                 local pforce = game.forces["player"]
-                -- Default size
-                local size = 1024
 
                 -- Use mods's surface and force if possible
                 if victim and victim.valid then
-                    psurface = victim.surface
+                    psurface = victim.physical_surface
                     pforce = victim.force
                 end
 
@@ -853,7 +744,7 @@ script.on_load(function()
                             end
                         end
                     else
-                        smart_print(victim, "Numbers only.")
+                        UTIL_SmartPrint(victim, "Numbers only.")
                         return
                     end
                 end
@@ -871,23 +762,21 @@ script.on_load(function()
                         }
                     })
                     local sstr = math.floor(size)
-                    smart_print(victim, "Revealing " .. sstr .. "x" .. sstr .. " tiles")
+                    UTIL_SmartPrint(victim, "Revealing " .. sstr .. "x" .. sstr .. " tiles")
                 else
-                    smart_print(victim, "Invalid force or surface.")
+                    UTIL_SmartPrint(victim, "Invalid force or surface.")
                 end
             end)
 
         -- Rechart map
-        commands.add_command("rechart", "Refreshes all chunks that exist", function(param)
+        commands.add_command("rechart", "Moderators only: Refreshes all chunks that exist", function(param)
             local victim
 
-            -- Moderators only
             if param and param.player_index then
                 victim = game.players[param.player_index]
-                if victim and victim.admin == false then
-                    smart_print(victim, "Moderators only.")
-                    return
-                end
+            end
+            if CMD_ModsOnly(param) then
+                return
             end
 
             local pforce = game.forces["player"]
@@ -899,9 +788,9 @@ script.on_load(function()
 
             if pforce then
                 pforce.clear_chart()
-                smart_print(victim, "Recharting map...")
+                UTIL_SmartPrint(victim, "Recharting map...")
             else
-                smart_print(victim, "Couldn't find force.")
+                UTIL_SmartPrint(victim, "Couldn't find force.")
             end
         end)
 
@@ -914,68 +803,63 @@ script.on_load(function()
             end
 
             -- Sends updated list of players to server
-            update_player_list()
+            ONLINE_UpdatePlayerList()
 
             -- Already sent if console
             if victim then
-                show_players(victim)
+                UTIL_SendPlayers(victim)
             end
         end)
 
         -- Game speed, without walk speed mod
-        commands.add_command("aspeed", "<x.x> -- Set game UPS, and do not adjust walk speed.", function(param)
-            local player
-
-            if param and param.player_index then
-                player = game.players[param.player_index]
-            end
-
-            -- Moderators only
-            if player and player.admin == false then
-                smart_print(player, "Moderators only.")
-                return
-            end
-
-            -- Need argument
-            if (not param.parameter) then
-                smart_print(player, "But what speed? 4 to 1000")
-                return
-            end
-
-            -- Decode arg
-            if tonumber(param.parameter) then
-                local value = tonumber(param.parameter)
-
-                -- Limit speed range
-                if (value >= 4 and value <= 1000) then
-                    game.speed = (value / 60.0)
-                else
-                    smart_print(player, "That doesn't seem like a good idea...")
-                end
-            else
-                smart_print(player, "Numbers only.")
-            end
-        end)
-
-        -- Game speed
-        commands.add_command("gspeed",
-            "<x.x> -- Changes game speed. Default speed: 1.0 (60 UPS), Min 0.01 (0.6 UPS), Max  10.0 (600 UPS)",
+        commands.add_command("aspeed", "Moderators only: <x.x> -- Set game UPS, and do not adjust walk speed.",
             function(param)
                 local player
 
                 if param and param.player_index then
                     player = game.players[param.player_index]
                 end
-
-                -- Moderators only
-                if player and player.admin == false then
-                    smart_print(player, "Moderators only.")
+                if CMD_ModsOnly(param) then
                     return
                 end
 
                 -- Need argument
                 if (not param.parameter) then
-                    smart_print(player, "But what speed? 0.01 to 10")
+                    UTIL_SmartPrint(player, "But what speed? 4 to 1000")
+                    return
+                end
+
+                -- Decode arg
+                if tonumber(param.parameter) then
+                    local value = tonumber(param.parameter)
+
+                    -- Limit speed range
+                    if (value >= 4 and value <= 1000) then
+                        game.speed = (value / 60.0)
+                    else
+                        UTIL_SmartPrint(player, "That doesn't seem like a good idea...")
+                    end
+                else
+                    UTIL_SmartPrint(player, "Numbers only.")
+                end
+            end)
+
+        -- Game speed
+        commands.add_command("gspeed",
+            "Moderators only: <x.x> -- Changes game speed. Default speed: 1.0 (60 UPS), Min 0.01 (0.6 UPS), Max  10.0 (600 UPS)",
+            function(param)
+                local player
+
+                if param and param.player_index then
+                    player = game.players[param.player_index]
+                end
+                if CMD_ModsOnly(param) then
+                    return
+                end
+
+                -- Need argument
+                if (not param.parameter) then
+                    UTIL_SmartPrint(player, "But what speed? 0.01 to 10")
                     return
                 end
 
@@ -999,170 +883,154 @@ script.on_load(function()
                         if pforce then
                             -- Calculate walk speed for UPS
                             pforce.character_running_speed_modifier = ((1.0 / value) - 1.0)
-                            smart_print(player, "Game speed: " .. value .. " Walk speed: " ..
+                            UTIL_SmartPrint(player, "Game speed: " .. value .. " Walk speed: " ..
                                 pforce.character_running_speed_modifier)
 
                             -- Don't show message if run via console (ChatWire)
                             if (player) then
-                                message_all("Game speed set to " .. (game.speed * 100.00) .. "%")
+                                UTIL_MsgAll("Game speed set to " .. (game.speed * 100.00) .. "%")
                             end
                         else
-                            smart_print(player, "Couldn't find a valid force")
+                            UTIL_SmartPrint(player, "Couldn't find a valid force")
                         end
                     else
-                        smart_print(player, "That doesn't seem like a good idea...")
+                        UTIL_SmartPrint(player, "That doesn't seem like a good idea...")
                     end
                 else
-                    smart_print(player, "Numbers only.")
+                    UTIL_SmartPrint(player, "Numbers only.")
                 end
             end)
 
         -- Teleport to
-        commands.add_command("tto", "<player> -- teleport to <player>", function(param)
-            -- No console :P
-            if not param.player_index then
-                smart_print(nil, "You want me to teleport a remote console somewhere???")
+        commands.add_command("tto", "Moderators only: <player> -- teleport to <player>", function(param)
+            local player
+
+            if param and param.player_index then
+                player = game.players[param.player_index]
+            end
+            if CMD_NoSys(param) or CMD_ModsOnly(param) then
                 return
             end
-            local player = game.players[param.player_index]
 
-            -- Moderator only
-            if (player and player.valid and player.connected and player.character and player.character.valid) then
-                if (player.admin == false) then
-                    smart_print(player, "Moderators only.")
+            -- Argument required
+            if param.parameter then
+                local victim = game.players[param.parameter]
+
+                if (victim and victim.valid) then
+                    local newpos = victim.physical_surface.find_non_colliding_position("character", victim.position, 1024,
+                        1, false)
+                    if (newpos) then
+                        player.teleport(newpos, victim.physical_surface)
+                        UTIL_SmartPrint(player, "*Poof!*")
+                    else
+                        UTIL_SmartPrint(player, "Area appears to be full.")
+                        UTIL_ConsolePrint("[ERROR] tto: unable to find non_colliding_position.")
+                    end
                     return
                 end
-
-                -- Argument required
-                if param.parameter then
-                    local victim = game.players[param.parameter]
-
-                    if (victim and victim.valid) then
-                        local newpos = victim.surface.find_non_colliding_position("character", victim.position, 100,
-                            0.1, false)
-                        if (newpos) then
-                            player.teleport(newpos, victim.surface)
-                            smart_print(player, "*Poof!*")
-                        else
-                            smart_print(player, "Area appears to be full.")
-                            console_print("[ERROR] tto: unable to find non_colliding_position.")
-                        end
-                        return
-                    end
-                end
-                smart_print(player, "Teleport to who?")
             end
+            UTIL_SmartPrint(player, "Teleport to who?")
         end)
 
         -- Teleport x,y
-        commands.add_command("tp", "<x,y> -- teleport to <x,y> or <surface>", function(param)
-            -- No console :P
-            if not param.player_index then
-                smart_print(nil, "You want me to teleport a remote console somewhere???")
+        commands.add_command("tp", "Moderators only: <x,y> -- teleport to <x,y> or <surface>", function(param)
+            local player
+            if param and param.player_index then
+                player = game.players[param.player_index]
+            end
+            if CMD_NoSys(param) or CMD_ModsOnly(param) then
                 return
             end
-            local player = game.players[param.player_index]
 
-            -- Moderators only
-            if (player and player.valid and player.connected and player.character and player.character.valid) then
-                if (player.admin == false) then
-                    smart_print(player, "Moderators only.")
-                    return
-                end
+            local surface = player.physical_surface
 
-                local surface = player.surface
+            -- Argument required
+            if param.parameter then
+                local str = param.parameter
+                local xpos = "0.0"
+                local ypos = "0.0"
 
-                -- Argument required
-                if param.parameter then
-                    local str = param.parameter
-                    local xpos = "0.0"
-                    local ypos = "0.0"
-
-                    -- Find surface from argument
-                    local n = game.surfaces[param.parameter]
-                    if n then
-                        surface = n
-                        local position = {
-                            x = xpos,
-                            y = ypos
-                        }
-                        local newpos = surface.find_non_colliding_position("character", position, 100, 0.1, false)
-                        if newpos then
-                            player.teleport(newpos, surface)
-                            return
-                        else
-                            player.teleport(position, surface)
-                            console_print("[ERROR] tp: unable to find non_colliding_position.")
-                        end
-                    end
-
-                    -- Find x/y from argument
-                    -- Matches two potentially negative numbers separated by a comma, gps compatible
-                    -- str could be "-353.5,19.3" or "[gps=80,-20]" or "[gps=5,3,hell]"
-                    xpos, ypos = str:match("(%-?%d+)%.?%d*,%s*(%-?%d+)")
-                    if tonumber(xpos) and tonumber(ypos) then
-                        local position = {
-                            x = xpos,
-                            y = ypos
-                        }
-
-                        if position then
-                            if position.x and position.y then
-                                local newpos = surface.find_non_colliding_position("character", position, 100, 0.1,
-                                    false)
-                                if (newpos) then
-                                    player.teleport(newpos, surface)
-                                    smart_print(player, "*Poof!*")
-                                else
-                                    smart_print(player, "Area appears to be full.")
-                                    console_print("[ERROR] tp: unable to find non_colliding_position.")
-                                end
-                            else
-                                smart_print(player, "Invalid location.")
-                            end
-                        end
+                -- Find surface from argument
+                local n = game.surfaces[param.parameter]
+                if n then
+                    surface = n
+                    local position = {
+                        x = xpos,
+                        y = ypos
+                    }
+                    local newpos = surface.find_non_colliding_position("character", position, 1024, 1, false)
+                    if newpos then
+                        player.teleport(newpos, surface)
                         return
                     else
-                        smart_print(player, "Numbers only.")
+                        player.teleport(position, surface)
+                        UTIL_ConsolePrint("[ERROR] tp: unable to find non_colliding_position.")
                     end
                 end
-                smart_print(player, "Teleport where? x,y or surface name")
+
+                -- Find x/y from argument
+                -- Matches two potentially negative numbers separated by a comma, gps compatible
+                -- str could be "-353.5,19.3" or "[gps=80,-20]" or "[gps=5,3,jail]"
+                xpos, ypos = str:match("(%-?%d+)%.?%d*,%s*(%-?%d+)")
+                if tonumber(xpos) and tonumber(ypos) then
+                    local position = {
+                        x = xpos,
+                        y = ypos
+                    }
+
+                    if position then
+                        if position.x and position.y then
+                            local newpos = surface.find_non_colliding_position("character", position, 1024, 1,
+                                false)
+                            if (newpos) then
+                                player.teleport(newpos, surface)
+                                UTIL_SmartPrint(player, "*Poof!*")
+                            else
+                                UTIL_SmartPrint(player, "Area appears to be full.")
+                                UTIL_ConsolePrint("[ERROR] tp: unable to find non_colliding_position.")
+                            end
+                        else
+                            UTIL_SmartPrint(player, "Invalid location.")
+                        end
+                    end
+                    return
+                else
+                    UTIL_SmartPrint(player, "Numbers only.")
+                end
             end
+            UTIL_SmartPrint(player, "Teleport where? x,y or surface name")
         end)
 
         -- Teleport player to me
-        commands.add_command("tfrom", "<player> -- teleport <player> to me", function(param)
-            -- No console :P
-            if not param.player_index then
-                smart_print(nil, "You want me to teleport a remote console somewhere???")
+        commands.add_command("tfrom", "Moderators only: <player> -- teleport <player> to me", function(param)
+            local player
+            if param and param.player_index then
+                player = game.players[param.player_index]
+            end
+            if CMD_NoSys(param) or CMD_ModsOnly(param) then
                 return
             end
-            local player = game.players[param.player_index]
 
-            -- Moderators only
-            if (player and player.valid and player.connected and player.character and player.character.valid) then
-                if (player.admin == false) then
-                    smart_print(player, "Moderators only.")
+            -- Argument required
+            if param.parameter then
+                local victim = game.players[param.parameter]
+                if UTIL_Is_Banished(victim) then
+                    UTIL_SmartPrint(player, "They are in jail, use /unjail <name>")
                     return
                 end
 
-                -- Argument required
-                if param.parameter then
-                    local victim = game.players[param.parameter]
-
-                    if (victim and victim.valid) then
-                        local newpos = player.surface.find_non_colliding_position("character", player.position, 100,
-                            0.1, false)
-                        if (newpos) then
-                            victim.teleport(newpos, player.surface)
-                            smart_print(player, "*Poof!*")
-                        else
-                            smart_print(player, "Area appears to be full.")
-                            console_print("[ERROR] tfrom: unable to find non_colliding_position.")
-                        end
+                if (victim and victim.valid) then
+                    local newpos = player.physical_surface.find_non_colliding_position("character", player.position, 1024,
+                        1, false)
+                    if (newpos) then
+                        victim.teleport(newpos, player.physical_surface)
+                        UTIL_SmartPrint(player, "*Poof!*")
                     else
-                        smart_print(player, "Who do you want to teleport to you?")
+                        UTIL_SmartPrint(player, "Area appears to be full.")
+                        UTIL_ConsolePrint("[ERROR] tfrom: unable to find non_colliding_position.")
                     end
+                else
+                    UTIL_SmartPrint(player, "Who do you want to teleport to you?")
                 end
             end
         end)

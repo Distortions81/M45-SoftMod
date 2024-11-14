@@ -2,42 +2,121 @@
 -- carlotto81@gmail.com
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
+
 -- Add M45 Logo to spawn area
-function dodrawlogo()
-    local msurf = game.surfaces["nauvis"]
+function LOGO_DrawLogo(force)
+    if force then
+        storage.SM_Store.redrawLogo = true
+        UTIL_MapPin()
+    end
+
+    local msurf = game.surfaces[1]
     if msurf then
+        -- Migrate old scripts
+        if storage.m45logo then
+            storage.m45logo.destroy()
+        end
+        if storage.m45logo_light then
+            storage.m45logo_light.destroy()
+        end
+        if storage.servtext then
+            storage.servtext.destroy()
+        end
+
         -- Only draw if needed
-        if not storage.drawlogo then
+        if storage.SM_Store.redrawLogo then
             -- Destroy if already exists
-            if storage.m45logo then
-               storage.m45logo.destroy()
+            if storage.SM_Store.spawnLight then
+                storage.SM_Store.spawnLight.destroy()
             end
-            if storage.m45logo_light then
-               storage.m45logo_light.destroy()
+            if storage.SM_Store.spawnText then
+                storage.SM_Store.spawnText.destroy()
             end
-            if storage.servtext then
-               storage.servtext.destroy()
+            if storage.SM_Store.spawnLogo then
+                storage.SM_Store.spawnLogo.destroy()
             end
 
-            -- Get spawn position
-            local cpos = get_default_spawn()
+            --Check if any buildings are on top of spawn
+            local blocked = false
+            local cpos = UTIL_GetDefaultSpawn()
+            local entFound = msurf.find_entities({ { x = cpos.x - 10, y = cpos.y - 10 }, { x = cpos.x + 10, y = cpos.y + 10 } })
+            for _, ent in pairs(entFound) do
+                if string.find(ent.name, "tree") then
+                    ent.destroy()
+                elseif ent.name ~= "character" and ent.has_flag("player-creation") then
+                    blocked = true
+                end
+            end
 
-            -- Find nice clear area for spawn
-            local newpos = msurf.find_non_colliding_position("crash-site-spaceship", cpos, 8192, 10, false)
-            -- Set spawn position if we found a better spot
-            if newpos then
-                cpos = newpos
-                local pforce = game.forces["player"]
-                if pforce then
-                    pforce.set_spawn_position(cpos, msurf)
+            --If needed, move spawn
+            if blocked then
+                local lpos = { x = 0, y = 0 }
+                cpos = lpos
+                local attempts = 0
+                local stillBlocked = false
+                while blocked do
+                    for x = 0, 4000, 4 do
+                        for y = 0, 4000, 4 do
+                            for z = 0, 3, 1 do
+                                if z == 0 then
+                                    lpos.x = cpos.x + x
+                                    lpos.y = cpos.y + y
+                                elseif z == 1 then
+                                    lpos.x = cpos.x - x
+                                    lpos.y = cpos.y + y
+                                elseif z == 2 then
+                                    lpos.x = cpos.x + x
+                                    lpos.y = cpos.y - y
+                                else
+                                    lpos.x = cpos.x - x
+                                    lpos.y = cpos.y - y
+                                end
+                                local entFound = msurf.find_entities({ { lpos.x - 10, lpos.y - 10 }, { lpos.x + 10, lpos.y + 10 } })
+                                attempts = attempts + 1
+                                if attempts >= 10000 then
+                                    return
+                                end
+                                stillBlocked = false
+                                for _, ent in pairs(entFound) do
+                                    if string.find(ent.name, "tree") then
+                                        ent.destroy()
+                                    elseif ent.name ~= "character" and ent.has_flag("player-creation") then
+                                        stillBlocked = true
+                                    end
+                                end
+                                if msurf.can_place_entity("crash-site-spaceship", lpos, defines.direction.south, game.forces["player"], defines.build_check_type.manual, false) then
+                                    if not stillBlocked then
+                                        blocked = false
+                                        goto done
+                                    else
+                                        stillBlocked = false
+                                        blocked = true
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+
+
+                ::done::
+                if not blocked then
+                    local pforce = game.forces["player"]
+                    if pforce then
+                        pforce.set_spawn_position(lpos, msurf)
+                        UTIL_MapPin()
+                        UTIL_MsgAllSys("Items placed on top of the spawn area, spawn moved to " .. UTIL_GPSPos(lpos))
+                    else
+                        UTIL_ConsolePrint("[ERROR] dodrawlogo: Player force not found.")
+                    end
                 else
-                    console_print("[ERROR] dodrawlogo: Player force not found.")
+                    UTIL_ConsolePrint("[ERROR] dodrawlogo: No suitable spawn location found!!!")
                 end
             end
 
             -- Set drawn flag
-            storage.drawlogo = true
-            storage.m45logo = rendering.draw_sprite {
+            storage.SM_Store.redrawLogo = false
+            storage.SM_Store.spawnLogo = rendering.draw_sprite {
                 sprite = "file/img/world/m45-pad-v6.png",
                 render_layer = "floor",
                 target = cpos,
@@ -45,7 +124,7 @@ function dodrawlogo()
                 y_scale = 0.5,
                 surface = msurf
             }
-            storage.m45logo_light = rendering.draw_light {
+            storage.SM_Store.spawnLight = rendering.draw_light {
                 sprite = "utility/light_medium",
                 render_layer = 148,
                 target = cpos,
@@ -53,16 +132,16 @@ function dodrawlogo()
                 surface = msurf,
                 minimum_darkness = 0.5
             }
-            if not storage.servname then
-                storage.servname = ""
+            if not storage.SM_Store.serverName then
+                storage.SM_Store.serverName = ""
             end
-            storage.servtext = rendering.draw_text {
-                text = storage.servname,
+            storage.SM_Store.spawnText = rendering.draw_text {
+                text = storage.SM_Store.serverName,
                 draw_on_ground = true,
                 surface = msurf,
-                target = {cpos.x - 0.125, cpos.y - 2.5},
+                target = { cpos.x - 0.125, cpos.y - 2.5 },
                 scale = 3.0,
-                color = {1, 1, 1},
+                color = { 1, 1, 1 },
                 alignment = "center",
                 scale_with_zoom = false
             }

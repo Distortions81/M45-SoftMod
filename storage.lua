@@ -3,120 +3,145 @@
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
 -- Create storage, if needed
-function create_mystorage()
-    storage.svers = "624-11.02.2024-1043p"
-
-
-    if not storage.oneLifeMode then
-        oneLifeMode = false
+function STORAGE_CreateGlobal()
+    if not storage.PData then
+        storage.PData = {}
     end
-    
-    -- Adjust look
-    game.surfaces[1].show_clouds = false
-
-    -- This mod complely screws player permissions
-    if script.active_mods["RemoteConfiguration"] then
-        storage.disableperms = true
-    else
-        storage.disableperms = false
+    if not storage.SM_Store then
+        storage.SM_Store = {}
     end
 
-    if not storage.resetdur then
-        storage.resetdur = ""
+    --Map resets
+    if not storage.SM_Store.resetDuration then
+        storage.SM_Store.resetDuration = ""
     end
-    if not storage.resetint then
-        storage.resetint = ""
-    end
-    if not storage.restrict == nil then
-        storage.restrict = true
-    end
-    if not storage.playeractive then
-        storage.playeractive = {}
-    end
-    if not storage.playermoving then
-        storage.playermoving = {}
-    end
-    if not storage.active_playtime then
-        storage.active_playtime = {}
-    end
-    if not storage.last_playtime then
-        storage.last_playtime = {}
+    if not storage.SM_Store.resetDuration then
+        storage.SM_Store.resetDate = ""
     end
 
-    if not storage.patreons then
-        storage.patreons = {}
-    end
-    if not storage.nitros then
-        storage.nitros = {}
+    --Perms
+    if not storage.SM_Store.restrictNew then
+        storage.SM_Store.restrictNew = false
     end
 
-    if not storage.patreonlist then
-        storage.patreonlist = {}
+    --Credits
+    if not storage.SM_Store.patreonCredits then
+        storage.SM_Store.patreonCredits = {}
     end
-    if not storage.nitrolist then
-        storage.nitrolist = {}
-    end
-
-    if not storage.last_speaker_warning then
-        storage.last_speaker_warning = 1
-    end
-    if not storage.last_warning then
-        storage.last_warning = 1
-    end
-    if not storage.last_ghost_log then
-        storage.last_warning = 1
+    if not storage.SM_Store.nitroCredits then
+        storage.SM_Store.nitroCredits = {}
     end
 
-    make_banish_storage()
-
-    if not storage.info_shown then
-        storage.info_shown = {}
+    --Banish
+    if not storage.SM_Store.votes then
+        storage.SM_Store.votes = {}
+    end
+    if not storage.SM_Store.sendToSurface then
+        storage.SM_Store.sendToSurface = {}
     end
 
-    if not storage.hide_clock then
-        storage.hide_clock = {}
+    --Game Modes
+    if not storage.SM_Store.noBlueprints then
+        storage.SM_Store.noBlueprints = false
+    end
+    if not storage.SM_Store.oneLifeMode then
+        storage.SM_Store.oneLifeMode = false
+    end
+    if not storage.SM_Store.cheats then
+        storage.SM_Store.cheats = false
     end
 
-    if not storage.lastonlinestring then
-        storage.lastonlinestring = ""
+    --Players Online
+    if not storage.SM_Store.onlineCache then
+        storage.SM_Store.onlineCache = ""
+    end
+    if not storage.SM_Store.pcount then
+        storage.SM_Store.pcount = 0
+    end
+    if not storage.SM_Store.tcount then
+        storage.SM_Store.tcount = 0
+    end
+    if not storage.SM_Store.playerList then
+        storage.SM_Store.playerList = {}
     end
 
-    if not storage.cleaned_players then
-        storage.cleaned_players = {}
+    --Spawn Logo
+    if not storage.SM_Store.redrawLogo then
+        storage.SM_Store.redrawLogo = true
+    end
+    if not storage.SM_Store.serverName then
+        storage.SM_Store.serverName = ""
+    end
+
+    --Tick divider
+    if not storage.SM_Store.tickDiv then
+        storage.SM_Store.tickDiv = 0
+    end
+
+    --Fix existing players
+    for _, victim in pairs(game.players) do 
+        STORAGE_MakePlayerStorage(victim)
     end
 end
 
 -- Create player storage, if needed
-function create_player_storage(player)
-    if player and player.valid then
-        if storage.playeractive and player and player.index then
-            if not storage.playeractive[player.index] then
-                storage.playeractive[player.index] = false
-            end
-            if not storage.playermoving[player.index] then
-                storage.playermoving[player.index] = false
-            end
+function STORAGE_MakePlayerStorage(player)
+    if not storage.PData then
+        storage.PData = {}
+    end
+    if not storage.PData[player.index] then
+        storage.PData[player.index] = {}
+    end
+    --score
+    if not storage.PData[player.index].active then
+        storage.PData[player.index].active = false
+    end
+    if not storage.PData[player.index].moving then
+        storage.PData[player.index].moving = false
+    end
+    if not storage.PData[player.index].score then
+        storage.PData[player.index].score = 0
+    end
+    if not storage.PData[player.index].lastOnline then
+        storage.PData[player.index].lastOnline = game.tick
+    end
 
-            if not storage.active_playtime[player.index] then
-                storage.active_playtime[player.index] = 0
-            end
+    --prefs
+    if not storage.PData[player.index].hideClock then
+        storage.PData[player.index].hideClock = false
+    end
 
-            if not storage.thebanished[player.index] then
-                storage.thebanished[player.index] = 0
-            end
 
-            if not storage.hide_clock[player.index] then
-                storage.hide_clock[player.index] = false
-            end
+    --state
+    if not storage.PData[player.index].cleaned then
+        storage.PData[player.index].cleaned = false
+    end
+    if not storage.PData[player.index].patreon then
+        storage.PData[player.index].patreon = false
+    end
+    if not storage.PData[player.index].nitro then
+        storage.PData[player.index].nitro = false
+    end
 
-            if not storage.last_playtime[player.index] then
-                storage.last_playtime[player.index] = false
-            end
+    --throttle
+    if not storage.PData[player.index].regAttempts then
+        storage.PData[player.index].regAttempts = 0
+    end
+    if not storage.PData[player.index].lastWarned then
+        storage.PData[player.index].lastWarned = 0
+    end
+    if not storage.PData[player.index].reports then
+        storage.PData[player.index].reports = 0
+    end
+    if not storage.PData[player.index].permDeath then
+        storage.PData[player.index].permDeath = 0
+    end
 
-            if not storage.cleaned_players[player.index] then
-                storage.cleaned_players[player.index] = true
-            end
-
-        end
+    --online menu
+    if not storage.PData[player.index].onlineBrief then
+        storage.PData[player.index].online_brief = false
+    end
+    if not storage.PData[player.index].onlineShowOffline then
+        storage.PData[player.index].online_show_offline = false
     end
 end

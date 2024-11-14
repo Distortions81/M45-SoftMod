@@ -2,9 +2,126 @@
 -- carlotto81@gmail.com
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
-require "utility"
 
 local loremipsum = "Lorem ipsum dolor sit amet"
+
+local function markNoteIDRead(victim, id)
+    --Note valid
+    if not storage.todo_list or not storage.todo_list[id] then
+        return
+    end
+
+    --Init list if needed
+    if not storage.todo_unread then
+        storage.todo_unread = {}
+    end
+
+    --Init player if needed
+    if not storage.todo_unread[victim.index] then
+        storage.todo_unread[victim.index] = {
+            note = {}
+        }
+    end
+
+    --Update
+    storage.todo_unread[victim.index].note[id] = storage.todo_list[id].time
+end
+
+
+local function isUnreadVictim(victim, id)
+    --Invalid victim
+    if not victim or not victim.index then
+        return false
+    end
+
+    --Invalid note
+    if not storage.todo_list or not storage.todo_list[id] then
+        return false
+    end
+
+    local note = storage.todo_list[id]
+
+    --We've never seen a note
+    if not storage.todo_unread then
+        return false
+    end
+
+    --We've never seen a note
+    if not storage.todo_unread[victim.index] then
+        storage.todo_unread[victim.index] = {
+            note = {}
+        }
+        return true
+    end
+
+    --We've never seen this note
+    if not storage.todo_unread[victim.index].note[id] then
+        return true
+    end
+
+    --We saw this note, but it was updated
+    if storage.todo_unread[victim.index].note[id] < note.time then
+        return true
+    end
+
+    --We've already seen the note
+    return false
+end
+
+local function unreadCount(victim)
+    --Invalid player
+    if not victim or not victim.index then
+        return 0
+    end
+
+    --No notes
+    if not storage.todo_list then
+        return 0
+    end
+
+    --Init unread list
+    if not storage.todo_unread then
+        storage.todo_unread = {}
+    end
+
+    --init player
+    if not storage.todo_unread[victim.index] then
+        storage.todo_unread[victim.index] = {
+            note = {}
+        }
+    end
+
+    --Count notes
+    local count = 0
+    for id, note in pairs(storage.todo_list) do
+        if isUnreadVictim(victim, id) then
+            count = count + 1
+        end
+    end
+
+    if count == 0 then
+        return nil
+    end
+    return count
+end
+
+
+local function updateTODOWindows()
+    for _, player in pairs(game.connected_players) do
+        -- Already handles destroying
+        if player.gui and player.gui.screen then
+            if player.gui.top and player.gui.top.todo_button then
+                player.gui.top.todo_button.number = unreadCount(player)
+            end
+            if player.gui.screen.m45_todo then
+                TODO_MakeWindow(player)
+                if player.gui.screen.m45_todo_submenu then
+                    player.gui.screen.m45_todo_submenu.bring_to_front()
+                end
+            end
+        end
+    end
+end
 
 local function todo_key(i)
     if storage.todo_list and storage.todo_list[i] then
@@ -14,7 +131,7 @@ local function todo_key(i)
     end
 end
 
-local function todo_id_to_index(id)
+local function id_to_index(id)
     if storage.todo_list then
         for i, item in pairs(storage.todo_list) do
             if item and item.id then
@@ -24,11 +141,11 @@ local function todo_id_to_index(id)
             end
         end
     end
-    console_print("[ERROR] todo_id_to_index: could not find note id: " .. id)
+    UTIL_ConsolePrint("[ERROR] todo_id_to_index: could not find note id: " .. id)
     return -1
 end
 
-local function make_m45_todo_submenu(player, i, edit_mode)
+local function makeTodoSubmenu(player, i, edit_mode)
     if player and player.valid then
         -- Always refresh when called
         if player.gui and player.gui.screen and player.gui.screen.m45_todo_submenu then
@@ -39,10 +156,14 @@ local function make_m45_todo_submenu(player, i, edit_mode)
             local target = storage.todo_list[i]
 
             local no_edit = false
-            if not edit_mode or is_new(player) or
+            if not edit_mode or UTIL_Is_New(player) or
                 (not player.admin and player.name ~= target.owner and not target.can_edit) then
                 no_edit = true
             end
+
+            --Mark read
+            markNoteIDRead(player, i)
+            updateTODOWindows()
 
             -- make todo root submenu
             if player and target and target.time then
@@ -187,7 +308,7 @@ local function make_m45_todo_submenu(player, i, edit_mode)
                             local whoedit = ""
                             local c = 0
                             for _, victim in pairs(game.players) do
-                                if victim.name ~= player.name and storage.todo_player_editing_id[victim.index] ==
+                                if victim.index ~= player.index and storage.todo_player_editing_id[victim.index] ==
                                     storage.todo_player_editing_id[player.index] then
                                     c = c + 1
                                     if c > 1 then
@@ -214,6 +335,9 @@ local function make_m45_todo_submenu(player, i, edit_mode)
                                     style = "red_button",
                                     name = "m45_todo_hide," .. storage.todo_player_editing_id[player.index]
                                 }
+                                if no_edit then
+                                    delete_button.enabled = false
+                                end
                             else
                                 local delete_button = todo_save_frame.add {
                                     type = "button",
@@ -221,6 +345,9 @@ local function make_m45_todo_submenu(player, i, edit_mode)
                                     style = "red_button",
                                     name = "m45_todo_hide," .. storage.todo_player_editing_id[player.index]
                                 }
+                                if no_edit then
+                                    delete_button.enabled = false
+                                end
                             end
                             local lock_spacer = todo_save_frame.add {
                                 type = "empty-widget"
@@ -235,7 +362,6 @@ local function make_m45_todo_submenu(player, i, edit_mode)
 
                             if no_edit then
                                 save_button.enabled = false
-                                delete_button.enabled = false
                             end
                         end
                     end
@@ -246,7 +372,7 @@ local function make_m45_todo_submenu(player, i, edit_mode)
 end
 
 -- M45 ToDo Window
-function make_m45_todo_window(player)
+function TODO_MakeWindow(player)
     if player.gui and player.gui.screen then
         if player.gui.screen.m45_todo then
             player.gui.screen.m45_todo.destroy()
@@ -373,6 +499,12 @@ function make_m45_todo_window(player)
                             type = "flow",
                             direction = "horizontal"
                         }
+                        if isUnreadVictim(player, i) then
+                            local unread_label = pframe.add {
+                                type = "label",
+                                caption = "[NEW]"
+                            }
+                        end
                         pframe.style.horizontally_stretchable = true
                         pframe.style.vertically_stretchable = false
                         pframe.style.maximal_width = 1600
@@ -383,7 +515,7 @@ function make_m45_todo_window(player)
                             name = "m45_todo_submenu_view," .. i, -- pass-item
                             tooltip = "View this item"
                         }
-                        submenu_view.style.size = {36, 36}
+                        submenu_view.style.size = { 36, 36 }
                         submenu_view.style.padding = 4
 
                         local submenu_edit = pframe.add {
@@ -393,11 +525,11 @@ function make_m45_todo_window(player)
                             name = "m45_todo_submenu_edit," .. i, -- pass-item
                             tooltip = "Edit this item"
                         }
-                        submenu_edit.style.size = {36, 36}
+                        submenu_edit.style.size = { 36, 36 }
                         submenu_edit.style.padding = 4
                         local can_edit = true
                         -- Disable button if we can't edit
-                        if is_new(player) or (not player.admin and player.name ~= target.owner and not target.can_edit) then
+                        if UTIL_Is_New(player) or (not player.admin and player.name ~= target.owner and not target.can_edit) then
                             submenu_edit.enabled = false
                             can_edit = false
                         end
@@ -475,7 +607,7 @@ function make_m45_todo_window(player)
                             style = "frame_action_button",
                             tooltip = "move up"
                         }
-                        moveup.style.size = {18, 18}
+                        moveup.style.size = { 18, 18 }
 
                         local movedown = move_ud_frame.add {
                             type = "sprite-button",
@@ -484,9 +616,9 @@ function make_m45_todo_window(player)
                             style = "frame_action_button",
                             tooltip = "move down"
                         }
-                        movedown.style.size = {18, 18}
+                        movedown.style.size = { 18, 18 }
 
-                        if is_new(player) then
+                        if UTIL_Is_New(player) then
                             movedown.visible = false
                             moveup.visible = false
                         end
@@ -524,21 +656,21 @@ function make_m45_todo_window(player)
                 sprite = "file/img/todo/add.png",
                 name = "m45_todo_add"
             }
-            if is_new(player) then
+            if UTIL_Is_New(player) then
                 add.enabled = false
             end
             local add_note = add_frame.add {
                 type = "label",
                 caption = "Add item"
             }
-            add.style.size = {24, 24}
+            add.style.size = { 24, 24 }
             notes_label.style.rich_text_setting = defines.rich_text_setting.highlight
             notes_label.style.horizontally_stretchable = true
         end
     end
 end
 
-local function update_vis_todo_count()
+local function updateTodoCount()
     storage.vis_todo_count = 0
     for _, item in pairs(storage.todo_list) do
         if not item.hidden then
@@ -547,91 +679,43 @@ local function update_vis_todo_count()
     end
 end
 
-local function update_todo_windows()
-    for _, player in pairs(game.connected_players) do
-        -- Already handles destroying
-        if player.gui and player.gui.screen and player.gui.screen.m45_todo then
-            make_m45_todo_window(player)
-            if player.gui.screen.m45_todo_submenu then
-                player.gui.screen.m45_todo_submenu.bring_to_front()
-            end
+function TODO_Setup(player)
+    if not player or not player.index then
+        return
+    end
+    -- To-Do button--
+    if player.gui.top.todo_button then
+        player.gui.top.todo_button.destroy()
+    end
+    if not player.gui.top.todo_button then
+        local todo_64 = player.gui.top.add {
+            type = "sprite-button",
+            name = "todo_button",
+            sprite = "file/img/buttons/todo2-64.png",
+            tooltip = "Read or edit the To-Do list."
+        }
+        todo_64.style.size = { 64, 64 }
+        if not storage.todo_unread then
+            storage.todo_unread = {}
         end
-    end
-end
-
-local function todo_create_mystorage()
-    -- For layout testing
-    if not storage.todo_list then
-        storage.todo_list = {{
-            priority = 9001,
-            subject = "Main Objective",
-            text = "Destroy All Trees",
-            time = 0,
-            last_user = "Nemaster",
-            can_edit = false,
-            owner = "Nemaster",
-            gps = {
-                x = 0,
-                y = 0
-            },
-            id = 0,
-            hidden = false
-        }}
-    end
-
-    if not storage.todo_list_id then
-        storage.todo_list_id = 0
-    end
-
-    if not storage.vis_todo_count then
-        storage.vis_todo_count = 1
-    end
-
-    update_vis_todo_count()
-end
-
-local function on_player_joined_game(event)
-    todo_create_mystorage()
-
-    if event and event.player_index then
-        local player = game.players[event.player_index]
-
-        -- To-Do button--
-        if player.gui.top.todo_button then
-            player.gui.top.todo_button.destroy()
-        end
-        if not player.gui.top.todo_button then
-            local todo_32 = player.gui.top.add {
-                type = "sprite-button",
-                name = "todo_button",
-                sprite = "file/img/buttons/todo-64.png",
-                tooltip = "Read or edit the To-Do list."
-            }
-            todo_32.style.size = {64, 64}
-        end
-
-        -- Refresh window if open
-        if player.gui.screen.m45_todo then
-            player.gui.screen.m45_todo.destroy()
-            make_m45_todo_window(player)
+        if not storage.todo_unread[player.index] then
+            storage.todo_unread[player.index] = {}
         end
     end
 end
 
 -- GUI clicks
-local function on_gui_click(event)
+local function guiClick(event)
     if event and event.element and event.element.valid and event.player_index then
         local player = game.players[event.player_index]
-        local args = mysplit(event.element.name, ",")
+        local args = UTIL_SplitStr(event.element.name, ",")
 
         if player and player.valid then
-            -- Grab target if we have one
-            local victim_name
-            local victim
-            if storage.m45_online_submenu_target and storage.m45_online_submenu_target[player.index] then
-                victim_name = storage.m45_online_submenu_target[player.index]
-                victim = game.players[victim_name]
+            if UTIL_Is_Banished(player) then
+                return
             end
+
+            -- Grab target if we have one
             if event.element.name == "m45_todo_submenu_close_button" then
                 ----------------------------------------------------------------
                 -- Close online submenu
@@ -644,22 +728,19 @@ local function on_gui_click(event)
                     end
                 end
             elseif event.element.name == "m45_todo_show_hidden" then
-                if not storage.show_hidden_notes then
-                    storage.show_hidden_notes = {}
-                end
                 storage.show_hidden_notes[player.index] = event.element.state
-                make_m45_todo_window(player)
+                TODO_MakeWindow(player)
             elseif args and args[2] and args[1] == "m45_todo_moveup" then
                 ----------------------------------------------------------------
                 local i = tonumber(args[2])
                 if i > 1 then
                     table.insert(storage.todo_list, i - 1, table.remove(storage.todo_list, i))
-                    update_todo_windows()
+                    updateTODOWindows()
                 else
-                    smart_print(player, "It is already the first item!")
+                    UTIL_SmartPrint(player, "It is already the first item!")
                 end
                 local moved_item = todo_key(i)
-                console_print("[TODO] " .. player.name .. " moved item " .. todo_key(i) .. " up.")
+                UTIL_ConsolePrint("[TODO] " .. player.name .. " moved item " .. todo_key(i) .. " up.")
             elseif args and args[2] and args[1] == "m45_todo_movedown" then
                 ----------------------------------------------------------------
                 local i = tonumber(args[2])
@@ -669,29 +750,24 @@ local function on_gui_click(event)
                 end
                 if i < count then
                     table.insert(storage.todo_list, i + 1, table.remove(storage.todo_list, i))
-                    update_todo_windows()
+                    updateTODOWindows()
                 else
-                    smart_print(player, "It is already at the end of the list.")
+                    UTIL_SmartPrint(player, "It is already at the end of the list.")
                 end
-                console_print("[TODO] " .. player.name .. " moved item " .. todo_key(i) .. " down.")
-           
+                UTIL_ConsolePrint("[TODO] " .. player.name .. " moved item " .. todo_key(i) .. " down.")
             elseif args and args[2] and args[1] == "m45_todo_submenu_edit" then
                 ----------------------------------------------------------------
                 if player and player.valid and player.character and player.character.valid then
                     local i = tonumber(args[2])
                     if storage.todo_list and storage.todo_list[i] then
-                        -- Init if needed
-                        if not storage.todo_player_editing_id then
-                            storage.todo_player_editing_id = {}
-                        end
                         -- Save what ID we are editing for updates
                         local item = storage.todo_list[i]
                         storage.todo_player_editing_id[player.index] = storage.todo_list[i].id
-                        make_m45_todo_submenu(player, i, true)
+                        makeTodoSubmenu(player, i, true)
                     else
                         local error = "[ERROR] m45_todo_submenu_edit: Unable to find item: " .. i
-                        smart_print(player, error)
-                        console_print(error)
+                        UTIL_SmartPrint(player, error)
+                        UTIL_ConsolePrint(error)
                     end
                 end
             elseif args and args[2] and args[1] == "m45_todo_submenu_view" then
@@ -699,19 +775,16 @@ local function on_gui_click(event)
                 if player and player.valid and player.character and player.character.valid then
                     local i = tonumber(args[2])
                     if storage.todo_list and storage.todo_list[i] then
-                        make_m45_todo_submenu(player, i, false)
+                        makeTodoSubmenu(player, i, false)
                     end
                 end
             elseif event.element.name == "m45_todo_add" then
                 ----------------------------------------------------------------
-                if not storage.todo_throttle then
-                    storage.todo_throttle = {}
-                end
-
+                ---
                 -- edit/create throttle
                 if storage.todo_throttle[player.index] then
                     if game.tick - storage.todo_throttle[player.index] < (60 * 5) then -- 10 seconds
-                        smart_print(player, "(SYSTEM) Please wait 5 seconds before attempting to make a new item.")
+                        UTIL_SmartPrint(player, "(SYSTEM) Please wait 5 seconds before attempting to make a new item.")
                         -- storage.todo_throttle[player.index] = game.tick --Reset timer, prevent spamming
                         return
                     end
@@ -725,7 +798,7 @@ local function on_gui_click(event)
                     if storage.todo_max[player.index] < 25 then
                         storage.todo_max[player.index] = storage.todo_max[player.index] + 1
                     else
-                        smart_print(player, "You have personally created 25 todo items, limit reached.")
+                        UTIL_SmartPrint(player, "You have personally created 25 todo items, limit reached.")
                         return
                     end
                 else
@@ -745,14 +818,14 @@ local function on_gui_click(event)
                     hidden = false
                 })
 
-                update_vis_todo_count()
-                update_todo_windows()
-                console_print("[TODO] " .. player.name .. " added a new todo item: " .. todo_key(i))
+                updateTodoCount()
+                updateTODOWindows()
+                UTIL_ConsolePrint("[TODO] " .. player.name .. " added a new todo item: " .. storage.todo_list_id)
             elseif args and args[2] and args[1] == "m45_todo_hide" then
                 ----------------------------------------------------------------
                 local id = tonumber(args[2]) -- Grab passed ID
-                local i = todo_id_to_index(id) -- Find by ID, index can change
-                if i > 0 then -- If we found the note
+                local i = id_to_index(id)    -- Find by ID, index can change
+                if i > 0 then                -- If we found the note
                     -- Sanity check
                     if storage.todo_list and storage.todo_list[i] and player and player.valid and player.gui and
                         player.gui.screen and player.gui.screen.m45_todo_submenu and
@@ -764,13 +837,9 @@ local function on_gui_click(event)
                         end
                         if storage.todo_throttle[player.index] then
                             if game.tick - storage.todo_throttle[player.index] < (60 * 5) then -- 10 seconds
-                                smart_print(player,
-                                    "[color=red](SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.[/color]")
-                                smart_print(player,
-                                    "[color=cyan](SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.[/color]")
-                                smart_print(player,
-                                    "[color=white](SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.[/color]")
-                                -- storage.todo_throttle[player.index] = game.tick --Reset timer so you can't spam.
+                                UTIL_SmartPrintColor(player,
+                                    "(SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.")
+
                                 return
                             end
                         else
@@ -781,31 +850,32 @@ local function on_gui_click(event)
                         -- Set timer, hide, update count
                         storage.todo_throttle[player.index] = game.tick
                         storage.todo_list[i].hidden = (not storage.todo_list[i].hidden)
-                        update_vis_todo_count()
+                        updateTodoCount()
 
                         -- Log action
-                        console_print("[TODO] " .. player.name .. " hid todo item: " .. todo_key(i))
+                        UTIL_ConsolePrint("[TODO] " .. player.name .. " hid todo item: " .. storage.todo_list_id)
 
                         -- Destroy window
                         player.gui.screen.m45_todo_submenu.destroy()
 
                         -- Update windows
-                        update_todo_windows()
+                        updateTODOWindows()
 
                         -- We are no longer editing, clear
                         storage.todo_player_editing_id[player.index] = nil
                     else
                         -- Something is broken
-                        smart_print(player, "Sorry, something went wrong, unable to delete. Please report this issue.")
+                        UTIL_SmartPrint(player,
+                            "Sorry, something went wrong, unable to delete. Please report this issue.")
                     end
                 else
-                    smart_print(player, "Error: Could not find note id: " .. id)
+                    UTIL_SmartPrint(player, "Error: Could not find note id: " .. id)
                 end
             elseif args and args[2] and args[1] == "m45_todo_save" then
                 ----------------------------------------------------------------
                 local id = tonumber(args[2]) -- Grab passed ID
-                local i = todo_id_to_index(id) -- Find by ID, index can change
-                if i > 0 then -- If we found the note
+                local i = id_to_index(id)    -- Find by ID, index can change
+                if i > 0 then                -- If we found the note
                     -- Sanity check
                     if storage.todo_list and storage.todo_list[i] and player and player.valid and player.gui and
                         player.gui.screen and player.gui.screen.m45_todo_submenu and
@@ -827,18 +897,10 @@ local function on_gui_click(event)
                         -- Only save & archive if something was changed
                         if prev_priority ~= priority or prev_subject ~= subject or prev_can_edit ~= can_edit or
                             prev_text ~= text then
-                            if not storage.todo_throttle then
-                                storage.todo_throttle = {}
-                            end
                             if storage.todo_throttle[player.index] then
                                 if game.tick - storage.todo_throttle[player.index] < (60 * 5) then -- 5 seconds
-                                    smart_print(player,
-                                        "[color=red](SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.[/color]")
-                                    smart_print(player,
-                                        "[color=cyan](SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.[/color]")
-                                    smart_print(player,
-                                        "[color=white](SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.[/color]")
-                                    -- storage.todo_throttle[player.index] = game.tick --Reset timer so you can't spam.
+                                    UTIL_SmartPrintColor(player,
+                                        "(SYSTEM) CHANGES NOT SAVED, PLEASE WAIT 5 SECONDS BEFORE TRYING TO SAVE AGAIN.")
                                     return
                                 end
                             else
@@ -870,26 +932,26 @@ local function on_gui_click(event)
                             storage.todo_throttle[player.index] = game.tick
 
                             -- Log action
-                            console_print("[TODO] " .. player.name .. " editied todo item: " .. todo_key(i))
+                            UTIL_ConsolePrint("[TODO] " .. player.name .. " editied todo item: " .. todo_key(i))
 
                             -- Destroy window
                             player.gui.screen.m45_todo_submenu.destroy()
 
                             -- Update windows
-                            update_todo_windows()
+                            updateTODOWindows()
 
                             -- We are no longer editing, clear
                             storage.todo_player_editing_id[player.index] = nil
                         else
                             -- Nothing changed
-                            smart_print(player, "No changes to save.")
+                            UTIL_SmartPrint(player, "No changes to save.")
                         end
                     else
                         -- Something is broken
-                        smart_print(player, "Sorry, something went wrong, unable to save. Please report this issue.")
+                        UTIL_SmartPrint(player, "Sorry, something went wrong, unable to save. Please report this issue.")
                     end
                 else
-                    smart_print(player, "Error: Could not find note id: " .. id)
+                    UTIL_SmartPrint(player, "Error: Could not find note id: " .. id)
                 end
             elseif event.element.name == "m45_todo_close_button" then
                 ----------------------------------------------------------------
@@ -908,17 +970,62 @@ local function on_gui_click(event)
                 if player.gui and player.gui.left and player.gui.left.m45_todo then
                     player.gui.left.m45_todo.destroy()
                 else
-                    make_m45_todo_window(player)
+                    TODO_MakeWindow(player)
                 end
             end
         end
     end
 end
 
-function todo_event_handler(event)
-    if event.name == defines.events.on_player_joined_game then
-        on_player_joined_game(event)
-    elseif event.name == defines.events.on_gui_click then
-        on_gui_click(event)
+
+local function updateWindowEvent(event)
+    local player = game.players[event.player_index]
+    -- Refresh window if open
+    if player.gui.screen.m45_todo then
+        player.gui.screen.m45_todo.destroy()
+        TODO_MakeWindow(player)
     end
+end
+
+function TODO_EventHandler(event)
+    if event.name == defines.events.on_player_joined_game then
+        updateWindowEvent(event)
+    elseif event.name == defines.events.on_gui_click then
+        guiClick(event)
+    end
+end
+
+function TODO_Init()
+    if not storage.todo_player_editing_id then
+        storage.todo_player_editing_id = {}
+    end
+    if not storage.show_hidden_notes then
+        storage.show_hidden_notes = {}
+    end
+    if not storage.todo_list_id then
+        storage.todo_list_id = 0
+    end
+    if not storage.vis_todo_count then
+        storage.vis_todo_count = 1
+    end
+    if not storage.todo_throttle then
+        storage.todo_throttle = {}
+    end
+    if not storage.todo_unread then
+        storage.todo_unread = {}
+    end
+    if not storage.todo_list then
+        storage.todo_list = { {
+            priority = 10000,
+            subject = "Use the TO-DO list",
+            text = "Use the TO-DO list",
+            time = 0,
+            last_user = "System",
+            can_edit = false,
+            owner = "System",
+            id = 0,
+            hidden = false
+        } }
+    end
+    updateTodoCount()
 end

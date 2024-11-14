@@ -1,5 +1,11 @@
-function doOnelife(event)
-    if not storage.oneLifeMode then
+-- Carl Frank Otto III
+-- carlotto81@gmail.com
+-- GitHub: https://github.com/M45-Science/SoftMod
+-- License: MPL 2.0
+-- Safe console print
+
+function ONELIFE_Main(event)
+    if not storage.SM_Store.oneLifeMode then
         return
     end
 
@@ -11,17 +17,21 @@ function doOnelife(event)
         return
     end
 
+    if UTIL_Is_Banished(player) then
+        return
+    end
+
     player.set_controller {
         type = defines.controllers.spectator
     }
-    smart_print(player, "Game over! you are now a spectator.")
-    update_player_list()
+    UTIL_SmartPrint(player, "Game over! you are now a spectator.")
+    ONLINE_UpdatePlayerList()
 
     if not player.character or not player.character.valid then
         return
     end
     local character = player.character
-    -- Stop player states, just in case
+    -- Stop player states, or they will continue forever
     character.walking_state = {
         walking = false,
         direction = defines.direction.south
@@ -44,8 +54,8 @@ function doOnelife(event)
     }
 end
 
-function onelife_clickhandler(event)
-    if not storage.oneLifeMode then
+function ONELIFE_Clicks(event)
+    if not storage.SM_Store.oneLifeMode then
         return
     end
 
@@ -56,44 +66,33 @@ function onelife_clickhandler(event)
     if not player or not player.valid then
         return
     end
+    if UTIL_Is_Banished(player) then
+        return
+    end
     if not player.character or not player.character.valid then
-        smart_print("You are already dead!")
+        UTIL_SmartPrint("You are already dead!")
         return
     end
     if event.element and event.element.valid and event.element.name == "spec_button" then
-        -- Init storage if needed
-        if not storage.spec_confirm then
-            storage.spec_confirm = {}
-        end
-        -- Create player entry if needed
-        if not storage.spec_confirm[player.index] then
-            storage.spec_confirm[player.index] = 0
-        end
         -- Otherwise confirm
-        if storage.spec_confirm and player.index and storage.spec_confirm[player.index] then
-            if storage.spec_confirm[player.index] >= 2 then
-                storage.spec_confirm[player.index] = nil
+        if storage.PData[player.index].permDeath then
+            if storage.PData[player.index].permDeath >= 2 then
+                storage.PData[player.index].permDeath = nil
                 player.character.die("player")
-                doOnelife(event)
+                ONELIFE_Main(event)
                 return
-            elseif storage.spec_confirm[player.index] < 2 then
-                smart_print(player,
-                    "[color=red](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.spec_confirm[player.index] ..
-                    " more times to confirm.[/color]")
-                smart_print(player,
-                    "[color=white](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.spec_confirm[player.index] ..
-                    " more times to confirm.[/color]")
-                smart_print(player,
-                    "[color=black](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.spec_confirm[player.index] ..
+            elseif storage.PData[player.index].permDeath < 2 then
+                UTIL_SmartPrintColor(player,
+                    "[color=red](NO UNDO, PERM-DEATH) -- click " .. 2 - storage.PData[player.index].permDeath ..
                     " more times to confirm.[/color]")
             end
 
-            storage.spec_confirm[player.index] = storage.spec_confirm[player.index] + 1
+            storage.PData[player.index].permDeath = storage.PData[player.index].permDeath + 1
         end
     end
 end
 
-function make_onelife_button(player)
+function ONELIFE_MakeButton(player)
     if not player then
         return
     end
@@ -101,14 +100,14 @@ function make_onelife_button(player)
         player.gui.top.spec_button.destroy()
     end
 
-    if not storage.oneLifeMode then
+    if not storage.SM_Store.oneLifeMode then
         if player.controller_type == defines.controllers.spectator then
             player.set_controller {
                 type = defines.controllers.character,
-                character = game.surfaces[1].create_entity({name = "character", position = game.surfaces[1].find_non_colliding_position("character", {0,0}, 10000, 1), force = game.forces.player})
+                character = game.surfaces[1].create_entity({ name = "character", position = game.surfaces[1].find_non_colliding_position("character", { x = 0, y = 0 }, 1024, 1, false), force = game.forces.player })
             }
-            smart_print(player, "You have been revived!")
-            update_player_list()
+            UTIL_SmartPrint(player, "You have been revived!")
+            ONLINE_UpdatePlayerList()
         end
         return
     end

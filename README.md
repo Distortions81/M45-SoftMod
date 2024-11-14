@@ -3,9 +3,6 @@
 ### LUA scripts for M45's Factorio servers. ( softmod / scenario scripts )
 <br>Currently approximately 3700 lines of lua.
 <br>
-*antigrief.lua*<br>
-Logging and alerts <br>
-<br>
 *banish.lua*<br>
 Allows regulars to vote-ban players,<br>
 <br>

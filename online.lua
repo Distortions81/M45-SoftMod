@@ -2,9 +2,16 @@
 -- carlotto81@gmail.com
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
-require "utility"
 
-function make_online_button(player)
+local function update_online_windows()
+    for _, player in pairs(game.connected_players) do
+        if player.gui and player.gui.screen and player.gui.left.m45_online then
+            ONLINE_Window(player)
+        end
+    end
+end
+
+function ONLINE_MakeOnlineButton(player)
     -- Online button--
     if player.gui.top.online_button then
         player.gui.top.online_button.destroy()
@@ -16,26 +23,20 @@ function make_online_button(player)
             sprite = "file/img/buttons/online-64.png",
             tooltip = "See players online!"
         }
-        online_32.style.size = {64, 64}
+        online_32.style.size = { 64, 64 }
     end
 end
 
 -- Count online players, store
-function update_player_list()
-
+function ONLINE_UpdatePlayerList()
     -- Sort by active time
     local results = {}
     local count = 0
     local tcount = 0
 
-    -- Init if needed
-    if not storage.active_playtime then
-        storage.active_playtime = {}
-    end
 
     -- Make a table with active time, handle missing data
     for i, victim in pairs(game.players) do
-
         local utag
 
         -- Catch all
@@ -47,29 +48,29 @@ function update_player_list()
         end
 
         -- Normal groups
-        if is_new(victim) then
+        if UTIL_Is_New(victim) then
             utag = "NEW"
         end
-        if is_member(victim) then
+        if UTIL_Is_Member(victim) then
             utag = "Members"
         end
-        if is_regular(victim) then
+        if UTIL_Is_Regular(victim) then
             utag = "Regulars"
         end
-        if is_veteran(victim) then
+        if UTIL_Is_Veteran(victim) then
             utag = "Veterans"
         end
-        if is_banished(victim) then
+        if UTIL_Is_Banished(victim) then
             utag = "BANISHED"
         end
         if victim.admin then
             utag = "Moderator"
         end
 
-        if is_patreon(victim) then
+        if UTIL_Is_Patreon(victim) then
             utag = utag .. " (SUPPORTER)"
         end
-        if is_nitro(victim) then
+        if UTIL_Is_Nitro(victim) then
             utag = utag .. " (NITRO)"
         end
 
@@ -80,27 +81,24 @@ function update_player_list()
         -- Show last online in minutes
         local isafk = "   "
 
-        if victim and storage.last_playtime then
-            if storage.last_playtime and storage.last_playtime[victim.index] then
-                local time = ((game.tick - storage.last_playtime[victim.index]) / 60)
-                local days = math.floor(time / 60 / 60 / 24)
-                local hours = math.floor(time / 60 / 60)
-                local minutes = math.floor(time / 60)
-                local seconds = math.floor(time)
-                if days > 0 then
-                    isafk = string.format("%3.2fd", time / 60 / 60 / 24)
-                elseif hours > 0 then
-                    isafk = string.format("%3.2fh", time / 60 / 60)
-                elseif minutes > 2 then
-                    isafk = minutes .. "m"
-                end
+        if storage.PData and storage.PData[victim.index].lastOnline then
+            local time = ((game.tick - storage.PData[victim.index].lastOnline) / 60)
+            local days = math.floor(time / 60 / 60 / 24)
+            local hours = math.floor(time / 60 / 60)
+            local minutes = math.floor(time / 60)
+            if days > 0 then
+                isafk = string.format("%3.2fd", time / 60 / 60 / 24)
+            elseif hours > 0 then
+                isafk = string.format("%3.2fh", time / 60 / 60)
+            elseif minutes > 2 then
+                isafk = minutes .. "m"
             end
         end
 
-        if storage.active_playtime[victim.index] then
+        if storage.PData[victim.index].score then
             table.insert(results, {
                 victim = victim,
-                score = storage.active_playtime[victim.index],
+                score = storage.PData[victim.index].score,
                 time = victim.online_time,
                 type = utag,
                 afk = isafk
@@ -119,7 +117,6 @@ function update_player_list()
         if victim.connected then
             count = count + 1
         end
-
     end
 
     table.sort(results, function(k1, k2)
@@ -131,27 +128,15 @@ function update_player_list()
             item.victim.gui.top.online_button.number = count
         end
     end
-    storage.player_count = count
-    storage.tplayer_count = tcount
-    storage.player_list = results
-
-    local tmp_online = storage.lastonlinestring
-    show_players(nil)
-
-    -- Refresh open player-online windows
-    if tmp_online ~= storage.lastonlinestring then
-        for _, victim in pairs(game.connected_players) do
-            if victim and victim.valid and victim.gui and victim.gui.left and victim.gui.left.m45_online then
-                victim.gui.left.m45_online.destroy()
-                make_m45_online_window(victim) -- online.lua
-            end
-        end
-    end
-
+    storage.SM_Store.pcount = count
+    storage.SM_Store.tcount = tcount
+    storage.SM_Store.playerList = results
+    UTIL_SendPlayers(nil)
+    update_online_windows()
 end
 
 -- Global, called from control.lua
-function make_m45_online_submenu(player, target_name)
+function ONLINE_MakeM45OnlineSub(player, target_name)
     local target = game.players[target_name]
 
     -- make online root submenu
@@ -287,7 +272,7 @@ function make_m45_online_submenu(player, target_name)
                         tooltip = "Vote to banish this player!"
                     }
 
-                    if is_regular(player) or is_veteran(player) or player.admin then
+                    if UTIL_Is_Regular(player) or UTIL_Is_Veteran(player) or player.admin then
                         if target.admin then
                             local banish_note = banish_frame.add {
                                 type = "label",
@@ -319,27 +304,22 @@ function make_m45_online_submenu(player, target_name)
     end
 end
 
-local function destroy_m45_online_submenu(player)
+local function destoryOnlineSub(player)
     if player.gui and player.gui.screen and player.gui.screen.m45_online_submenu then
         player.gui.screen.m45_online_submenu.destroy()
     end
 end
 
-local function handle_m45_online_submenu(player, target_name)
-    -- init if needed
-    if not storage.m45_online_submenu_target then
-        storage.m45_online_submenu_target = {}
-    end
-
+local function handleOnlineSubmenu(player, target_name)
     if player and player.valid and target_name then
-        storage.m45_online_submenu_target[player.index] = target_name
-        destroy_m45_online_submenu(player)
-        make_m45_online_submenu(player, target_name)
+        storage.PData[player.index].onlineSub = target_name
+        destoryOnlineSub(player)
+        ONLINE_MakeM45OnlineSub(player, target_name)
     end
 end
 
 -- M45 Online Players Window
-function make_m45_online_window(player)
+function ONLINE_Window(player)
     -- Auto close membership welcome window--
     if player then
         if player.gui.screen then
@@ -380,31 +360,23 @@ function make_m45_online_window(player)
             online_titlebar.style.horizontal_align = "center"
             online_titlebar.style.horizontally_stretchable = true
 
-            if not storage.player_count or not storage.player_list then
-                update_player_list()
-            end
-
-            if not storage.online_brief then
-                storage.online_brief = {}
-            end
-
             local bcheckstate = false
-            if storage.online_brief[player.index] then
-                if storage.online_brief[player.index] == true then
+            if storage.PData[player.index].onlineBrief then
+                if storage.PData[player.index].onlineBrief then
                     bcheckstate = true
                 else
                     bcheckstate = false
                 end
             else
-                storage.online_brief[player.index] = false
+                storage.PData[player.index].onlineBrief = false
             end
 
-            if not storage.online_brief[player.index] then
+            if not storage.PData[player.index].onlineBrief then
                 online_titlebar.add {
                     type = "label",
                     name = "online_title",
                     style = "frame_title",
-                    caption = "Players Online: " .. storage.player_count .. ", Total: " .. storage.tplayer_count
+                    caption = "Players Online: " .. storage.SM_Store.pcount .. ", Total: " .. storage.SM_Store.tcount
                 }
             else
                 online_titlebar.add {
@@ -420,22 +392,19 @@ function make_m45_online_window(player)
                 type = "flow",
                 direction = "horizontal"
             }
-            if not storage.show_offline_state then
-                storage.show_offline_state = {}
-            end
 
             local checkstate = false
-            if storage.show_offline_state[player.index] then
-                if storage.show_offline_state[player.index] == true then
+            if storage.PData[player.index].onlineShowOffline then
+                if storage.PData[player.index].onlineShowOffline then
                     checkstate = true
                 else
                     checkstate = false
                 end
             else
-                storage.show_offline_state[player.index] = false
+                storage.PData[player.index].onlineShowOffline = false
             end
 
-            if not storage.online_brief[player.index] then
+            if not storage.PData[player.index].brief then
                 local show_offline = online_close_button.add {
                     type = "checkbox",
                     caption = "Show offline  ",
@@ -462,14 +431,14 @@ function make_m45_online_window(player)
                 sprite = "utility/close",
                 tooltip = "Close this window"
             }
-            
+
 
             local online_main = main_flow.add {
                 type = "scroll-pane",
                 direction = "vertical"
             }
 
-            if not storage.online_brief[player.index] then
+            if not storage.PData[player.index].onlineBrief then
                 local pframe = online_main.add {
                     type = "frame",
                     direction = "horizontal"
@@ -526,8 +495,7 @@ function make_m45_online_window(player)
                 }
             end
 
-            -- for x = 0, 100, 1 do
-            for i, target in pairs(storage.player_list) do
+            for i, target in pairs(storage.SM_Store.playerList) do
                 local skip = false
                 local is_offline = false
 
@@ -535,7 +503,7 @@ function make_m45_online_window(player)
                     skip = true
                 end
 
-                if skip and storage.show_offline_state and storage.show_offline_state[player.index] then
+                if skip and storage.PData[player.index].onlineShowOffline then
                     skip = false
                     is_offline = true
                 end
@@ -544,7 +512,7 @@ function make_m45_online_window(player)
                     local victim = target.victim
 
                     local pframe
-                    if not storage.online_brief[player.index] then
+                    if not storage.PData[player.index].onlineBrief then
                         pframe = online_main.add {
                             type = "frame",
                             direction = "horizontal"
@@ -556,7 +524,7 @@ function make_m45_online_window(player)
                         }
                     end
 
-                    if not storage.online_brief[player.index] then
+                    if not storage.PData[player.index].onlineBrief then
                         local submenu
                         -- Yeah don't need this menu for ourself
                         if victim.name == player.name then
@@ -574,7 +542,7 @@ function make_m45_online_window(player)
                                 tooltip = "Additional options, such as whisper, banish and find-on-map."
                             }
                         end
-                        submenu.style.size = {24, 24}
+                        submenu.style.size = { 24, 24 }
 
                         local gps_spacer = pframe.add {
                             type = "empty-widget"
@@ -600,19 +568,19 @@ function make_m45_online_window(player)
                         g = 1,
                         b = 1
                     }
-                    if is_banished(victim) then
+                    if UTIL_Is_Banished(victim) then
                         newcolor = {
                             r = 0,
                             g = 0,
                             b = 0
                         }
-                    elseif is_patreon(victim) then
+                    elseif UTIL_Is_Patreon(victim) then
                         newcolor = {
                             r = 1.0,
                             g = 0.0,
                             b = 1.0
                         }
-                    elseif is_nitro(victim) then
+                    elseif UTIL_Is_Nitro(victim) then
                         newcolor = {
                             r = 0.0,
                             g = 0.5,
@@ -624,19 +592,19 @@ function make_m45_online_window(player)
                             g = 0,
                             b = 0
                         }
-                    elseif is_veteran(victim) then
+                    elseif UTIL_Is_Veteran(victim) then
                         newcolor = {
                             r = 1,
                             g = 0.5,
                             b = 0
                         }
-                    elseif is_regular(victim) then
+                    elseif UTIL_Is_Regular(victim) then
                         newcolor = {
                             r = 1,
                             g = 1,
                             b = 0
                         }
-                    elseif is_member(victim) then
+                    elseif UTIL_Is_Member(victim) then
                         newcolor = {
                             r = 0,
                             g = 1,
@@ -644,7 +612,7 @@ function make_m45_online_window(player)
                         }
                     end
 
-                    if not storage.online_brief[player.index] then
+                    if not storage.PData[player.index].onlineBrief then
                         name_label.style.font = "default-bold"
                         name_label.style.width = 200
                     end
@@ -661,7 +629,7 @@ function make_m45_online_window(player)
                     -- Set font color
                     name_label.style.font_color = newcolor
 
-                    if not storage.online_brief[player.index] then
+                    if not storage.PData[player.index].onlineBrief then
                         local name_label = pframe.add {
                             type = "line",
                             direction = "vertical"
@@ -708,29 +676,29 @@ function make_m45_online_window(player)
                             direction = "vertical"
                         }
                         local utag = ""
-                        if is_new(victim) then
+                        if UTIL_Is_New(victim) then
                             utag = "[color=white]NEW[/color]"
                         end
-                        if is_member(victim) then
+                        if UTIL_Is_Member(victim) then
                             utag = "[color=green]Members[/color]"
                         end
-                        if is_regular(victim) then
+                        if UTIL_Is_Regular(victim) then
                             utag = "[color=yellow]Regulars[/color]"
                         end
-                        if is_veteran(victim) then
+                        if UTIL_Is_Veteran(victim) then
                             utag = "[color=orange]Veterans[/color]"
                         end
-                        if is_banished(victim) then
+                        if UTIL_Is_Banished(victim) then
                             utag = "[color=red]BANISHED[/color]"
                         end
                         if victim.admin then
                             utag = "[color=red]Moderators[/color]"
                         end
 
-                        if is_nitro(victim) then
+                        if UTIL_Is_Nitro(victim) then
                             utag = utag .. " [color=cyan](NITRO)[/color]"
                         end
-                        if is_patreon(victim) then
+                        if UTIL_Is_Patreon(victim) then
                             utag = utag .. " [color=purple](SUPPORTER)[/color]"
                         end
 
@@ -759,35 +727,38 @@ function make_m45_online_window(player)
 end
 
 -- GUI clicks
-function online_on_gui_click(event)
+function ONLINE_Clicks(event)
     if event and event.element and event.element.valid and event.player_index then
         local player = game.players[event.player_index]
 
-        local args = mysplit(event.element.name, ",")
+        local args = UTIL_SplitStr(event.element.name, ",")
 
         if player and player.valid then
             -- Grab target if we have one
             local victim_name
             local victim
-            if storage.m45_online_submenu_target and storage.m45_online_submenu_target[player.index] then
-                victim_name = storage.m45_online_submenu_target[player.index]
+            if storage.PData[player.index].onlineSub then
+                victim_name = storage.PData[player.index].onlineSub
                 victim = game.players[victim_name]
             end
 
             if args and args[1] == "m45_online_submenu_open" then
                 ----------------------------------------------------------------
                 -- Online sub-menu
-                handle_m45_online_submenu(player, args[2])
+                handleOnlineSubmenu(player, args[2])
             elseif event.element.name == "m45_online_submenu_close_button" then
                 ----------------------------------------------------------------
                 -- Close online submenu
                 if player.gui and player.gui.screen and player.gui.screen.m45_online_submenu then
                     player.gui.screen.m45_online_submenu.destroy()
-                    if storage.m45_online_submenu_target then
-                        storage.m45_online_submenu_target[player.index] = nil
+                    if storage.PData and storage.PData[player.index] then
+                        storage.PData[player.index].onlineSub = nil
                     end
                 end
             elseif event.element.name == "send_whisper" then
+                if CMD_NoBanished(player) then
+                    return
+                end
                 ----------------------------------------------------------------
                 if player.gui and player.gui.screen and player.gui.screen.m45_online_submenu and
                     player.gui.screen.m45_online_submenu.main and
@@ -800,19 +771,20 @@ function online_on_gui_click(event)
                             if string.match(text, "\n") then
                                 text = string.gsub(text, "\n", " ")
                             end
-                            smart_print(player, player.name .. " (whisper): " .. text)
-                            smart_print(victim, player.name .. " (whisper): " .. text)
+                            UTIL_SmartPrint(player, player.name .. " (whisper): " .. text)
+                            UTIL_SmartPrint(victim, player.name .. " (whisper): " .. text)
                         end
                         player.gui.screen.m45_online_submenu.main.whisper_frame.whisper_textbox.text = ""
 
                         if not victim.connected then
-                            smart_print(player, "They aren't online right now, but message will appear in chat history.")
+                            UTIL_SmartPrint(player,
+                                "They aren't online right now, but message will appear in chat history.")
                         end
                     else
-                        smart_print(player, "(SYSTEM) That player does not exist.")
+                        UTIL_SmartPrint(player, "(SYSTEM) That player does not exist.")
                     end
                 else
-                    console_print("[ERROR] send_whisper: text-box not found")
+                    UTIL_ConsolePrint("[ERROR] send_whisper: text-box not found")
                 end
             elseif event.element.name == "banish_player" then
                 ----------------------------------------------------------------
@@ -826,16 +798,16 @@ function online_on_gui_click(event)
                             if string.match(reason, "\n") then
                                 reason = string.gsub(reason, "\n", " ")
                             end
-                            g_banish(player, victim, reason)
+                            BANISH_DoBanish(player, victim, reason)
                         else
-                            smart_print(player, "(SYSTEM) You must enter a reason!")
+                            UTIL_SmartPrint(player, "(SYSTEM) You must enter a reason!")
                         end
                         player.gui.screen.m45_online_submenu.main.banish_frame.banish_textbox.text = ""
                     else
-                        smart_print(player, "(SYSTEM) That player does not exist.")
+                        UTIL_SmartPrint(player, "(SYSTEM) That player does not exist.")
                     end
                 else
-                    console_print("[ERROR] send_whisper: text-box not found")
+                    UTIL_ConsolePrint("[ERROR] send_whisper: text-box not found")
                 end
             elseif event.element.name == "report_player" then
                 ----------------------------------------------------------------
@@ -849,52 +821,46 @@ function online_on_gui_click(event)
                             if string.match(reason, "\n") then
                                 reason = string.gsub(reason, "\n", " ")
                             end
-                            g_report(player, ": " .. victim.name .. ": " .. reason)
+                            BANISH_DoReport(player, ": " .. victim.name .. ": " .. reason)
                         end
                         player.gui.screen.m45_online_submenu.main.report_frame.report_textbox.text = ""
                     else
-                        smart_print(player, "(SYSTEM) That player does not exist.")
+                        UTIL_SmartPrint(player, "(SYSTEM) That player does not exist.")
                     end
                 else
-                    console_print("[ERROR] send_whisper: text-box not found")
+                    UTIL_ConsolePrint("[ERROR] send_whisper: text-box not found")
                 end
             elseif event.element.name == "find_on_map" then
-                ----------------------------------------------------------------
+                if CMD_NoBanished(player) then
+                    return
+                end
                 if victim and victim.valid then
-                    player.set_controller{type=defines.controllers.remote, position=victim.position}
+                    player.set_controller { type = defines.controllers.remote, position = victim.position }
                 else
-                    smart_print(player, "Invalid target.")
+                    UTIL_SmartPrint(player, "Invalid target.")
                 end
             elseif event.element.name == "online_button" then
-                ----------------------------------------------------------------
-                -- Online window close
-                if player.gui and player.gui.left and player.gui.left.m45_online then
-                    player.gui.left.m45_online.destroy()
-                else
-                    make_m45_online_window(player)
+                if player.gui and player.gui.left then
+                    if player.gui.left.m45_online then
+                        player.gui.left.m45_online.destroy()
+                        return
+                    end
                 end
+                ONLINE_Window(player)
             elseif event.element.name == "m45_online_close_button" then
-                ----------------------------------------------------------------
-                -- Close online window
                 if player.gui and player.gui.left and player.gui.left.m45_online then
                     player.gui.left.m45_online.destroy()
                 end
             elseif event.element.name == "m45_online_show_offline" then
-                if not storage.show_offline_state then
-                    storage.show_offline_state = {}
-                end
-                storage.show_offline_state[player.index] = event.element.state
-                make_m45_online_window(player)
+                storage.PData[player.index].onlineShowOffline = event.element.state
+                ONLINE_Window(player)
             elseif event.element.name == "m45_online_brief" then
-                if not storage.online_brief then
-                    storage.online_brief = {}
-                end
-                storage.online_brief[player.index] = event.element.state
-                make_m45_online_window(player)
+                storage.PData[player.index].onlineBrief = event.element.state
+                ONLINE_Window(player)
             elseif event.element.name == "m45_member_welcome_close" then
-                show_member_welcome(player)
-            elseif event.element.name == "banished_inform_close" then
-                showBanishedInform(true,player)
+                if player and player.gui and player.gui.screen and player.gui.screen.member_welcome then
+                    player.gui.screen.member_welcome.destroy()
+                end
             end
         end
     end
