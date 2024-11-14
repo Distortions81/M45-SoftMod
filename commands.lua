@@ -694,10 +694,11 @@ script.on_load(function()
                 -- Set new spawn spot
                 if pforce and psurface and new_pos_x and new_pos_y then
                     pforce.set_spawn_position({ new_pos_x, new_pos_y }, psurface)
-                    UTIL_SmartPrint(victim, string.format("New spawn point set: %d,%d", math.floor(new_pos_x),
-                        math.floor(new_pos_y)))
-                    UTIL_SmartPrint(victim, string.format("Force: %s", pforce.name))
 
+                    local newPos = UTIL_GetDefaultSpawn()
+                    UTIL_SmartPrint(victim, string.format("New spawn point set: %d,%d", math.floor(newPos.x),
+                        math.floor(newPos.y)))
+                    UTIL_SmartPrint(victim, string.format("Force: %s", pforce.name))
                     LOGO_DrawLogo(true)
                 else
                     UTIL_SmartPrint(victim, "Couldn't find force...")

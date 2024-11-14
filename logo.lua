@@ -35,7 +35,7 @@ function LOGO_DrawLogo(force)
                 storage.SM_Store.spawnLogo.destroy()
             end
 
-            local cpos = msurf.find_non_colliding_position("character", { x = 0, y = 0 }, 4096, 4, true)
+            local cpos = msurf.find_non_colliding_position("character", UTIL_GetDefaultSpawn(), 4096, 4, true)
             if not cpos then
                 cpos = { x = 0, y = 0 }
             end
