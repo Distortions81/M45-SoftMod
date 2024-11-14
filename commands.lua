@@ -917,7 +917,7 @@ script.on_load(function()
                 local victim = game.players[param.parameter]
 
                 if (victim and victim.valid) then
-                    local newpos = victim.physical_surface.find_non_colliding_position("character", victim.position, 8192,
+                    local newpos = victim.physical_surface.find_non_colliding_position("character", victim.position, 1024,
                         1, false)
                     if (newpos) then
                         player.teleport(newpos, victim.physical_surface)
@@ -958,7 +958,7 @@ script.on_load(function()
                         x = xpos,
                         y = ypos
                     }
-                    local newpos = surface.find_non_colliding_position("character", position, 8192, 1, false)
+                    local newpos = surface.find_non_colliding_position("character", position, 1024, 1, false)
                     if newpos then
                         player.teleport(newpos, surface)
                         return
@@ -980,7 +980,7 @@ script.on_load(function()
 
                     if position then
                         if position.x and position.y then
-                            local newpos = surface.find_non_colliding_position("character", position, 8192, 1,
+                            local newpos = surface.find_non_colliding_position("character", position, 1024, 1,
                                 false)
                             if (newpos) then
                                 player.teleport(newpos, surface)
@@ -1020,7 +1020,7 @@ script.on_load(function()
                 end
 
                 if (victim and victim.valid) then
-                    local newpos = player.physical_surface.find_non_colliding_position("character", player.position, 8192,
+                    local newpos = player.physical_surface.find_non_colliding_position("character", player.position, 1024,
                         1, false)
                     if (newpos) then
                         victim.teleport(newpos, player.physical_surface)
