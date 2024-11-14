@@ -6,12 +6,14 @@
 local loremipsum = "Lorem ipsum dolor sit amet"
 
 local function markNoteIDRead(victim, id)
+    --Note valid
+    if not storage.todo_list or not storage.todo_list[id] then
+        return
+    end
+
     --Init list if needed
     if not storage.todo_unread then
         storage.todo_unread = {}
-    end
-    if not storage.todo_list or not storage.todo_list[id] then
-        return
     end
 
     --Init player if needed
@@ -22,21 +24,21 @@ local function markNoteIDRead(victim, id)
     end
 
     --Update
-    if not storage.todo_unread[victim.index].note then
-        storage.todo_unread[victim.index].note = {}
-    end
     storage.todo_unread[victim.index].note[id] = storage.todo_list[id].time
 end
 
 
 local function isUnreadVictim(victim, id)
+    --Invalid victim
     if not victim or not victim.index then
         return false
     end
+
+    --Invalid note
     if not storage.todo_list or not storage.todo_list[id] then
-        --Note does not exist
         return false
     end
+
     local note = storage.todo_list[id]
 
     --We've never seen a note
@@ -59,6 +61,61 @@ local function isUnreadVictim(victim, id)
 
     --We've already seen the note
     return false
+end
+
+local function unreadCount(victim)
+    --Invalid player
+    if not victim or not victim.index then
+        return 0
+    end
+
+    --No notes
+    if not storage.todo_list then
+        return 0
+    end
+
+    --Init unread list
+    if not storage.todo_unread then
+        storage.todo_unread = {}
+    end
+
+    --init player
+    if not storage.todo_unread[victim.index] then
+        storage.todo_unread[victim.index] = {
+            note = {}
+        }
+    end
+
+    --Count notes
+    local count = 0
+    for id, note in pairs(storage.todo_list) do
+        if isUnreadVictim(victim, id) then
+            count = count + 1
+        end
+    end
+
+    if count == 0 then
+        return nil
+    end
+    return count
+end
+
+
+local function updateTODOWindows()
+    for _, player in pairs(game.connected_players) do
+        -- Already handles destroying
+        if player.gui and player.gui.screen then
+            if player.gui.top and player.gui.top.todo_button then
+                player.gui.top.todo_button.number = unreadCount(player)
+            end
+            if player.gui.screen.m45_todo then
+                TODO_MakeWindow(player)
+                if player.gui.screen.m45_todo_submenu then
+                    player.gui.screen.m45_todo_submenu.bring_to_front()
+                end
+            end
+        end
+    end
 end
 
 local function todo_key(i)
@@ -101,6 +158,7 @@ local function makeTodoSubmenu(player, i, edit_mode)
 
             --Mark read
             markNoteIDRead(player, i)
+            updateTODOWindows()
 
             -- make todo root submenu
             if player and target and target.time then
@@ -616,19 +674,10 @@ local function updateTodoCount()
     end
 end
 
-local function updateTODOWindows()
-    for _, player in pairs(game.connected_players) do
-        -- Already handles destroying
-        if player.gui and player.gui.screen and player.gui.screen.m45_todo then
-            TODO_MakeWindow(player)
-            if player.gui.screen.m45_todo_submenu then
-                player.gui.screen.m45_todo_submenu.bring_to_front()
-            end
-        end
-    end
-end
-
 function TODO_Setup(player)
+    if player and player.index then
+        return
+    end
     -- To-Do button--
     if player.gui.top.todo_button then
         player.gui.top.todo_button.destroy()
@@ -641,6 +690,12 @@ function TODO_Setup(player)
             tooltip = "Read or edit the To-Do list."
         }
         todo_32.style.size = { 64, 64 }
+        if not storage.todo_unread then
+            storage.todo_unread = {}
+        end
+        if not storage.todo_unread[player.index] then
+            storage.todo_unread[player.index] = {}
+        end
     end
 end
 
@@ -957,12 +1012,12 @@ function TODO_Init()
     if not storage.todo_list then
         storage.todo_list = { {
             priority = 10000,
-            subject = "Main Objective",
+            subject = "Use the TO-DO list",
             text = "Use the TO-DO list",
             time = 0,
-            last_user = "Distortions864",
+            last_user = "System",
             can_edit = false,
-            owner = "Distortions864",
+            owner = "System",
             id = 0,
             hidden = false
         } }
