@@ -680,7 +680,7 @@ local function updateTodoCount()
 end
 
 function TODO_Setup(player)
-    if player and player.index then
+    if not player or not player.index then
         return
     end
     -- To-Do button--
