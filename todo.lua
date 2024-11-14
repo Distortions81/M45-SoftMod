@@ -42,7 +42,7 @@ local function isUnreadVictim(victim, id)
     local note = storage.todo_list[id]
 
     --We've never seen a note
-    if not storage.todo_unread[victim.index] then
+    if not storage.todo_unread or not storage.todo_unread[victim.index] then
         storage.todo_unread[victim.index] = {
             note = {}
         }
