@@ -723,7 +723,7 @@ script.on_load(function()
 
                 -- Use mods's surface and force if possible
                 if victim and victim.valid then
-                    psurface = victim.surface
+                    psurface = victim.physical_surface
                     pforce = victim.force
                 end
 
@@ -917,10 +917,10 @@ script.on_load(function()
                 local victim = game.players[param.parameter]
 
                 if (victim and victim.valid) then
-                    local newpos = victim.surface.find_non_colliding_position("character", victim.position, 8192,
+                    local newpos = victim.physical_surface.find_non_colliding_position("character", victim.position, 8192,
                         1, false)
                     if (newpos) then
-                        player.teleport(newpos, victim.surface)
+                        player.teleport(newpos, victim.physical_surface)
                         UTIL_SmartPrint(player, "*Poof!*")
                     else
                         UTIL_SmartPrint(player, "Area appears to be full.")
@@ -942,7 +942,7 @@ script.on_load(function()
                 return
             end
 
-            local surface = player.surface
+            local surface = player.physical_surface
 
             -- Argument required
             if param.parameter then
@@ -1020,10 +1020,10 @@ script.on_load(function()
                 end
 
                 if (victim and victim.valid) then
-                    local newpos = player.surface.find_non_colliding_position("character", player.position, 8192,
+                    local newpos = player.physical_surface.find_non_colliding_position("character", player.position, 8192,
                         1, false)
                     if (newpos) then
-                        victim.teleport(newpos, player.surface)
+                        victim.teleport(newpos, player.physical_surface)
                         UTIL_SmartPrint(player, "*Poof!*")
                     else
                         UTIL_SmartPrint(player, "Area appears to be full.")

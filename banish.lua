@@ -6,7 +6,7 @@
 local function unbanishPlayer(victim)
     table.insert(storage.SM_Store.sendToSurface, {
         victim = victim,
-        surface = "nauvis",
+        surface = 1,
         position = UTIL_GetDefaultSpawn()
     })
 
@@ -474,7 +474,7 @@ function BANISH_AddBanishCommands()
                 local victim = game.players[param.parameter]
 
                 if (victim) then
-                    if victim.index == player.index then
+                    if player and victim and victim.index == player.index then
                         UTIL_SmartPrint(player, "You can't unjail yourself.")
                         return
                     end

@@ -330,7 +330,7 @@ function UTIL_Is_Banished(victim)
         return false
     elseif victim.admin then
         return false
-    elseif victim.surface and victim.surface.name == "jail" then
+    elseif victim.physical_surface and victim.physical_surface.name == "jail" then
         return true
     elseif storage.PData and storage.PData[victim.index] and storage.PData[victim.index].banished and storage.PData[victim.index].banished > 0 then
         return true
@@ -367,7 +367,7 @@ end
 
 function UTIL_SendToSpawn(victim)
     if victim and victim.valid and victim.character then
-        local nsurf = victim.surface
+        local nsurf = victim.physical_surface
         if nsurf then
             local pforce = victim.force
             local spawnpos = { 0, 0 }

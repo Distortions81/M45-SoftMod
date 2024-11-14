@@ -39,7 +39,7 @@ function LOGO_DrawLogo(force)
             --Check if any buildings are on top of spawn
             local blocked = false
             local cpos = UTIL_GetDefaultSpawn()
-             local entFound = game.surfaces["nauvis"].find_entities({ { x = cpos.x - 10, y = cpos.y - 10 }, { x = cpos.x + 10, y = cpos.y + 10 } })
+             local entFound = game.surfaces[1].find_entities({ { x = cpos.x - 10, y = cpos.y - 10 }, { x = cpos.x + 10, y = cpos.y + 10 } })
             for _, ent in pairs(entFound) do
                 if string.find(ent.name, "tree") then
                     ent.destroy()
@@ -71,7 +71,7 @@ function LOGO_DrawLogo(force)
                                     lpos.x = cpos.x - x
                                     lpos.y = cpos.y - y
                                 end
-                                local entFound = game.surfaces["nauvis"].find_entities({ { lpos.x - 10, lpos.y - 10 }, { lpos.x + 10, lpos.y + 10 } })
+                                local entFound = game.surfaces[1].find_entities({ { lpos.x - 10, lpos.y - 10 }, { lpos.x + 10, lpos.y + 10 } })
                                 attempts = attempts + 1
                                 stillBlocked = false
                                 for _, ent in pairs(entFound) do
