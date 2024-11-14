@@ -39,7 +39,7 @@ function LOGO_DrawLogo(force)
             --Check if any buildings are on top of spawn
             local blocked = false
             local cpos = UTIL_GetDefaultSpawn()
-            local entFound = game.surfaces[1].find_entities({ { x = cpos.x - 10, y = cpos.y - 10 }, { x = cpos.x + 10, y = cpos.y + 10 } })
+            local entFound = msurf.find_entities({ { x = cpos.x - 10, y = cpos.y - 10 }, { x = cpos.x + 10, y = cpos.y + 10 } })
             for _, ent in pairs(entFound) do
                 if string.find(ent.name, "tree") then
                     ent.destroy()
@@ -71,7 +71,7 @@ function LOGO_DrawLogo(force)
                                     lpos.x = cpos.x - x
                                     lpos.y = cpos.y - y
                                 end
-                                local entFound = game.surfaces[1].find_entities({ { lpos.x - 10, lpos.y - 10 }, { lpos.x + 10, lpos.y + 10 } })
+                                local entFound = msurf.find_entities({ { lpos.x - 10, lpos.y - 10 }, { lpos.x + 10, lpos.y + 10 } })
                                 attempts = attempts + 1
                                 if attempts >= 10000 then
                                     return
@@ -84,7 +84,7 @@ function LOGO_DrawLogo(force)
                                         stillBlocked = true
                                     end
                                 end
-                                if game.surfaces[1].can_place_entity("crash-site-spaceship", lpos, defines.direction.south, game.forces["player"], defines.build_check_type.manual, false) then
+                                if msurf.can_place_entity("crash-site-spaceship", lpos, defines.direction.south, game.forces["player"], defines.build_check_type.manual, false) then
                                     if not stillBlocked then
                                         blocked = false
                                         goto done
