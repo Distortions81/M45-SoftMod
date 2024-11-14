@@ -45,12 +45,13 @@ function LOGO_DrawLogo(force)
                 pforce.set_spawn_position(cpos, msurf)
             end
 
+            local newPos = UTIL_GetDefaultSpawn()
             -- Set drawn flag
             storage.SM_Store.redrawLogo = false
             storage.SM_Store.spawnLogo = rendering.draw_sprite {
                 sprite = "file/img/world/m45-pad-v6.png",
                 render_layer = "floor",
-                target = cpos,
+                target = newPos,
                 x_scale = 0.5,
                 y_scale = 0.5,
                 surface = msurf
@@ -58,7 +59,7 @@ function LOGO_DrawLogo(force)
             storage.SM_Store.spawnLight = rendering.draw_light {
                 sprite = "utility/light_medium",
                 render_layer = 148,
-                target = cpos,
+                target = newPos,
                 scale = 8,
                 surface = msurf,
                 minimum_darkness = 0.5
@@ -70,7 +71,7 @@ function LOGO_DrawLogo(force)
                 text = storage.SM_Store.serverName,
                 draw_on_ground = true,
                 surface = msurf,
-                target = { cpos.x - 0.125, cpos.y - 2.5 },
+                target = { newPos.x - 0.125, newPos.y - 2.5 },
                 scale = 3.0,
                 color = { 1, 1, 1 },
                 alignment = "center",
