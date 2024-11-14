@@ -840,6 +840,12 @@ function ONLINE_Clicks(event)
                     UTIL_SmartPrint(player, "Invalid target.")
                 end
             elseif event.element.name == "online_button" then
+                if player.gui and player.gui.left then
+                    if player.gui.left.m45_online then
+                        player.gui.left.m45_online.destroy()
+                        return
+                    end
+                end
                 ONLINE_Window(player)
             elseif event.element.name == "m45_online_close_button" then
                 if player.gui and player.gui.left and player.gui.left.m45_online then

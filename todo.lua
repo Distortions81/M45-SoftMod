@@ -5,30 +5,29 @@
 
 local loremipsum = "Lorem ipsum dolor sit amet"
 
-local function markNoteIDUnread(id)
+local function markNoteIDRead(victim, id)
     --Init list if needed
     if not storage.todo_unread then
         storage.todo_unread = {}
     end
-    if not storage.note_list or not storage.todo_list[id] then
+    if not storage.todo_list or not storage.todo_list[id] then
         return
     end
 
-    for _, victim in pairs(game.players) do
-        --Init player if needed
-        if not storage.todo_unread[victim.index] then
-            storage.todo_unread[victim.index] = {
-                note = {}
-            }
-        end
-
-        --Update
-        if not storage.todo_unread[victim.index].note then
-            storage.todo_unread[victim.index].note = {}
-        end
-        storage.todo_unread[victim.index].note[id] = storage.todo_list[id].time
+    --Init player if needed
+    if not storage.todo_unread[victim.index] then
+        storage.todo_unread[victim.index] = {
+            note = {}
+        }
     end
+
+    --Update
+    if not storage.todo_unread[victim.index].note then
+        storage.todo_unread[victim.index].note = {}
+    end
+    storage.todo_unread[victim.index].note[id] = storage.todo_list[id].time
 end
+
 
 local function isUnreadVictim(victim, id)
     if not victim or not victim.index then
@@ -101,7 +100,7 @@ local function makeTodoSubmenu(player, i, edit_mode)
             end
 
             --Mark read
-            markNoteIDUnread(i)
+            markNoteIDRead(player, i)
 
             -- make todo root submenu
             if player and target and target.time then
@@ -442,11 +441,6 @@ function TODO_MakeWindow(player)
                                 type = "label",
                                 caption = "[NEW]"
                             }
-                        else
-                            local unread_label = pframe.add {
-                                type = "label",
-                                caption = "[---]"
-                            }
                         end
                         pframe.style.horizontally_stretchable = true
                         pframe.style.vertically_stretchable = false
@@ -763,8 +757,6 @@ local function guiClick(event)
                     id = storage.todo_list_id,
                     hidden = false
                 })
-
-                markNoteIDUnread(storage.todo_list[storage.todo_list_id])
 
                 updateTodoCount()
                 updateTODOWindows()
