@@ -6,7 +6,7 @@
 local loremipsum = "Lorem ipsum dolor sit amet"
 
 local function markNoteIDUnread(id)
-    --Init list if needed 
+    --Init list if needed
     if not storage.todo_unread then
         storage.todo_unread = {}
     end
@@ -24,7 +24,7 @@ local function markNoteIDUnread(id)
 
         --Update
         if not storage.todo_unread[victim.index].note then
-            storage.todo_unread[victim.index].note= {}
+            storage.todo_unread[victim.index].note = {}
         end
         storage.todo_unread[victim.index].note[id] = storage.todo_list[id].time
     end
@@ -32,29 +32,34 @@ end
 
 local function isUnreadVictim(victim, id)
     if not victim or not victim.index then
-        return
+        return false
     end
-    if not storage.note_list or not storage.note_list[id] then
+    if not storage.todo_list or not storage.todo_list[id] then
         --Note does not exist
-        return
+        return false
     end
-    local note = storage.note_list[id]
+    local note = storage.todo_list[id]
 
+    --We've never seen a note
     if not storage.todo_unread[victim.index] then
         storage.todo_unread[victim.index] = {
             note = {}
         }
-        return false
+        return true
     end
 
+    --We've never seen this note
     if not storage.todo_unread[victim.index].note[id] then
-        storage.todo_unread[victim.index].note[id] = note.time
         return true
     end
 
-    if not storage.todo_unread[victim.index].note[id]  < note.time then
+    --We saw this note, but it was updated
+    if storage.todo_unread[victim.index].note[id] < note.time then
         return true
     end
+
+    --We've already seen the note
+    return false
 end
 
 local function todo_key(i)
@@ -432,17 +437,17 @@ function TODO_MakeWindow(player)
                             type = "flow",
                             direction = "horizontal"
                         }
-                        if isUnreadVictim(player, target.id) then
-                        local unread_label = pframe.add {
-                            type = "label",
-                            caption = "NEW"
-                        }
-                    else
-                        local unread_label = pframe.add {
-                            type = "label",
-                            caption = "   "
-                        } 
-                    end
+                        if isUnreadVictim(player, i) then
+                            local unread_label = pframe.add {
+                                type = "label",
+                                caption = "[NEW]"
+                            }
+                        else
+                            local unread_label = pframe.add {
+                                type = "label",
+                                caption = "[---]"
+                            }
+                        end
                         pframe.style.horizontally_stretchable = true
                         pframe.style.vertically_stretchable = false
                         pframe.style.maximal_width = 1600
