@@ -108,13 +108,16 @@ function LOG_TrainSchedule(event)
     end
     local player = game.players[event.player_index]
 
-    local msg = player.name ..
-        " changed schedule on train ID " .. event.train.id .. " at " .. event.train.gps_tag
+    local tObj = event.train.front_stock
+    if tObj then
+        local msg = player.name ..
+            " changed schedule on train ID " .. event.train.id .. " at " .. UTIL_GPSObj(tObj)
 
-    if UTIL_Is_Regular(player) or UTIL_Is_Veteran(player) or player.admin then
-        UTIL_ConsolePrint("[ACT] " .. msg)
-    else
-        UTIL_MsgAll(msg)
+        if UTIL_Is_Regular(player) or UTIL_Is_Veteran(player) or player.admin then
+            UTIL_ConsolePrint("[ACT] " .. msg)
+        else
+            UTIL_MsgAll(msg)
+        end
     end
 end
 
