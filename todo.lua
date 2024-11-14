@@ -54,6 +54,11 @@ local function isUnreadVictim(victim, id)
         return true
     end
 
+    --We've never seen a note
+    if not storage.todo_unread[victim.index].note then
+        return true
+    end
+
     --We've never seen this note
     if not storage.todo_unread[victim.index].note[id] then
         return true
