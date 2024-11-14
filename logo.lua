@@ -9,7 +9,7 @@ function LOGO_DrawLogo(force)
         storage.SM_Store.redrawLogo = true
     end
 
-    local msurf = game.surfaces["nauvis"]
+    local msurf = game.surfaces[1]
     if msurf then
         -- Migrate old scripts
         if storage.m45logo then
