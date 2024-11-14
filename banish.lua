@@ -277,6 +277,7 @@ function BANISH_MakeJail()
         }
         game.create_surface("jail", my_map_gen_settings)
         game.surfaces["jail"].show_clouds = false
+        game.surfaces["jail"].request_to_generate_chunks({x=0,y=0},1)
     end
 end
 
