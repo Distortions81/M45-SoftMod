@@ -17,7 +17,7 @@ require "todo"     -- To-Do-list
 require "utility"  -- Widely used general utility
 
 function RunSetup()
-    storage.SM_Version = "626-11.13.2024-1143p"
+    storage.SM_Version = "626-11.14.2024-0827"
 
     storage.SM_OldVersion = storage.SM_Version
 

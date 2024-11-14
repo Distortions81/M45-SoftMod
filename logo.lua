@@ -7,7 +7,6 @@
 function LOGO_DrawLogo(force)
     if force then
         storage.SM_Store.redrawLogo = true
-        UTIL_MapPin()
     end
 
     local msurf = game.surfaces[1]
