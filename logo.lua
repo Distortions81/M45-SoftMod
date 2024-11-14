@@ -83,7 +83,7 @@ function LOGO_DrawLogo(force)
                                         stillBlocked = true
                                     end
                                 end
-                                if msurf.can_place_entity("crash-site-spaceship", lpos, defines.direction.south, game.forces["player"], defines.build_check_type.manual, false) then
+                                if msurf.can_place_entity("crash-site-spaceship", lpos) then
                                     if not stillBlocked then
                                         blocked = false
                                         goto done
