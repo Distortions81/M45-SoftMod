@@ -125,7 +125,7 @@ local function e_respawn(event)
 end
 
 local function makeUI(player)
-    if player.gui and player.gui.top then
+    if player.gui then
         INFO_MakeButton(player)
         ONLINE_MakeOnlineButton(player)
         ONELIFE_MakeButton(player)
