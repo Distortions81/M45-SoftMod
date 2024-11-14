@@ -991,9 +991,18 @@ end
 local function updateWindowEvent(event)
     local player = game.players[event.player_index]
     -- Refresh window if open
+
+    if not player or not player.gui then
+        return
+    end
+
     if player.gui.screen.m45_todo then
         player.gui.screen.m45_todo.destroy()
         TODO_MakeWindow(player)
+    end
+    --Update todo unread
+    if player.gui.top and player.gui.top.todo_button then
+        player.gui.top.todo_button.number = unreadCount(player)
     end
 end
 
