@@ -39,7 +39,7 @@ function LOGO_DrawLogo(force)
             --Check if any buildings are on top of spawn
             local blocked = false
             local cpos = UTIL_GetDefaultSpawn()
-             local entFound = game.surfaces[1].find_entities({ { x = cpos.x - 10, y = cpos.y - 10 }, { x = cpos.x + 10, y = cpos.y + 10 } })
+            local entFound = game.surfaces[1].find_entities({ { x = cpos.x - 10, y = cpos.y - 10 }, { x = cpos.x + 10, y = cpos.y + 10 } })
             for _, ent in pairs(entFound) do
                 if string.find(ent.name, "tree") then
                     ent.destroy()
@@ -54,7 +54,7 @@ function LOGO_DrawLogo(force)
                 cpos = lpos
                 local attempts = 0
                 local stillBlocked = false
-                while blocked and attempts < 10000 do
+                while blocked do
                     for x = 0, 4000, 4 do
                         for y = 0, 4000, 4 do
                             for z = 0, 3, 1 do
@@ -73,6 +73,9 @@ function LOGO_DrawLogo(force)
                                 end
                                 local entFound = game.surfaces[1].find_entities({ { lpos.x - 10, lpos.y - 10 }, { lpos.x + 10, lpos.y + 10 } })
                                 attempts = attempts + 1
+                                if attempts >= 10000 then
+                                    return
+                                end
                                 stillBlocked = false
                                 for _, ent in pairs(entFound) do
                                     if string.find(ent.name, "tree") then
@@ -81,14 +84,20 @@ function LOGO_DrawLogo(force)
                                         stillBlocked = true
                                     end
                                 end
-                                if not stillBlocked then
-                                    blocked = false
-                                    goto done
+                                if game.surfaces[1].can_place_entity("crash-site-spaceship", lpos, defines.direction.south, game.forces["player"], defines.build_check_type.manual, false) then
+                                    if not stillBlocked then
+                                        blocked = false
+                                        goto done
+                                    else
+                                        stillBlocked = false
+                                        blocked = true
+                                    end
                                 end
                             end
                         end
                     end
                 end
+
 
                 ::done::
                 if not blocked then
