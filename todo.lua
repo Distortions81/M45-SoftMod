@@ -5,6 +5,58 @@
 
 local loremipsum = "Lorem ipsum dolor sit amet"
 
+local function markNoteIDUnread(id)
+    --Init list if needed 
+    if not storage.todo_unread then
+        storage.todo_unread = {}
+    end
+    if not storage.note_list or not storage.todo_list[id] then
+        return
+    end
+
+    for _, victim in pairs(game.players) do
+        --Init player if needed
+        if not storage.todo_unread[victim.index] then
+            storage.todo_unread[victim.index] = {
+                note = {}
+            }
+        end
+
+        --Update
+        if not storage.todo_unread[victim.index].note then
+            storage.todo_unread[victim.index].note= {}
+        end
+        storage.todo_unread[victim.index].note[id] = storage.todo_list[id].time
+    end
+end
+
+local function isUnreadVictim(victim, id)
+    if not victim or not victim.index then
+        return
+    end
+    if not storage.note_list or not storage.note_list[id] then
+        --Note does not exist
+        return
+    end
+    local note = storage.note_list[id]
+
+    if not storage.todo_unread[victim.index] then
+        storage.todo_unread[victim.index] = {
+            note = {}
+        }
+        return false
+    end
+
+    if not storage.todo_unread[victim.index].note[id] then
+        storage.todo_unread[victim.index].note[id] = note.time
+        return true
+    end
+
+    if not storage.todo_unread[victim.index].note[id]  < note.time then
+        return true
+    end
+end
+
 local function todo_key(i)
     if storage.todo_list and storage.todo_list[i] then
         return storage.todo_list[i].id
@@ -42,6 +94,9 @@ local function makeTodoSubmenu(player, i, edit_mode)
                 (not player.admin and player.name ~= target.owner and not target.can_edit) then
                 no_edit = true
             end
+
+            --Mark read
+            markNoteIDUnread(i)
 
             -- make todo root submenu
             if player and target and target.time then
@@ -377,6 +432,17 @@ function TODO_MakeWindow(player)
                             type = "flow",
                             direction = "horizontal"
                         }
+                        if isUnreadVictim(player, target.id) then
+                        local unread_label = pframe.add {
+                            type = "label",
+                            caption = "NEW"
+                        }
+                    else
+                        local unread_label = pframe.add {
+                            type = "label",
+                            caption = "   "
+                        } 
+                    end
                         pframe.style.horizontally_stretchable = true
                         pframe.style.vertically_stretchable = false
                         pframe.style.maximal_width = 1600
@@ -551,7 +617,7 @@ local function updateTodoCount()
     end
 end
 
-local function update_todo_windows()
+local function updateTODOWindows()
     for _, player in pairs(game.connected_players) do
         -- Already handles destroying
         if player.gui and player.gui.screen and player.gui.screen.m45_todo then
@@ -610,7 +676,7 @@ local function guiClick(event)
                 local i = tonumber(args[2])
                 if i > 1 then
                     table.insert(storage.todo_list, i - 1, table.remove(storage.todo_list, i))
-                    update_todo_windows()
+                    updateTODOWindows()
                 else
                     UTIL_SmartPrint(player, "It is already the first item!")
                 end
@@ -625,7 +691,7 @@ local function guiClick(event)
                 end
                 if i < count then
                     table.insert(storage.todo_list, i + 1, table.remove(storage.todo_list, i))
-                    update_todo_windows()
+                    updateTODOWindows()
                 else
                     UTIL_SmartPrint(player, "It is already at the end of the list.")
                 end
@@ -693,8 +759,10 @@ local function guiClick(event)
                     hidden = false
                 })
 
+                markNoteIDUnread(storage.todo_list[storage.todo_list_id])
+
                 updateTodoCount()
-                update_todo_windows()
+                updateTODOWindows()
                 UTIL_ConsolePrint("[TODO] " .. player.name .. " added a new todo item: " .. storage.todo_list_id)
             elseif args and args[2] and args[1] == "m45_todo_hide" then
                 ----------------------------------------------------------------
@@ -734,7 +802,7 @@ local function guiClick(event)
                         player.gui.screen.m45_todo_submenu.destroy()
 
                         -- Update windows
-                        update_todo_windows()
+                        updateTODOWindows()
 
                         -- We are no longer editing, clear
                         storage.todo_player_editing_id[player.index] = nil
@@ -813,7 +881,7 @@ local function guiClick(event)
                             player.gui.screen.m45_todo_submenu.destroy()
 
                             -- Update windows
-                            update_todo_windows()
+                            updateTODOWindows()
 
                             -- We are no longer editing, clear
                             storage.todo_player_editing_id[player.index] = nil
@@ -853,7 +921,7 @@ local function guiClick(event)
 end
 
 
-local function updateWindow(event)
+local function updateWindowEvent(event)
     local player = game.players[event.player_index]
     -- Refresh window if open
     if player.gui.screen.m45_todo then
@@ -864,7 +932,7 @@ end
 
 function TODO_EventHandler(event)
     if event.name == defines.events.on_player_joined_game then
-        updateWindow(event)
+        updateWindowEvent(event)
     elseif event.name == defines.events.on_gui_click then
         guiClick(event)
     end
@@ -885,6 +953,9 @@ function TODO_Init()
     end
     if not storage.todo_throttle then
         storage.todo_throttle = {}
+    end
+    if not storage.todo_unread then
+        storage.todo_unread = {}
     end
     if not storage.todo_list then
         storage.todo_list = { {
