@@ -683,13 +683,13 @@ function TODO_Setup(player)
         player.gui.top.todo_button.destroy()
     end
     if not player.gui.top.todo_button then
-        local todo_32 = player.gui.top.add {
+        local todo_64 = player.gui.top.add {
             type = "sprite-button",
             name = "todo_button",
             sprite = "file/img/buttons/todo2-64.png",
             tooltip = "Read or edit the To-Do list."
         }
-        todo_32.style.size = { 64, 64 }
+        todo_64.style.size = { 64, 64 }
         if not storage.todo_unread then
             storage.todo_unread = {}
         end
