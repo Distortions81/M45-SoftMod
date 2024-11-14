@@ -23,6 +23,11 @@ local function markNoteIDRead(victim, id)
         }
     end
 
+    --Init player if needed
+    if not storage.todo_unread[victim.index].note then
+        storage.todo_unread[victim.index].note = {}
+    end
+
     --Update
     storage.todo_unread[victim.index].note[id] = storage.todo_list[id].time
 end
