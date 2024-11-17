@@ -235,7 +235,7 @@ function BANISH_DoJail(victim)
     end
 
     storage.PData[victim.index].playScore = 0
-    INFO_DumpInv(victim, true)
+    UTIL_DumpInv(victim, true)
     UTIL_MsgAllSys(victim.name .. "'s inventory has been dumped at "..UTIL_GPSObj(UTIL_GetDefaultSpawn()).." so the items can be recovered.")
 
     local newpos = game.surfaces["jail"].find_non_colliding_position("character", { x = 0, y = 0 }, 1024, 1, false)

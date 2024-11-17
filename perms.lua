@@ -549,7 +549,7 @@ function PERMS_WelcomeMember(player)
                         type = "sprite-button",
                         name = "online_button",
                         sprite = "file/img/buttons/online-64.png",
-                        tooltip = "See players online!"
+                        tooltip = "See players online, report and banish."
                     }
                     online_32.style.size = { 64, 64 }
                     rframe.add {
@@ -566,13 +566,13 @@ function PERMS_WelcomeMember(player)
 
                 rframe.add {
                     type = "label",
-                    caption = tfont .. "To find out more, click the SERVER-INFO button here: " .. efont
+                    caption = tfont .. "To find out more, click the HELP-INFO button here: " .. efont
                 }
                 local m45_32 = rframe.add {
                     type = "sprite-button",
                     name = "m45_button",
                     sprite = "file/img/buttons/m45-64.png",
-                    tooltip = "Opens the server-info window"
+                    tooltip = "Opens the server-info window."
                 }
                 m45_32.style.size = { 64, 64 }
             end

@@ -11,13 +11,12 @@ require "logo"     -- Spawn logo
 require "onelife"  -- Time until map reset
 require "online"   -- Players online window
 require "perms"    -- Permissions system
-require "reset"    -- Time until map reset
 require "storage"  -- Global variable init
 require "todo"     -- To-Do-list
 require "utility"  -- Widely used general utility
 
 function RunSetup()
-    storage.SM_Version = "626-11.14.2024-0457p"
+    storage.SM_Version = "627-11.17.2024-1046"
 
     storage.SM_OldVersion = storage.SM_Version
 

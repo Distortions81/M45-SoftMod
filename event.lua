@@ -49,7 +49,7 @@ script.on_nth_tick(599, function(event)
     --15 mins
     if storage.SM_Store.tickDiv >= 90 then
         storage.SM_Store.tickDiv = 0
-        INFO_CheckAbandoned()
+        UTIL_CheckAbandoned()
     end
 
 
@@ -130,7 +130,7 @@ local function makeUI(player)
         ONLINE_MakeOnlineButton(player)
         ONELIFE_MakeButton(player)
         TODO_Setup(player)
-        RESET_MakeClock(player)
+        INFO_MakeClock(player)
     end
 end
 

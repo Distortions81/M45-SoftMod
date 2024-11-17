@@ -502,6 +502,6 @@ function LOG_Banned(event)
         return
     end
     local player = game.players[event.player_index]
-    INFO_DumpInv(player, true)
+    UTIL_DumpInv(player, true)
     UTIL_MsgAllSys(player.name .. "'s items have been left at spawn, so they can be recovered.")
 end

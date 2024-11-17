@@ -40,3 +40,6 @@ simple to-do list<br>
 <br>
 *utility.lua*<br>
 commonly needed utility functions<br>
+<br>
+*onelife.lua*<br>
+permadeath-onelife mode<br>

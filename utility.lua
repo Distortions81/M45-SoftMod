@@ -4,6 +4,107 @@
 -- License: MPL 2.0
 -- Safe console print
 
+function UTIL_CheckAbandoned()
+    for _, player in pairs(game.players) do
+        if not player.connected and UTIL_Is_New(player) then
+            if game.tick - storage.PData[player.index].lastOnline > 1 * 60 * 60 * 60 then
+                if UTIL_DumpInv(player, false) then
+                    UTIL_MsgAllSys("New player '" .. player.name ..
+                        "' was not active long enough to become a member, and have been offline for some time. Their items are now considered abandoned, and have been placed at spawn.")
+                end
+            end
+        end
+    end
+end
+
+
+function UTIL_DumpInv(player, force)
+    if not player then
+        return false
+    end
+    if not player.valid then
+        return false
+    end
+
+    if not force then
+        if storage.PData[player.index].cleaned then
+            if storage.PData[player.index].cleaned then
+                return false
+            end
+        end
+    end
+
+    local inv_main = player.get_inventory(defines.inventory.character_main)
+    local inv_trash = player.get_inventory(defines.inventory.character_trash)
+
+    local inv_main_contents
+    if inv_main and inv_main.valid then
+        inv_main_contents = inv_main.get_contents()
+    end
+
+    local inv_trash_contents
+    if inv_trash and inv_trash.valid then
+        inv_trash_contents = inv_trash.get_contents()
+    end
+
+    local inv_corpse_size = 0
+    if inv_main_contents then
+        inv_corpse_size = inv_corpse_size + (#inv_main - inv_main.count_empty_stacks())
+    end
+
+    if inv_trash_contents then
+        inv_corpse_size = inv_corpse_size + (#inv_trash - inv_trash.count_empty_stacks())
+    end
+
+    if inv_corpse_size <= 0 then
+        return false
+    end
+
+    local position = player.position
+    local corpse = game.surfaces[1].create_entity {
+        name = "character-corpse",
+        position = game.surfaces[1].find_non_colliding_position("character", UTIL_GetDefaultSpawn(), 1024, 1, false),
+        inventory_size = inv_corpse_size,
+        player_index = player.index
+    }
+    if not corpse then
+        return false
+    end
+
+    corpse.active = true
+
+    local inv_corpse = corpse.get_inventory(defines.inventory.character_corpse)
+
+    if not inv_corpse then
+        return false
+    end
+
+    if inv_main_contents then
+        for _, item in pairs(inv_main_contents) do
+            inv_corpse.insert(item)
+        end
+
+        if inv_main_contents then
+            inv_main.clear()
+        end
+    end
+    if inv_trash_contents then
+        for _, item in pairs(inv_trash_contents) do
+            inv_corpse.insert(item)
+        end
+
+        if inv_trash_contents then
+            inv_trash.clear()
+        end
+    end
+
+
+    -- Mark as cleaned up.
+    storage.PData[player.index].cleaned = true
+
+    return true
+end
+
 function UTIL_MapPin()
     --Migrate old maps
     if (storage.servertag and storage.servertag.valid) then

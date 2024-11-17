@@ -21,7 +21,7 @@ function ONLINE_MakeOnlineButton(player)
             type = "sprite-button",
             name = "online_button",
             sprite = "file/img/buttons/online-64.png",
-            tooltip = "See players online!"
+            tooltip = "See players online, report and banish."
         }
         online_32.style.size = { 64, 64 }
     end

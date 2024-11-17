@@ -3,103 +3,20 @@
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
 
-function INFO_DumpInv(player, force)
-    if not player then
-        return false
+function INFO_MakeClock(player)
+    -- Online button--
+    if player.gui.top.reset_clock then
+        player.gui.top.reset_clock.destroy()
     end
-    if not player.valid then
-        return false
-    end
-
-    if not force then
-        if storage.PData[player.index].cleaned then
-            if storage.PData[player.index].cleaned then
-                return false
-            end
-        end
-    end
-
-    local inv_main = player.get_inventory(defines.inventory.character_main)
-    local inv_trash = player.get_inventory(defines.inventory.character_trash)
-
-    local inv_main_contents
-    if inv_main and inv_main.valid then
-        inv_main_contents = inv_main.get_contents()
-    end
-
-    local inv_trash_contents
-    if inv_trash and inv_trash.valid then
-        inv_trash_contents = inv_trash.get_contents()
-    end
-
-    local inv_corpse_size = 0
-    if inv_main_contents then
-        inv_corpse_size = inv_corpse_size + (#inv_main - inv_main.count_empty_stacks())
-    end
-
-    if inv_trash_contents then
-        inv_corpse_size = inv_corpse_size + (#inv_trash - inv_trash.count_empty_stacks())
-    end
-
-    if inv_corpse_size <= 0 then
-        return false
-    end
-
-    local position = player.position
-    local corpse = game.surfaces[1].create_entity {
-        name = "character-corpse",
-        position = game.surfaces[1].find_non_colliding_position("character", UTIL_GetDefaultSpawn(), 1024, 1, false),
-        inventory_size = inv_corpse_size,
-        player_index = player.index
-    }
-    if not corpse then
-        return false
-    end
-
-    corpse.active = true
-
-    local inv_corpse = corpse.get_inventory(defines.inventory.character_corpse)
-
-    if not inv_corpse then
-        return false
-    end
-
-    if inv_main_contents then
-        for _, item in pairs(inv_main_contents) do
-            inv_corpse.insert(item)
-        end
-
-        if inv_main_contents then
-            inv_main.clear()
-        end
-    end
-    if inv_trash_contents then
-        for _, item in pairs(inv_trash_contents) do
-            inv_corpse.insert(item)
-        end
-
-        if inv_trash_contents then
-            inv_trash.clear()
-        end
-    end
-
-
-    -- Mark as cleaned up.
-    storage.PData[player.index].cleaned = true
-
-    return true
-end
-
-function INFO_CheckAbandoned()
-    for _, player in pairs(game.players) do
-        if not player.connected and UTIL_Is_New(player) then
-            if game.tick - storage.PData[player.index].lastOnline > 1 * 60 * 60 * 60 then
-                if INFO_DumpInv(player, false) then
-                    UTIL_MsgAllSys("New player '" .. player.name ..
-                        "' was not active long enough to become a member, and have been offline for some time. Their items are now considered abandoned, and have been placed at spawn.")
-                end
-            end
-        end
+    if not player.gui.top.reset_clock then
+        local rclock = player.gui.top.add {
+            type = "button",
+            name = "reset_clock",
+            style = "red_button",
+            tooltip = "Map reset schdule. Control-right-click to minimize.",
+            visible = false,
+        }
+        rclock.style.size = { 24, 24 }
     end
 end
 
@@ -112,7 +29,7 @@ function INFO_MakeButton(player)
             type = "sprite-button",
             name = "m45_button",
             sprite = "file/img/buttons/m45-64.png",
-            tooltip = "Opens the server-info window"
+            tooltip = "Open help and info about M45-Science."
         }
         m45_32.style.size = { 64, 64 }
     end
@@ -165,20 +82,28 @@ function INFO_InfoWin(player)
                     type = "label",
                     name = "online_title",
                     style = "frame_title",
-                    caption = "Welcome to M45!"
+                    caption = "Welcome!"
                 }
             else
                 info_titlebar.add {
                     type = "label",
                     name = "online_title",
                     style = "frame_title",
-                    caption = "You are playing on: " .. storage.SM_Store.serverName
+                    caption = "Welcome! --  Map: " .. storage.SM_Store.serverName
                 }
             end
             local pusher = info_titlebar.add {
                 type = "empty-widget",
                 style = "draggable_space_header"
             }
+
+            info_titlebar.add {
+                type = "label",
+                name = "online_title_note",
+                style = "frame_title",
+                caption = "  please read before closing  "
+            }
+
             pusher.style.vertically_stretchable = true
             pusher.style.horizontally_stretchable = true
             pusher.drag_target = main_flow
@@ -199,27 +124,23 @@ function INFO_InfoWin(player)
 
             local tab1 = info_pane.add {
                 type = "tab",
-                caption = "[entity=character] INFO-README"
+                caption = "[virtual-signal=signal-info] Welcome"
             }
             local tab2 = info_pane.add {
                 type = "tab",
-                caption = "[item=automation-science-pack] FREE-MEMBERSHIP"
+                caption = "[entity=item-request-proxy] Membership"
             }
             local tab3 = info_pane.add {
                 type = "tab",
-                caption = "[item=steel-plate] RULES"
+                caption = "[virtual-signal=signal-deny] Rules"
             }
             local tab5 = info_pane.add {
                 type = "tab",
-                caption = "[item=advanced-circuit] Discord Link"
+                caption = "[item=lab] Discord"
             }
             local tab6 = info_pane.add {
                 type = "tab",
                 caption = "[item=production-science-pack] Patreon"
-            }
-            local tab4 = info_pane.add {
-                type = "tab",
-                caption = "[virtual-signal=signal-info] Tips & Tricks"
             }
 
             -- Tab 1 -- Welcome
@@ -248,7 +169,7 @@ function INFO_InfoWin(player)
             }
             tab1_lframe.add {
                 type = "label",
-                caption = "[color=white][font=default-large-bold]M45[/font][/color]"
+                caption = "[color=white][font=default-large-bold]M45-Science[/font][/color]"
             }
             tab1_lframe.add {
                 type = "label",
@@ -313,12 +234,6 @@ function INFO_InfoWin(player)
                 type = "label",
                 caption = ""
             }
-            tab1_lframe.add {
-                type = "button",
-                caption = "Help Out!",
-                style = "red_button",
-                name = "patreon_button"
-            }
             tab1_lframe.style.horizontal_align = "center"
 
             -- Tab 1 -- left/right divider line
@@ -342,7 +257,7 @@ function INFO_InfoWin(player)
             tab1_info_center.style.horizontally_stretchable = true
             tab1_info_center.add {
                 type = "label",
-                caption = "[color=orange][font=default-large-bold]TROLLS or GRIEFERS?[/font][/color]"
+                caption = "[color=orange][font=default-large-bold]Trolls or griefers?[/font][/color]"
             }
             tab1_info_center.add {
                 type = "sprite",
@@ -350,7 +265,7 @@ function INFO_InfoWin(player)
             }
             tab1_info_center.add {
                 type = "label",
-                caption = "[color=orange][font=default-large-bold]JUST BANISH THEM![/font][/color]"
+                caption = "[color=orange][font=default-large-bold]Banish them![/font][/color]"
             }
             tab1_info_center.add {
                 type = "label",
@@ -379,30 +294,26 @@ function INFO_InfoWin(player)
                 direction = "vertical"
             }
             tab1_info_top.style.horizontally_stretchable = true
-            tab1_info_top.add {
-                type = "label",
-                caption = ""
-            }
             if storage.SM_Store.resetDate and storage.SM_Store.resetDate ~= "" then
-                local reset_warning = tab1_info_top.add {
+                tab1_info_top.add {
                     type = "label",
                     caption = "[virtual-signal=signal-everything]  [color=orange][font=default-large-bold]Next map reset: " ..
                         string.upper(storage.SM_Store.resetDate) .. "[/font][/color]"
                 }
+            else
+                tab1_info_top.add {
+                    type = "label",
+                    caption = "[virtual-signal=signal-everything]  [color=orange][font=default-large-bold]No map reset is currently scheduled.[/font][/color]"
+                }
             end
             if storage.SM_Store.resetDuration and storage.SM_Store.resetDuration ~= "" then
-                local reset_warning = tab1_info_top.add {
+                tab1_info_top.add {
                     type = "label",
                     caption = "[virtual-signal=signal-everything]  [color=orange][font=default-large-bold]Map will reset in: " ..
                         string.upper(storage.SM_Store.resetDuration) .. "[/font][/color]"
                 }
             end
-            tab1_info_top.style.horizontally_stretchable = true
             tab1_info_top.add {
-                type = "label",
-                caption = ""
-            }
-            local restrictions = tab1_info_top.add {
                 type = "label",
                 caption = "[entity=character]  [color=yellow][font=default-large-bold]NEW PLAYERS start with some restrictions![/font][/color]"
             }
@@ -425,33 +336,21 @@ function INFO_InfoWin(player)
                     type = "label",
                     caption = "[color=red][font=default-large-bold]CHEATS ARE ENABLED![/font][/color]"
                 }
-            else
-                tab1_info_top.add {
-                    type = "label",
-                    caption = ""
-                }
             end
-            tab1_info_top.add {
-                type = "label",
-                caption = "[font=default-large-bold]Click the '[item=automation-science-pack] FREE-MEMBERSHIP' tab to learn more.[/font]"
-            }
-            tab1_info_top.add {
-                type = "label",
-                caption = ""
-            }
 
             -- Contextual editing
             if player.force.friendly_fire then
-                friendly_fire.caption = "Friendly fire is currently ON (normally off)."
-            end
-            if not storage.SM_Store.restrictNew then
-                restrictions.caption = ""
+                friendly_fire.caption = "[recipe=combat-shotgun] [font=default-large-bold]Friendly fire is ON.[/font]"
             end
 
             -- server list URL
             tab1_info_top.add {
                 type = "label",
-                caption = "[font=default-large]See our other Factorio servers:[/font]"
+                caption = ""
+            }
+            tab1_info_top.add {
+                type = "label",
+                caption = "[font=default-large]See other M45 maps:[/font]"
             }
 
             tab1_info_top.add {
@@ -480,7 +379,6 @@ function INFO_InfoWin(player)
                 direction = "vertical"
             }
 
-
             -- Tab 1 Main -- Discord -- Info Text
             tab1_discord_sub1_frame.add {
                 type = "label",
@@ -488,7 +386,7 @@ function INFO_InfoWin(player)
             }
             tab1_discord_sub1_frame.add {
                 type = "label",
-                caption = "[font=default-large]Visit m45sci.xyz or copy-paste the Discord link below:[/font]"
+                caption = "[font=default-large]Visit m45sci.xyz or copy-paste the link below:[/font]"
             }
 
             -- Tab 1 Main -- Discord -- Logo/URL frame
@@ -550,7 +448,7 @@ function INFO_InfoWin(player)
             tab2_main_frame.add {
                 type = "label",
                 name = "tab2_score",
-                caption = "[color=orange][font=default-large-bold]Current score: " ..
+                caption = "[color=orange][font=default-large-bold]Your current score: " ..
                     math.floor(storage.PData[player.index].score / 60 / 60) .. "[/font][/color]"
             }
             tab2_main_frame.add {
@@ -559,15 +457,15 @@ function INFO_InfoWin(player)
             }
             tab2_main_frame.add {
                 type = "label",
-                caption = "[font=default-large-bold]Membership is automatic & free, and based on ACTIVITY. Your current activity score is listed above.[/font]"
+                caption = "[font=default-large-bold]Membership is automatic & free, and based on score. Your current score is listed above.[/font]"
             }
             tab2_main_frame.add {
                 type = "label",
-                caption = "[font=default-large]The score is specific to this map, and does not carry over to other maps or servers.[/font]"
+                caption = "[font=default-large]The score is specific to this map, and does not carry over to other maps.[/font]"
             }
             tab2_main_frame.add {
                 type = "label",
-                caption = "[font=default-large]Once you achieve a specific level, the level persists between maps and servers (but the activity score does not).[/font]"
+                caption = "[font=default-large]Once you achieve a level, the level persists between maps (but the activity score does not).[/font]"
             }
             tab2_main_frame.add {
                 type = "label",
@@ -674,6 +572,10 @@ function INFO_InfoWin(player)
                 caption = "[font=default-large]Access to vote-map command on Discord (after registration).[/font]"
             }
             tab2_main_frame.add {
+                type = "label",
+                caption = " "
+            }
+            tab2_main_frame.add {
                 type = "line",
                 direction = "horizontal"
             }
@@ -754,7 +656,7 @@ function INFO_InfoWin(player)
             }
             tab3_main_frame.add {
                 type = "label",
-                caption = "[font=default-large-bold]3: [item=blueprint-book] Read the INFO-README, RULES and FREE-MEMBERSHIP tabs before asking for help.[/font]"
+                caption = "[font=default-large-bold]3: [item=blueprint-book] Read the Weclome, Rules and Membership tabs before asking for help.[/font]"
             }
             tab3_main_frame.add {
                 type = "label",
@@ -762,7 +664,7 @@ function INFO_InfoWin(player)
             }
             tab3_main_frame.add {
                 type = "label",
-                caption = "[font=default-large-bold]4: [item=repair-pack] Use [/font][font=default-game]BANISH[/font] [font=default-large-bold]if there are problem-players.[/font]"
+                caption = "[font=default-large-bold]4: [item=repair-pack] Use [/font][font=default-game]BANISH or REPORT[/font] [font=default-large-bold]if there are problem-players. (online menu, top-left)[/font]"
             }
             tab3_main_frame.add {
                 type = "label",
@@ -786,90 +688,8 @@ function INFO_InfoWin(player)
 
             info_pane.add_tab(tab3, tab3_frame)
 
-            ------------------------
-            -- tab 4 -- Tips & Tricks --
-            ------------------------
-            local tab4_frame = info_pane.add {
-                type = "flow",
-                direction = "vertical"
-            }
-            tab4_frame.style.vertically_squashable = true
-            tab4_frame.style.horizontal_align = "center"
-
-            -- tab 4 -- Main
-            local tab4_main_frame = tab4_frame.add {
-                type = "scroll-pane",
-                direction = "vertical"
-            }
-            tab4_main_frame.style.horizontal_align = "right"
-            tab4_main_frame.style.padding = 4
-
-            tab4_main_frame.style.horizontally_stretchable = true
-            tab4_main_frame.add {
-                type = "label",
-                caption = ""
-            }
-            tab4_main_frame.add {
-                type = "label",
-                caption = "[font=default-large]You can bookmark servers, by clicking the star icon in the server browser![/font]"
-            }
-            local tab4_img2_frame = tab4_main_frame.add {
-                type = "frame",
-                direction = "vertical"
-            }
-            tab4_img2_frame.add {
-                type = "sprite",
-                sprite = "file/img/info-win/tips/bookmark.png",
-                tooltip = "The gear icon will turn orange, and the bookmarked servers appear first in the list."
-            }
-            tab4_main_frame.add {
-                type = "label",
-                caption = ""
-            }
-
-            tab4_main_frame.add {
-                type = "label",
-                caption = "[font=default-large]Map reset, but want to keep playing the old map?[/font]"
-            }
-            tab4_main_frame.add {
-                type = "text-box",
-                name = "old_maps",
-                text = "https://m45sci.xyz/u/fact2/archive/1.1%20maps/?C=M;O=D",
-                tooltip = "drag-select with mouse, control-c to copy."
-            }
-            tab4_main_frame.old_maps.style.font = "default-large"
-            tab4_main_frame.old_maps.style.minimal_width = 550
-            tab4_main_frame.add {
-                type = "label",
-                caption = ""
-            }
-
-            tab4_main_frame.add {
-                type = "label",
-                caption = "[font=default-large]Download a stand-alone copy of Factorio (no install)![/font]"
-            }
-            tab4_main_frame.add {
-                type = "label",
-                caption = "[font=default-large]It is a great way to have multiple versions, or mod-sets![/font]"
-            }
-            tab4_main_frame.add {
-                type = "sprite",
-                sprite = "file/img/info-win/tips/dl-fact.png",
-                tooltip = "Place the unzipped folder wherever you want!"
-            }
-            tab4_main_frame.add {
-                type = "text-box",
-                name = "wube_dl",
-                text = "https://factorio.com/download",
-                tooltip = "drag-select with mouse, control-c to copy."
-            }
-            tab4_main_frame.wube_dl.style.font = "default-large"
-            tab4_main_frame.wube_dl.style.minimal_width = 350
-
-            info_pane.add_tab(tab4, tab4_frame)
-
             ---------------
-            --- QR CODE ---
+            --- Discord QR CODE ---
             ---------------
             local tab5_frame = info_pane.add {
                 type = "flow",
@@ -890,10 +710,12 @@ function INFO_InfoWin(player)
                 sprite = "file/img/info-win/discord-64.png",
                 tooltip = ""
             }
-            tab5_qr_frame.add {
-                type = "label",
-                caption = "Discord: M45-Science"
+            local durl = tab5_qr_frame.add {
+                type = "text-box",
+                text = "https://discord.gg/rQANzBheVh",
+                name = "discord_url"
             }
+            durl.style.minimal_width = 350
             tab5_qr_frame.add {
                 type = "label",
                 caption = ""
@@ -909,92 +731,60 @@ function INFO_InfoWin(player)
             }
             tab5_qr_frame.add {
                 type = "label",
-                caption = "(links to: https://discord.gg/rQANzBheVh)"
+                caption = "(Or scan this QR Code, it links to the address above)"
             }
 
             info_pane.add_tab(tab5, tab5_frame)
 
             --------------
-            --- HELP    ---
+            --- Patreon    ---
             ---------------
             local tab6_frame = info_pane.add {
                 type = "flow",
                 direction = "vertical"
             }
 
-            local tab6_main_frame = tab6_frame.add {
+            local tab6_qr_frame = tab6_frame.add {
                 type = "flow",
                 direction = "vertical"
             }
-            tab6_main_frame.add {
-                type = "label",
-                caption = ""
-            }
-            tab6_frame.style.horizontal_align = "center"
-            tab6_frame.style.vertical_align = "center"
-            tab6_main_frame.add {
+            tab6_qr_frame.style.horizontally_stretchable = true
+            tab6_qr_frame.style.vertically_stretchable = true
+            tab6_qr_frame.style.horizontal_align = "center"
+            tab6_qr_frame.style.vertical_align = "center"
+            tab6_qr_frame.add {
                 type = "sprite",
-                sprite = "file/img/info-win/patreon-64.png"
+                name = "tab6_patreon_logo",
+                sprite = "file/img/info-win/patreon-64.png",
+                tooltip = ""
             }
-            tab6_main_frame.add {
-                type = "label",
-                caption = ""
-            }
-            tab6_main_frame.add {
-                type = "label",
-                caption = "[font=default-large-bold]Our patreons keep these servers online![/font]"
-            }
-            tab6_main_frame.add {
-                type = "label",
-                caption = "[font=default-large]Server: Dual Intel Xeon E5 2680 v4 28C/56T, 8 channels of DDR4 (64GB)[/font]"
-            }
-            tab6_main_frame.add {
-                type = "label",
-                caption = "(Rented in a datacenter, Southfield Michigan, USA)"
-            }
-            tab6_main_frame.add {
-                type = "label",
-                caption = ""
-            }
-            tab6_main_frame.add {
-                type = "label",
-                caption = "[font=default-large]Our server costs are $70/mo USD[/font]"
-            }
-            tab6_main_frame.add {
-                type = "label",
-                caption = "[font=default-large]See the link below to find out more:[/font]"
-            }
-            tab6_main_frame.add {
-                type = "label",
-                caption = ""
-            }
-            local tab6_patreon_url = tab6_main_frame.add {
+            local purl = tab6_qr_frame.add {
                 type = "text-box",
                 text = "https://www.patreon.com/m45sci",
                 name = "patreon_url"
             }
-            tab6_patreon_url.style.font = "default-large"
-            tab6_patreon_url.style.minimal_width = 300
-
-            tab6_main_frame.add {
+            purl.style.minimal_width = 350
+            tab6_qr_frame.add {
                 type = "label",
                 caption = ""
             }
-            tab6_main_frame.add {
+            local tab6_qr = tab6_qr_frame.add {
                 type = "sprite",
-                sprite = "file/img/info-win/patreon-qr.png"
+                sprite = "file/img/info-win/patreon-qr.png",
+                tooltip = "Just open camera on a cellphone!"
             }
-            tab6_main_frame.add {
+            tab6_qr_frame.add {
+                type = "label",
+                caption = ""
+            }
+            tab6_qr_frame.add {
                 type = "label",
                 caption = "(Or scan this QR Code, it links to the address above)"
             }
 
             info_pane.add_tab(tab6, tab6_frame)
-
-            info_pane.selected_tab_index = 1
-            tab1_discord_sub2_frame.discord_url.focus()
-            tab1_discord_sub2_frame.discord_url.select_all()
         end
+        player.gui.screen.m45_info_window.m45_info_window_tabs.selected_tab_index = 1
     end
 end
 
@@ -1005,7 +795,7 @@ function INFO_Clicks(event)
 
         local args = UTIL_SplitStr(event.element.name, ",")
 
-        if player and player.valid then
+        if player and player.valid and event.element.name then
             -- debug
             UTIL_ConsolePrint("[ACT] GUI_CLICK: " .. player.name .. ": " .. event.element.name)
 
@@ -1065,11 +855,9 @@ function INFO_TextChanged(event)
         elseif event.element.name == "server_list" then
             event.element.text = "http://factorio.go-game.net/?tag=M45"
         elseif event.element.name == "old_maps" then
-            event.element.text = "https://m45sci.xyz/u/fact2/archive/1.1%20maps/?C=M;O=D"
+            event.element.text = "https://m45sci.xyz/u/fact2/archive/"
         elseif event.element.name == "patreon_url" then
             event.element.text = "https://www.patreon.com/m45sci"
-        elseif event.element.name == "wube_dl" then
-            event.element.text = "https://factorio.com/download"
         end
     end
 end
