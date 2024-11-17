@@ -664,7 +664,7 @@ function INFO_InfoWin(player)
             }
             tab3_main_frame.add {
                 type = "label",
-                caption = "[font=default-large-bold]4: [item=repair-pack] Use [/font][font=default-game]BANISH or REPORT[/font] [font=default-large-bold]if there are problem-players. (online menu, top-left)[/font]"
+                caption = "[font=default-large-bold]4: [item=repair-pack] Use [/font][font=default-game]BANISH[/font] [font=default-large-bold]if there are problem-players. (online menu, top-left)[/font]"
             }
             tab3_main_frame.add {
                 type = "label",
