@@ -43,7 +43,7 @@ script.on_nth_tick(599, function(event)
     if storage.SM_Store.tickDiv % 6 == 0 then
         ONLINE_UpdatePlayerList() -- online.lua
         UTIL_MapPin()             -- fix map pin if edit/delete
-        LOGO_DrawLogo(true) --Move spawn if blocked
+        LOGO_DrawLogo(true)       --Move spawn if blocked
     end
 
     --15 mins
@@ -158,6 +158,9 @@ local function e_joined(event)
     EVENT_PlayerInit(player)
     BANISH_SendToSurface(player)
     ONLINE_UpdatePlayerList()
+    if not UTIL_Is_Regular(player) and not UTIL_Is_Veteran(player) and not player.admin then
+        INFO_InfoWin(player)
+    end
 end
 
 -- New player created, insert items set perms, show players online, welcome to map.
