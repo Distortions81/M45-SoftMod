@@ -257,7 +257,7 @@ function INFO_InfoWin(player)
             tab1_info_center.style.horizontally_stretchable = true
             tab1_info_center.add {
                 type = "label",
-                caption = "[color=orange][font=default-large-bold]Trolls or griefers?[/font][/color]"
+                caption = "[color=orange][font=default-large-bold]Regulars/Vets: Trolls/griefers?[/font][/color]"
             }
             tab1_info_center.add {
                 type = "sprite",
@@ -265,7 +265,7 @@ function INFO_InfoWin(player)
             }
             tab1_info_center.add {
                 type = "label",
-                caption = "[color=orange][font=default-large-bold]Banish them![/font][/color]"
+                caption = "[color=orange][font=default-large-bold]You can banish them![/font][/color]"
             }
             tab1_info_center.add {
                 type = "label",
