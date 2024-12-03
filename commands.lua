@@ -95,7 +95,7 @@ script.on_load(function()
         end)
 
         -- Quickbar Save
-        commands.add_command("quickbar-save", "get a quickbar exchange string.", function(param)
+        commands.add_command("quickbar-save", "Export your quickbars to a quickbar exchange string.", function(param)
             local player
 
             if param and param.player_index then
@@ -105,7 +105,7 @@ script.on_load(function()
                 return
             end
 
-            local qstr = ExportQuickbar(player)
+            local qstr = ExportQuickbar(player, false)
             if qstr == "" then
                 UTIL_SmartPrint(player, "There are no quickbar items to export.")
                 return

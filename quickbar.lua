@@ -3,25 +3,24 @@
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
 
-function ExportQuickbar(player)
+function ExportQuickbar(player, limit)
     if not player or not player.valid then
         return
     end
 
     local outbuf = ""
-    local total = 0
-    for i = 1, 100 do
+    local maxExport = 100
+    if limit then
+        maxExport = 20
+    end
+
+    for i = 1, maxExport do
         local slot = player.get_quick_bar_slot(i)
         if slot ~= nil then
             if outbuf ~= "" then
                 outbuf = outbuf .. ","
             end
             outbuf = outbuf .. i .. ":" .. slot.name
-            total = total + 1
-            --Cap item count
-            if total == 30 then
-                return outbuf
-            end
         end
     end
     return outbuf
@@ -50,5 +49,15 @@ function ImportQuickbar(player, data)
 end
 
 function SaveQuickbar(player)
-      print("[QBSAVE] " .. ExportQuickbar(player))
+    if not player or not player.valid then
+        return
+    end
+      print("[QBSAVE] " .. ExportQuickbar(player, true))
+end
+
+function LoadQuickbar(player)
+    if not player or not player.valid or not player.name then
+        return
+    end
+    print("[QBLOAD] " .. player.name)
 end
