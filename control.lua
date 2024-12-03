@@ -14,9 +14,10 @@ require "perms"    -- Permissions system
 require "storage"  -- Global variable init
 require "todo"     -- To-Do-list
 require "utility"  -- Widely used general utility
+require "quickbar" -- Save or Restore Quickbar
 
 function RunSetup()
-    storage.SM_Version = "627-11.22.2024-1119p"
+    storage.SM_Version = "628-12.03.2024-0131p"
 
     storage.SM_OldVersion = storage.SM_Version
 
