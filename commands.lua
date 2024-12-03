@@ -100,6 +100,8 @@ script.on_load(function()
 
             if param and param.player_index then
                 player = game.players[param.player_index]
+            else
+                return
             end
             if CMD_ModsOnly(param) then
                 return
@@ -113,7 +115,9 @@ script.on_load(function()
             local quickBarStr = helpers.encode_string(qstr)
 
             if quickBarStr then
-                UTIL_SmartPrint(player, "Quickbar Exchange String: " .. quickBarStr)
+                if player.gui.center then
+                    QUICKBAR_MakeExchangeWindow(player, quickBarStr)
+                end
             else
                 UTIL_SmartPrint(player, "There are no quickbar items to export.")
             end
