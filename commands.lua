@@ -54,27 +54,69 @@ script.on_load(function()
     if (not commands.commands.server_interface) then
         BANISH_AddBanishCommands()
 
-        -- Quickbar Restore
-        commands.add_command("qbrestore", "System use only.", function(param)
-            if CMD_SysOnly(param) then
-                return
-            end
-
+        -- Quickbar Load
+        commands.add_command("quickbar-load", "load a quickbar exchange string", function(param)
             if not param.parameter then
                 return
             end
 
-            local args = UTIL_SplitStr(param.parameter, " ")
-            if not args or not args[2] then
-                return
+            local barData = ""
+            local victim
+
+            if CMD_SysOnly(param) then --ChatWire
+                local args = UTIL_SplitStr(param.parameter, " ")
+                if not args or not args[2] then
+                    return
+                end
+
+                victim = game.players[args[1]]
+                barData = args[2]
+            else --Player
+                if param and param.player_index then
+                    victim = game.players[param.player_index]
+                end
+                if not param.parameter then
+                    UTIL_SmartPrint(player, "That does not appear to be a valid quickbar exchange string.")
+                    return
+                end
+                barData = helpers.decode_string(param.parameter)
             end
 
-            local victim = game.players[args[1]]
             if not victim or not victim.valid then
                 return
             end
 
-            ImportQuickbar(victim, args[2])
+            if barData == "" then
+                UTIL_SmartPrint(player, "That does not appear to be a valid quickbar exchange string.")
+                return
+            end
+
+            ImportQuickbar(victim, barData)
+        end)
+
+        -- Quickbar Save
+        commands.add_command("quickbar-save", "get a quickbar exchange string.", function(param)
+            local player
+
+            if param and param.player_index then
+                player = game.players[param.player_index]
+            end
+            if CMD_ModsOnly(param) then
+                return
+            end
+
+            local qstr = ExportQuickbar(player)
+            if qstr == "" then
+                UTIL_SmartPrint(player, "There are no quickbar items to export.")
+                return
+            end
+            local quickBarStr = helpers.encode_string(qstr)
+
+            if quickBarStr then
+                UTIL_SmartPrint(player, "Quickbar Exchange String: " .. quickBarStr)
+            else
+                UTIL_SmartPrint(player, "There are no quickbar items to export.")
+            end
         end)
 
         -- Reset interval message
