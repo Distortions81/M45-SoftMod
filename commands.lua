@@ -63,7 +63,7 @@ script.on_load(function()
             local barData = ""
             local victim
 
-            if CMD_SysOnly(param) then --ChatWire
+            if not param.player_index then --ChatWire
                 local args = UTIL_SplitStr(param.parameter, " ")
                 if not args or not args[2] then
                     return
