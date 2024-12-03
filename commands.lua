@@ -53,7 +53,29 @@ script.on_load(function()
     -- Only add if no commands yet
     if (not commands.commands.server_interface) then
         BANISH_AddBanishCommands()
-        -- banish.lua
+
+        -- Quickbar Restore
+        commands.add_command("qbrestore", "System use only.", function(param)
+            if CMD_SysOnly(param) then
+                return
+            end
+
+            if not param.parameter then
+                return
+            end
+
+            local args = UTIL_SplitStr(param.parameter, " ")
+            if not args or not args[2] then
+                return
+            end
+
+            local victim = game.players[args[1]]
+            if not victim or not victim.valid then
+                return
+            end
+
+            ImportQuickbar(victim, args[2])
+        end)
 
         -- Reset interval message
         commands.add_command("resetdur", "System use only.", function(param)
