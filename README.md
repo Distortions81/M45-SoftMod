@@ -43,3 +43,6 @@ commonly needed utility functions<br>
 <br>
 *onelife.lua*<br>
 permadeath-onelife mode<br>
+<br>
+*quickbar.lua*<br>
+save/restore quickbar via chatwire<br>
