@@ -26,7 +26,8 @@ function ExportQuickbar(player, limit)
     if outbuf == "" then
         return ""
     end
-    return helpers.encode_string("M45-QB=" .. outbuf)
+
+    return helpers.encode_string(compress("M45-QB=" .. outbuf))
 end
 
 function ImportQuickbar(player, data)
@@ -37,7 +38,7 @@ function ImportQuickbar(player, data)
         return false
     end
 
-    local decoded = helpers.decode_string(data)
+    local decoded = decompress(helpers.decode_string(data))
     if decoded == "" then
         return false
     end

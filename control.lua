@@ -15,6 +15,7 @@ require "storage"  -- Global variable init
 require "todo"     -- To-Do-list
 require "utility"  -- Widely used general utility
 require "quickbar" -- Save or Restore Quickbar
+require ("lualzw")      --Compression
 
 function RunSetup()
     storage.SM_Version = "628-12.03.2024-0131p"
