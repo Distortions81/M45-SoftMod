@@ -194,24 +194,43 @@ function QUICKBAR_Clicks(event)
         local player = game.players[event.player_index]
 
         if player and player.valid and event.element.name then
-            -- Info window close
             if event.element.name == "qb_exchange_close" and player.gui and player.gui.screen and
-                --Exchange Window
                 player.gui.screen.quickbar_exchange then
                 player.gui.screen.quickbar_exchange.destroy()
             elseif event.element.name == "qb_exchange_button" and player.gui and player.gui.screen then
-                --Exchange Window
                 if player.gui.screen.quickbar_exchange then
                     player.gui.screen.quickbar_exchange.destroy()
                 else
                     QUICKBAR_MakeExchangeWindow(player, false)
                 end
             elseif event.element.name == "export_qb" and player.gui and player.gui.screen then
-                --Exchange Window
                 if player.gui.screen.quickbar_exchange then
                     player.gui.screen.quickbar_exchange.destroy()
                 end
                 QUICKBAR_MakeExchangeWindow(player, true)
+            elseif event.element.name == "import_qb" and player.gui and player.gui.screen then
+                if storage.PData and storage.PData[player.index] and
+                storage.PData[event.player_index].qb_import_string then
+                    ImportQuickbar(player,storage.PData[event.player_index].qb_import_string )
+                    if player.gui.screen.quickbar_exchange then
+                        player.gui.screen.quickbar_exchange.destroy()
+                    end
+                end
+            end
+        end
+    end
+end
+
+
+-- Grab text from text box
+function QUICKBAR_TextChanged(event)
+    -- Automatically fix URLs, because read-only/selectable text is confusing to players --
+    if event and event.element and event.player_index and event.text and event.element.name then
+        local player = game.players[event.player_index]
+
+        if event.element.name == "quickbar_string" then
+            if storage.PData and storage.PData[event.player_index] then
+                storage.PData[event.player_index].qb_import_string = event.element.text
             end
         end
     end
