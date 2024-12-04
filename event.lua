@@ -127,10 +127,10 @@ end
 local function makeUI(player)
     if player.gui then
         INFO_MakeButton(player)
-        QUICKBAR_MakeExchangeButton(player)
         ONLINE_MakeOnlineButton(player)
         ONELIFE_MakeButton(player)
         TODO_Setup(player)
+        QUICKBAR_MakeExchangeButton(player)
         INFO_MakeClock(player)
     end
 end
