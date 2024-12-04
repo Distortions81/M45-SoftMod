@@ -61,9 +61,24 @@ function ImportQuickbar(player, data)
     --Restore from string
     local items = UTIL_SplitStr(header[2], ",")
 
+    local error_list = ""
     for i, item in ipairs(items) do
         local values = UTIL_SplitStr(item, ":")
-        player.set_quick_bar_slot(values[1], values[2])
+        --If values are found
+        if values and values[1] and values[2] then
+            --If item is valid
+            if prototypes.item[values[2]] then
+            player.set_quick_bar_slot(values[1], values[2])
+            else
+                if error_list ~= "" then
+                    error_list = error_list .. ", "
+                end
+                error_list = error_list .. values[2]
+            end
+        end
+    end
+    if error_list ~= "" then
+        UTIL_SmartPrint(player, "Quickbar Import: Invalid items skipped: " .. error_list)
     end
 
     return true
