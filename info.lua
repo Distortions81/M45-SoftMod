@@ -357,7 +357,7 @@ function INFO_InfoWin(player)
                 type = "text-box",
                 name = "server_list",
                 text = "http://factorio.go-game.net/?tag=M45",
-                tooltip = "(if not selected), drag-select with mouse, control-c to copy."
+                tooltip = "Control-A then Control-C to copy"
             }
             tab1_info_top.server_list.style.font = "default-large"
             tab1_info_top.server_list.style.minimal_width = 350
@@ -405,7 +405,7 @@ function INFO_InfoWin(player)
                 type = "text-box",
                 name = "discord_url",
                 text = "https://discord.gg/rQANzBheVh",
-                tooltip = "(if not selected), drag-select with mouse, control-c to copy."
+                tooltip = "Control-A then Control-C to copy"
             }
 
             -- URL Style
