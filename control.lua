@@ -17,7 +17,7 @@ require "utility"  -- Widely used general utility
 require "quickbar" -- Save or Restore Quickbar
 
 function RunSetup()
-    storage.SM_Version = "629-12.03.2024-0904p"
+    storage.SM_Version = "629-12.03.2024-1008p"
 
     storage.SM_OldVersion = storage.SM_Version
 
