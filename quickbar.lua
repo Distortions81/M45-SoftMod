@@ -17,17 +17,12 @@ function ExportQuickbar(player, limit)
     for i = 1, maxExport do
         local slot = player.get_quick_bar_slot(i)
         if slot ~= nil then
-            if outbuf ~= "" then
-                outbuf = outbuf .. ","
-            end
-            outbuf = outbuf .. i .. ":" .. slot.name
+            outbuf = outbuf .. slot.name .. ","
         end
-    end
-    if outbuf == "" then
-        return ""
+        outbuf = outbuf .. ","
     end
 
-    return helpers.encode_string(compress("M45-QB1=" .. outbuf))
+    return helpers.encode_string("M45-QB1=" .. outbuf)
 end
 
 function ImportQuickbar(player, data)
@@ -39,17 +34,17 @@ function ImportQuickbar(player, data)
     end
 
     --Limit compressed size
-    if string.len(data) > 8192 then
+    if string.len(data) > 10240 then
         return
     end
 
-    local decoded = decompress(helpers.decode_string(data))
+    local decoded = helpers.decode_string(data)
     if decoded == "" then
         return false
     end
 
     --Limit decompressed size
-    if string.len(decoded) > 8192 then
+    if string.len(decoded) > 10240 then
         return
     end
 
@@ -72,27 +67,19 @@ function ImportQuickbar(player, data)
     local items = UTIL_SplitStr(header[2], ",")
 
     local error_list = ""
-    local total_items = 0
     for i, item in ipairs(items) do
-        local values = UTIL_SplitStr(item, ":")
-
-        --Limit import size
-        total_items = total_items + 1
-        if total_items > 100 then
+        if i > 100 then
             return
         end
 
-        --If values are found
-        if values and values[1] and values[2] then
-            --If item is valid
-            if prototypes.item[values[2]] then
-                player.set_quick_bar_slot(values[1], values[2])
-            else
-                if error_list ~= "" then
-                    error_list = error_list .. ", "
-                end
-                error_list = error_list .. values[2]
+        --If item is valid
+        if prototypes.item[item] then
+            player.set_quick_bar_slot(i, item)
+        else
+            if error_list ~= "" then
+                error_list = error_list .. ", "
             end
+            error_list = error_list .. item
         end
     end
     if error_list ~= "" then
@@ -233,29 +220,24 @@ function QUICKBAR_Clicks(event)
         if player and player.valid and event.element.name then
             if event.element.name == "qb_exchange_close" and player.gui and player.gui.screen and
                 player.gui.screen.quickbar_exchange then
-
                 QUICKBAR_ClearString(player)
                 player.gui.screen.quickbar_exchange.destroy()
             elseif event.element.name == "qb_exchange_button" and player.gui and player.gui.screen then
-
                 if player.gui.screen.quickbar_exchange then
                     player.gui.screen.quickbar_exchange.destroy()
-                QUICKBAR_ClearString(player)
-
+                    QUICKBAR_ClearString(player)
                 else
                     QUICKBAR_MakeExchangeWindow(player, false)
                 end
             elseif event.element.name == "export_qb" and player.gui and player.gui.screen then
-
                 if player.gui.screen.quickbar_exchange then
-                QUICKBAR_ClearString(player)
+                    QUICKBAR_ClearString(player)
                     player.gui.screen.quickbar_exchange.destroy()
                 end
                 QUICKBAR_MakeExchangeWindow(player, true)
             elseif event.element.name == "import_qb" and player.gui and player.gui.screen then
                 if storage.PData and storage.PData[player.index] and
                     storage.PData[event.player_index].qb_import_string then
-
                     ImportQuickbar(player, storage.PData[event.player_index].qb_import_string)
                     QUICKBAR_ClearString(player)
 
@@ -286,7 +268,7 @@ function QUICKBAR_TextChanged(event)
         if event.element.name == "quickbar_string" then
             if storage.PData and storage.PData[event.player_index] then
                 --Limit import size
-                if string.len(event.element.text) > 8192 then
+                if string.len(event.element.text) > 10240 then
                     event.element.text = "String too long."
                     return
                 end
