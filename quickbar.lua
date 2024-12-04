@@ -92,7 +92,7 @@ function QUICKBAR_MakeExchangeButton(player)
             type = "sprite-button",
             name = "qb_exchange_button",
             sprite = "file/img/buttons/exchange-64.png",
-            tooltip = "Import or export a M45 quickbar exchange string."
+            tooltip = "Import or Export a M45 quickbar exchange string."
         }
         ex_button.style.size = { 64, 64 }
     end
