@@ -54,8 +54,6 @@ script.on_load(function()
     if (not commands.commands.server_interface) then
         BANISH_AddBanishCommands()
 
-        QUICKBAR_AddQuickbarCommands()
-
         -- Reset interval message
         commands.add_command("resetdur", "System use only.", function(param)
             if CMD_SysOnly(param) then

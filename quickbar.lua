@@ -23,15 +23,33 @@ function ExportQuickbar(player, limit)
             outbuf = outbuf .. i .. ":" .. slot.name
         end
     end
-    return outbuf
+    if outbuf == "" then
+        return ""
+    end
+    return helpers.encode_string("M45-QB=" .. outbuf)
 end
 
 function ImportQuickbar(player, data)
     if not player or not player.valid then
-        return
+        return false
     end
     if data == nil or data == "" then
-        return
+        return false
+    end
+
+    local decoded = helpers.decode_string(data)
+    if decoded == "" then
+        return false
+    end
+
+    local header = UTIL_SplitStr(decoded, "=")
+    if not header or not header[1] then
+        UTIL_SmartPrint(player,"That isn't a valid M45 quickbar exchange string!")
+        return false
+    end
+    if header[1] ~= "M45-QB" then
+        UTIL_SmartPrint(player,"That isn't a valid M45 quickbar exchange string!")
+        return false
     end
 
     --Clear all bars
@@ -40,19 +58,21 @@ function ImportQuickbar(player, data)
     end
 
     --Restore from string
-    local items = UTIL_SplitStr(data, ",")
+    local items = UTIL_SplitStr(header[2], ",")
 
     for i, item in ipairs(items) do
         local values = UTIL_SplitStr(item, ":")
         player.set_quick_bar_slot(values[1], values[2])
     end
+
+    return true
 end
 
 function SaveQuickbar(player)
     if not player or not player.valid then
         return
     end
-      print("[QBSAVE] " .. ExportQuickbar(player, true))
+    print("[QBSAVE] " .. ExportQuickbar(player, true))
 end
 
 function LoadQuickbar(player)
@@ -67,11 +87,11 @@ function QUICKBAR_MakeExchangeButton(player)
         player.gui.top.qb_exchange_button.destroy()
     end
     if not player.gui.top.qb_exchange_button then
-        local ex_button= player.gui.top.add {
+        local ex_button = player.gui.top.add {
             type = "sprite-button",
             name = "qb_exchange_button",
             sprite = "file/img/buttons/exchange-64.png",
-            tooltip = "Import or export a quickbar exchange string."
+            tooltip = "Import or export a M45 quickbar exchange string."
         }
         ex_button.style.size = { 64, 64 }
     end
@@ -103,7 +123,7 @@ function QUICKBAR_MakeExchangeWindow(player, text)
         type = "label",
         name = "online_title",
         style = "frame_title",
-        caption = "Quickbar Exchange String"
+        caption = "M45 Quickbar Exchange String"
     }
     local pusher = info_titlebar.add {
         type = "empty-widget",
@@ -125,9 +145,9 @@ function QUICKBAR_MakeExchangeWindow(player, text)
     main_flow.style.padding = 4
     local mframe = main_flow.add {
         type = "flow",
-        direction = "horizontal"
+        direction = "vertical"
     }
-    mframe.style.minimal_height = 100
+    mframe.style.minimal_height = 75
     mframe.style.horizontally_squashable = false
 
     mframe.add {
@@ -137,76 +157,27 @@ function QUICKBAR_MakeExchangeWindow(player, text)
         tooltip = "control-a then control-c to copy, control-a then control-v to paste.",
     }
     mframe.quickbar_string.style.minimal_width = 500
-    mframe.quickbar_string.style.minimal_height= 50
-end
+    mframe.quickbar_string.style.minimal_height = 50
 
-function QUICKBAR_AddQuickbarCommands()
-    -- Quickbar Load
-    commands.add_command("quickbar-load", "load a quickbar exchange string", function(param)
-        if not param.parameter then
-            return
-        end
-
-        local barData = ""
-        local victim
-
-        if not param.player_index then --ChatWire
-            local args = UTIL_SplitStr(param.parameter, " ")
-            if not args or not args[2] then
-                return
-            end
-
-            victim = game.players[args[1]]
-            barData = args[2]
-        else --Player
-            if param and param.player_index then
-                victim = game.players[param.player_index]
-            end
-            if not param.parameter then
-                UTIL_SmartPrint(player, "That does not appear to be a valid quickbar exchange string.")
-                return
-            end
-            barData = helpers.decode_string(param.parameter)
-        end
-
-        if not victim or not victim.valid then
-            return
-        end
-
-        if barData == "" then
-            UTIL_SmartPrint(player, "That does not appear to be a valid quickbar exchange string.")
-            return
-        end
-
-        ImportQuickbar(victim, barData)
-    end)
-
-    -- Quickbar Save
-    commands.add_command("quickbar-save", "Export your quickbars to a quickbar exchange string.", function(param)
-        local player
-
-        if param and param.player_index then
-            player = game.players[param.player_index]
-        else
-            return
-        end
-        if CMD_ModsOnly(param) then
-            return
-        end
-
-        local qstr = ExportQuickbar(player, false)
-        if qstr == "" then
-            UTIL_SmartPrint(player, "There are no quickbar items to export.")
-            return
-        end
-        local quickBarStr = helpers.encode_string(qstr)
-
-        if quickBarStr then
-            if player.gui.center then
-                QUICKBAR_MakeExchangeWindow(player, quickBarStr)
-            end
-        else
-            UTIL_SmartPrint(player, "There are no quickbar items to export.")
-        end
-    end)
+    local bframe = mframe.add {
+        type = "flow",
+        direction = "horizontal"
+    }
+    bframe.add {
+        type = "button",
+        caption = "Import",
+        style = "green_button",
+        name = "import_qb"
+    }
+    local pusher = bframe.add {
+        type = "empty-widget",
+    }
+    pusher.style.vertically_stretchable = true
+    pusher.style.horizontally_stretchable = true
+    bframe.add {
+        type = "button",
+        caption = "Export",
+        style = "red_button",
+        name = "export_qb"
+    }
 end
