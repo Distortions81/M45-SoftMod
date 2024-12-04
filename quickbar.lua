@@ -27,7 +27,7 @@ function ExportQuickbar(player, limit)
         return ""
     end
 
-    return helpers.encode_string(compress("M45-QB=" .. outbuf))
+    return helpers.encode_string(compress("M45-QB1=" .. outbuf))
 end
 
 function ImportQuickbar(player, data)
@@ -48,7 +48,7 @@ function ImportQuickbar(player, data)
         UTIL_SmartPrint(player,"That isn't a valid M45 quickbar exchange string!")
         return false
     end
-    if header[1] ~= "M45-QB" then
+    if header[1] ~= "M45-QB1" then
         UTIL_SmartPrint(player,"That isn't a valid M45 quickbar exchange string!")
         return false
     end
