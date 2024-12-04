@@ -98,7 +98,7 @@ function QUICKBAR_MakeExchangeButton(player)
     end
 end
 
-function QUICKBAR_MakeExchangeWindow(player, text)
+function QUICKBAR_MakeExchangeWindow(player, exportMode)
     if player.gui.screen.quickbar_exchange then
         player.gui.screen.quickbar_exchange.destroy()
     end
@@ -151,11 +151,15 @@ function QUICKBAR_MakeExchangeWindow(player, text)
     mframe.style.minimal_height = 75
     mframe.style.horizontally_squashable = false
 
+    local qbes = ""
+    if exportMode then
+        qbes = ExportQuickbar(player, false)
+    end
     mframe.add {
         type = "text-box",
         name = "quickbar_string",
-        text = text,
-        tooltip = "control-a then control-c to copy, control-a then control-v to paste.",
+        text = qbes,
+        tooltip = "COPY: Control-A then Control-C\nPASTE: Control-A then Control-V",
     }
     mframe.quickbar_string.style.minimal_width = 500
     mframe.quickbar_string.style.minimal_height = 50
@@ -200,8 +204,14 @@ function QUICKBAR_Clicks(event)
                 if player.gui.screen.quickbar_exchange then
                     player.gui.screen.quickbar_exchange.destroy()
                 else
-                    QUICKBAR_MakeExchangeWindow(player)
+                    QUICKBAR_MakeExchangeWindow(player, false)
                 end
+            elseif event.element.name == "export_qb" and player.gui and player.gui.screen then
+                --Exchange Window
+                if player.gui.screen.quickbar_exchange then
+                    player.gui.screen.quickbar_exchange.destroy()
+                end
+                QUICKBAR_MakeExchangeWindow(player, true)
             end
         end
     end
