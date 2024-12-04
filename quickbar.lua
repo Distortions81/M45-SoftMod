@@ -168,7 +168,8 @@ function QUICKBAR_MakeExchangeWindow(player, text)
         type = "button",
         caption = "Import",
         style = "green_button",
-        name = "import_qb"
+        name = "import_qb",
+        tooltip = "Import a new quickbar."
     }
     local pusher = bframe.add {
         type = "empty-widget",
@@ -179,6 +180,7 @@ function QUICKBAR_MakeExchangeWindow(player, text)
         type = "button",
         caption = "Export",
         style = "red_button",
-        name = "export_qb"
+        name = "export_qb",
+        tooltip = "Export current quickbars."
     }
 end
