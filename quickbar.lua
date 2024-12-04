@@ -139,3 +139,74 @@ function QUICKBAR_MakeExchangeWindow(player, text)
     mframe.quickbar_string.style.minimal_width = 500
     mframe.quickbar_string.style.minimal_height= 50
 end
+
+function QUICKBAR_AddQuickbarCommands()
+    -- Quickbar Load
+    commands.add_command("quickbar-load", "load a quickbar exchange string", function(param)
+        if not param.parameter then
+            return
+        end
+
+        local barData = ""
+        local victim
+
+        if not param.player_index then --ChatWire
+            local args = UTIL_SplitStr(param.parameter, " ")
+            if not args or not args[2] then
+                return
+            end
+
+            victim = game.players[args[1]]
+            barData = args[2]
+        else --Player
+            if param and param.player_index then
+                victim = game.players[param.player_index]
+            end
+            if not param.parameter then
+                UTIL_SmartPrint(player, "That does not appear to be a valid quickbar exchange string.")
+                return
+            end
+            barData = helpers.decode_string(param.parameter)
+        end
+
+        if not victim or not victim.valid then
+            return
+        end
+
+        if barData == "" then
+            UTIL_SmartPrint(player, "That does not appear to be a valid quickbar exchange string.")
+            return
+        end
+
+        ImportQuickbar(victim, barData)
+    end)
+
+    -- Quickbar Save
+    commands.add_command("quickbar-save", "Export your quickbars to a quickbar exchange string.", function(param)
+        local player
+
+        if param and param.player_index then
+            player = game.players[param.player_index]
+        else
+            return
+        end
+        if CMD_ModsOnly(param) then
+            return
+        end
+
+        local qstr = ExportQuickbar(player, false)
+        if qstr == "" then
+            UTIL_SmartPrint(player, "There are no quickbar items to export.")
+            return
+        end
+        local quickBarStr = helpers.encode_string(qstr)
+
+        if quickBarStr then
+            if player.gui.center then
+                QUICKBAR_MakeExchangeWindow(player, quickBarStr)
+            end
+        else
+            UTIL_SmartPrint(player, "There are no quickbar items to export.")
+        end
+    end)
+end
