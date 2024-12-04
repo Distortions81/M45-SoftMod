@@ -184,3 +184,58 @@ function QUICKBAR_MakeExchangeWindow(player, text)
         tooltip = "Export current quickbars."
     }
 end
+
+-- GUI clicks
+function QUICKBAR_Clicks(event)
+    if event and event.element and event.element.valid and event.player_index then
+        local player = game.players[event.player_index]
+
+        local args = UTIL_SplitStr(event.element.name, ",")
+
+        if player and player.valid and event.element.name then
+            -- debug
+            UTIL_ConsolePrint("[ACT] GUI_CLICK: " .. player.name .. ": " .. event.element.name)
+
+            -- Info window close
+            if event.element.name == "m45_info_close_button" and player.gui and player.gui.center and
+                --Info Window
+                player.gui.screen.m45_info_window then
+                player.gui.screen.m45_info_window.destroy()
+            elseif event.element.name == "patreon_button" and player.gui and player.gui.center and
+                player.gui.screen.m45_info_window then
+                -- QR changetab button (info window)
+                player.gui.screen.m45_info_window.m45_info_window_tabs.selected_tab_index = 6
+            elseif event.element.name == "qr_button" and player.gui and player.gui.center and
+                player.gui.screen.m45_info_window then
+                -- QR Discord button
+                player.gui.screen.m45_info_window.m45_info_window_tabs.selected_tab_index = 5
+            elseif event.element.name == "m45_button" then
+                -- Online window toggle
+                if player.gui and player.gui.center and player.gui.screen.m45_info_window then
+                    player.gui.screen.m45_info_window.destroy()
+                else
+                    INFO_InfoWin(player)
+                end
+            elseif event.element.name == "reset_clock" then
+                -- reset-clock-close
+                if player.gui and player.gui.top and player.gui.top.reset_clock then
+                    if storage.PData then
+                        if storage.PData[player.index].hideClock and
+                            storage.SM_Store.resetDuration ~= "" then
+                            storage.PData[player.index].hideClock = false
+                            player.gui.top.reset_clock.caption    = "Map reset: " .. storage.SM_Store.resetDuration
+                            player.gui.top.reset_clock.style      = "red_button"
+                            player.gui.top.reset_clock.style.size = { 350, 24 }
+                        else
+                            if event.button and event.button == defines.mouse_button_type.right and event.control then
+                                storage.PData[player.index].hideClock = true
+                                player.gui.top.reset_clock.caption    = ">"
+                                player.gui.top.reset_clock.style.size = { 24, 24 }
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end

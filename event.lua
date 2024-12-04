@@ -295,12 +295,13 @@ script.on_event(
             -- gui
             LOG_PlayerLeft(event)
         elseif event.name == defines.events.on_gui_click then
-            INFO_Clicks(event)
+            INFO_Clicks(event) --info.lua
+            QUICKBAR_Clicks(event) --quickbar.kya
             ONLINE_Clicks(event)  -- online.lua
             ONELIFE_Clicks(event) --onelife.lua
         elseif event.name == defines.events.on_gui_text_changed then
             -- log
-            INFO_TextChanged(event)
+            INFO_TextChanged(event) --info.lua
         elseif event.name == defines.events.on_console_command then
             LOG_ConsoleCmd(event)
         elseif event.name == defines.events.on_chart_tag_removed then
@@ -360,6 +361,7 @@ script.on_event(
         -- player_joined_game
         -- on_gui_click
         TODO_EventHandler(event)
+        QUICKBAR_EventHandler(event)
     end)
 
 function EVENT_Loot(event)

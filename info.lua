@@ -804,10 +804,6 @@ function INFO_Clicks(event)
                 --Info Window
                 player.gui.screen.m45_info_window then
                 player.gui.screen.m45_info_window.destroy()
-            elseif event.element.name == "quickbar_exchange_close" and player.gui and player.gui.center and
-                --Quickbar Export Window
-                player.gui.screen.quickbar_exchange then
-                player.gui.screen.quickbar_exchange.destroy()
             elseif event.element.name == "patreon_button" and player.gui and player.gui.center and
                 player.gui.screen.m45_info_window then
                 -- QR changetab button (info window)
@@ -822,13 +818,6 @@ function INFO_Clicks(event)
                     player.gui.screen.m45_info_window.destroy()
                 else
                     INFO_InfoWin(player)
-                end
-            elseif event.element.name == "qb_exchange_button" then
-                -- Online window toggle
-                if player.gui and player.gui.center and player.gui.screen.quickbar_exchange then
-                    player.gui.screen.quickbar_exchange.destroy()
-                else
-                    QUICKBAR_MakeExchangeWindow(player, "")
                 end
             elseif event.element.name == "reset_clock" then
                 -- reset-clock-close
