@@ -361,7 +361,6 @@ script.on_event(
         -- player_joined_game
         -- on_gui_click
         TODO_EventHandler(event)
-        QUICKBAR_EventHandler(event)
     end)
 
 function EVENT_Loot(event)

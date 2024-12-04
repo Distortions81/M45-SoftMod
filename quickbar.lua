@@ -45,11 +45,11 @@ function ImportQuickbar(player, data)
 
     local header = UTIL_SplitStr(decoded, "=")
     if not header or not header[1] then
-        UTIL_SmartPrint(player,"That isn't a valid M45 quickbar exchange string!")
+        UTIL_SmartPrint(player, "That isn't a valid M45 quickbar exchange string!")
         return false
     end
     if header[1] ~= "M45-QB1" then
-        UTIL_SmartPrint(player,"That isn't a valid M45 quickbar exchange string!")
+        UTIL_SmartPrint(player, "That isn't a valid M45 quickbar exchange string!")
         return false
     end
 
@@ -137,7 +137,7 @@ function QUICKBAR_MakeExchangeWindow(player, text)
 
     info_titlebar.add {
         type = "sprite-button",
-        name = "quickbar_exchange_close",
+        name = "qb_exchange_close",
         sprite = "utility/close",
         style = "frame_action_button",
         tooltip = "Close this window"
@@ -185,55 +185,22 @@ function QUICKBAR_MakeExchangeWindow(player, text)
     }
 end
 
--- GUI clicks
 function QUICKBAR_Clicks(event)
     if event and event.element and event.element.valid and event.player_index then
         local player = game.players[event.player_index]
 
-        local args = UTIL_SplitStr(event.element.name, ",")
-
         if player and player.valid and event.element.name then
-            -- debug
-            UTIL_ConsolePrint("[ACT] GUI_CLICK: " .. player.name .. ": " .. event.element.name)
-
             -- Info window close
-            if event.element.name == "m45_info_close_button" and player.gui and player.gui.center and
-                --Info Window
-                player.gui.screen.m45_info_window then
-                player.gui.screen.m45_info_window.destroy()
-            elseif event.element.name == "patreon_button" and player.gui and player.gui.center and
-                player.gui.screen.m45_info_window then
-                -- QR changetab button (info window)
-                player.gui.screen.m45_info_window.m45_info_window_tabs.selected_tab_index = 6
-            elseif event.element.name == "qr_button" and player.gui and player.gui.center and
-                player.gui.screen.m45_info_window then
-                -- QR Discord button
-                player.gui.screen.m45_info_window.m45_info_window_tabs.selected_tab_index = 5
-            elseif event.element.name == "m45_button" then
-                -- Online window toggle
-                if player.gui and player.gui.center and player.gui.screen.m45_info_window then
-                    player.gui.screen.m45_info_window.destroy()
+            if event.element.name == "qb_exchange_close" and player.gui and player.gui.screen and
+                --Exchange Window
+                player.gui.screen.quickbar_exchange then
+                player.gui.screen.quickbar_exchange.destroy()
+            elseif event.element.name == "qb_exchange_button" and player.gui and player.gui.screen then
+                --Exchange Window
+                if player.gui.screen.quickbar_exchange then
+                    player.gui.screen.quickbar_exchange.destroy()
                 else
-                    INFO_InfoWin(player)
-                end
-            elseif event.element.name == "reset_clock" then
-                -- reset-clock-close
-                if player.gui and player.gui.top and player.gui.top.reset_clock then
-                    if storage.PData then
-                        if storage.PData[player.index].hideClock and
-                            storage.SM_Store.resetDuration ~= "" then
-                            storage.PData[player.index].hideClock = false
-                            player.gui.top.reset_clock.caption    = "Map reset: " .. storage.SM_Store.resetDuration
-                            player.gui.top.reset_clock.style      = "red_button"
-                            player.gui.top.reset_clock.style.size = { 350, 24 }
-                        else
-                            if event.button and event.button == defines.mouse_button_type.right and event.control then
-                                storage.PData[player.index].hideClock = true
-                                player.gui.top.reset_clock.caption    = ">"
-                                player.gui.top.reset_clock.style.size = { 24, 24 }
-                            end
-                        end
-                    end
+                    QUICKBAR_MakeExchangeWindow(player)
                 end
             end
         end
