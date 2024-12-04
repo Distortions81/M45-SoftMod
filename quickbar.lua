@@ -38,9 +38,19 @@ function ImportQuickbar(player, data)
         return false
     end
 
+    --Limit compressed size
+    if string.len(data) > 8192 then
+        return
+    end
+
     local decoded = decompress(helpers.decode_string(data))
     if decoded == "" then
         return false
+    end
+
+    --Limit decompressed size
+    if string.len(decoded) > 8192 then
+        return
     end
 
     local header = UTIL_SplitStr(decoded, "=")
@@ -62,13 +72,21 @@ function ImportQuickbar(player, data)
     local items = UTIL_SplitStr(header[2], ",")
 
     local error_list = ""
+    local total_items = 0
     for i, item in ipairs(items) do
         local values = UTIL_SplitStr(item, ":")
+
+        --Limit import size
+        total_items = total_items + 1
+        if total_items > 100 then
+            return
+        end
+
         --If values are found
         if values and values[1] and values[2] then
             --If item is valid
             if prototypes.item[values[2]] then
-            player.set_quick_bar_slot(values[1], values[2])
+                player.set_quick_bar_slot(values[1], values[2])
             else
                 if error_list ~= "" then
                     error_list = error_list .. ", "
@@ -99,6 +117,8 @@ function LoadQuickbar(player)
 end
 
 function QUICKBAR_MakeExchangeButton(player)
+    QUICKBAR_ClearString(player)
+
     if player.gui.top.qb_exchange_button then
         player.gui.top.qb_exchange_button.destroy()
     end
@@ -114,6 +134,8 @@ function QUICKBAR_MakeExchangeButton(player)
 end
 
 function QUICKBAR_MakeExchangeWindow(player, exportMode)
+    QUICKBAR_ClearString(player)
+
     if player.gui.screen.quickbar_exchange then
         player.gui.screen.quickbar_exchange.destroy()
     end
@@ -211,22 +233,32 @@ function QUICKBAR_Clicks(event)
         if player and player.valid and event.element.name then
             if event.element.name == "qb_exchange_close" and player.gui and player.gui.screen and
                 player.gui.screen.quickbar_exchange then
+
+                QUICKBAR_ClearString(player)
                 player.gui.screen.quickbar_exchange.destroy()
             elseif event.element.name == "qb_exchange_button" and player.gui and player.gui.screen then
+
                 if player.gui.screen.quickbar_exchange then
                     player.gui.screen.quickbar_exchange.destroy()
+                QUICKBAR_ClearString(player)
+
                 else
                     QUICKBAR_MakeExchangeWindow(player, false)
                 end
             elseif event.element.name == "export_qb" and player.gui and player.gui.screen then
+
                 if player.gui.screen.quickbar_exchange then
+                QUICKBAR_ClearString(player)
                     player.gui.screen.quickbar_exchange.destroy()
                 end
                 QUICKBAR_MakeExchangeWindow(player, true)
             elseif event.element.name == "import_qb" and player.gui and player.gui.screen then
                 if storage.PData and storage.PData[player.index] and
-                storage.PData[event.player_index].qb_import_string then
-                    ImportQuickbar(player,storage.PData[event.player_index].qb_import_string )
+                    storage.PData[event.player_index].qb_import_string then
+
+                    ImportQuickbar(player, storage.PData[event.player_index].qb_import_string)
+                    QUICKBAR_ClearString(player)
+
                     if player.gui.screen.quickbar_exchange then
                         player.gui.screen.quickbar_exchange.destroy()
                     end
@@ -236,15 +268,28 @@ function QUICKBAR_Clicks(event)
     end
 end
 
+function QUICKBAR_ClearString(player)
+    if not player or not player.valid then
+        return
+    end
+    if storage.PData and storage.PData[player.index] and
+        storage.PData[player.index].qb_import_string then
+        storage.PData[player.index].qb_import_string = ""
+    end
+end
 
 -- Grab text from text box
 function QUICKBAR_TextChanged(event)
-    -- Automatically fix URLs, because read-only/selectable text is confusing to players --
     if event and event.element and event.player_index and event.text and event.element.name then
         local player = game.players[event.player_index]
 
         if event.element.name == "quickbar_string" then
             if storage.PData and storage.PData[event.player_index] then
+                --Limit import size
+                if string.len(event.element.text) > 8192 then
+                    event.element.text = "String too long."
+                    return
+                end
                 storage.PData[event.player_index].qb_import_string = event.element.text
             end
         end
