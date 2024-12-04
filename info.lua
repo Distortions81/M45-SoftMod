@@ -357,7 +357,7 @@ function INFO_InfoWin(player)
                 type = "text-box",
                 name = "server_list",
                 text = "http://factorio.go-game.net/?tag=M45",
-                tooltip = "Control-A then Control-C to copy"
+                tooltip = "COPY: Click text then Control-C"
             }
             tab1_info_top.server_list.style.font = "default-large"
             tab1_info_top.server_list.style.minimal_width = 350
@@ -405,7 +405,7 @@ function INFO_InfoWin(player)
                 type = "text-box",
                 name = "discord_url",
                 text = "https://discord.gg/rQANzBheVh",
-                tooltip = "Control-A then Control-C to copy"
+                tooltip = "COPY: Click text then Control-C"
             }
 
             -- URL Style
@@ -713,7 +713,8 @@ function INFO_InfoWin(player)
             local durl = tab5_qr_frame.add {
                 type = "text-box",
                 text = "https://discord.gg/rQANzBheVh",
-                name = "discord_url"
+                name = "discord_url",
+                tooltip = "COPY: Click text then Control-C"
             }
             durl.style.minimal_width = 350
             tab5_qr_frame.add {
@@ -761,7 +762,8 @@ function INFO_InfoWin(player)
             local purl = tab6_qr_frame.add {
                 type = "text-box",
                 text = "https://www.patreon.com/m45sci",
-                name = "patreon_url"
+                name = "patreon_url",
+                tooltip = "COPY: Click text then Control-C"
             }
             purl.style.minimal_width = 350
             tab6_qr_frame.add {
@@ -796,6 +798,12 @@ function INFO_Clicks(event)
         local args = UTIL_SplitStr(event.element.name, ",")
 
         if player and player.valid and event.element.name then
+            if event.element.name == "discord_url" or
+            event.element.name == "server_list" or
+            event.element.name == "patreon_url" then
+                event.element.select_all()
+            end
+
             -- debug
             UTIL_ConsolePrint("[ACT] GUI_CLICK: " .. player.name .. ": " .. event.element.name)
 
@@ -854,8 +862,6 @@ function INFO_TextChanged(event)
             event.element.text = "https://discord.gg/rQANzBheVh"
         elseif event.element.name == "server_list" then
             event.element.text = "http://factorio.go-game.net/?tag=M45"
-        elseif event.element.name == "old_maps" then
-            event.element.text = "https://m45sci.xyz/u/fact2/archive/"
         elseif event.element.name == "patreon_url" then
             event.element.text = "https://www.patreon.com/m45sci"
         end
