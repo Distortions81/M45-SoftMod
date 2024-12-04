@@ -18,7 +18,7 @@ require "quickbar" -- Save or Restore Quickbar
 require ("lualzw")      --Compression
 
 function RunSetup()
-    storage.SM_Version = "628-12.03.2024-0131p"
+    storage.SM_Version = "629-12.03.2024-0733p"
 
     storage.SM_OldVersion = storage.SM_Version
 
