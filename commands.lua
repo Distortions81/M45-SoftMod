@@ -409,7 +409,7 @@ script.on_load(function()
         end)
 
         -- Server name
-        commands.add_command("cname", "Systen use only.", function(param)
+        commands.add_command("cname", "System use only.", function(param)
             if CMD_SysOnly(param) then
                 return
             end
