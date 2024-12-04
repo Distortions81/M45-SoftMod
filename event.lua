@@ -130,6 +130,7 @@ local function makeUI(player)
         ONLINE_MakeOnlineButton(player)
         ONELIFE_MakeButton(player)
         TODO_Setup(player)
+        QUICKBAR_MakeExchangeButton(player)
         INFO_MakeClock(player)
     end
 end
@@ -294,12 +295,14 @@ script.on_event(
             -- gui
             LOG_PlayerLeft(event)
         elseif event.name == defines.events.on_gui_click then
-            INFO_Clicks(event)
+            INFO_Clicks(event) --info.lua
+            QUICKBAR_Clicks(event) --quickbar.lua
             ONLINE_Clicks(event)  -- online.lua
             ONELIFE_Clicks(event) --onelife.lua
         elseif event.name == defines.events.on_gui_text_changed then
             -- log
-            INFO_TextChanged(event)
+            INFO_TextChanged(event) --info.lua
+            QUICKBAR_TextChanged(event)
         elseif event.name == defines.events.on_console_command then
             LOG_ConsoleCmd(event)
         elseif event.name == defines.events.on_chart_tag_removed then

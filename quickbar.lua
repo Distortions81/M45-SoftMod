@@ -23,15 +23,34 @@ function ExportQuickbar(player, limit)
             outbuf = outbuf .. i .. ":" .. slot.name
         end
     end
-    return outbuf
+    if outbuf == "" then
+        return ""
+    end
+
+    return helpers.encode_string(compress("M45-QB1=" .. outbuf))
 end
 
 function ImportQuickbar(player, data)
     if not player or not player.valid then
-        return
+        return false
     end
     if data == nil or data == "" then
-        return
+        return false
+    end
+
+    local decoded = decompress(helpers.decode_string(data))
+    if decoded == "" then
+        return false
+    end
+
+    local header = UTIL_SplitStr(decoded, "=")
+    if not header or not header[1] then
+        UTIL_SmartPrint(player, "That isn't a valid M45 quickbar exchange string!")
+        return false
+    end
+    if header[1] ~= "M45-QB1" then
+        UTIL_SmartPrint(player, "That isn't a valid M45 quickbar exchange string!")
+        return false
     end
 
     --Clear all bars
@@ -40,19 +59,36 @@ function ImportQuickbar(player, data)
     end
 
     --Restore from string
-    local items = UTIL_SplitStr(data, ",")
+    local items = UTIL_SplitStr(header[2], ",")
 
+    local error_list = ""
     for i, item in ipairs(items) do
         local values = UTIL_SplitStr(item, ":")
-        player.set_quick_bar_slot(values[1], values[2])
+        --If values are found
+        if values and values[1] and values[2] then
+            --If item is valid
+            if prototypes.item[values[2]] then
+            player.set_quick_bar_slot(values[1], values[2])
+            else
+                if error_list ~= "" then
+                    error_list = error_list .. ", "
+                end
+                error_list = error_list .. values[2]
+            end
+        end
     end
+    if error_list ~= "" then
+        UTIL_SmartPrint(player, "Quickbar Import: Invalid items skipped: " .. error_list)
+    end
+
+    return true
 end
 
 function SaveQuickbar(player)
     if not player or not player.valid then
         return
     end
-      print("[QBSAVE] " .. ExportQuickbar(player, true))
+    print("[QBSAVE] " .. ExportQuickbar(player, true))
 end
 
 function LoadQuickbar(player)
@@ -60,4 +96,157 @@ function LoadQuickbar(player)
         return
     end
     print("[QBLOAD] " .. player.name)
+end
+
+function QUICKBAR_MakeExchangeButton(player)
+    if player.gui.top.qb_exchange_button then
+        player.gui.top.qb_exchange_button.destroy()
+    end
+    if not player.gui.top.qb_exchange_button then
+        local ex_button = player.gui.top.add {
+            type = "sprite-button",
+            name = "qb_exchange_button",
+            sprite = "file/img/buttons/exchange-64.png",
+            tooltip = "Import or Export a M45 quickbar exchange string."
+        }
+        ex_button.style.size = { 64, 64 }
+    end
+end
+
+function QUICKBAR_MakeExchangeWindow(player, exportMode)
+    if player.gui.screen.quickbar_exchange then
+        player.gui.screen.quickbar_exchange.destroy()
+    end
+    local main_flow = player.gui.screen.add {
+        type = "frame",
+        name = "quickbar_exchange",
+        direction = "vertical"
+    }
+    main_flow.style.horizontal_align = "center"
+    main_flow.style.vertical_align = "center"
+    main_flow.force_auto_center()
+
+    -- Title Bar--
+    local info_titlebar = main_flow.add {
+        type = "flow",
+        direction = "horizontal"
+    }
+    info_titlebar.drag_target = main_flow
+    info_titlebar.style.horizontal_align = "center"
+    info_titlebar.style.horizontally_stretchable = true
+
+    info_titlebar.add {
+        type = "label",
+        name = "online_title",
+        style = "frame_title",
+        caption = "M45 Quickbar Exchange String"
+    }
+    local pusher = info_titlebar.add {
+        type = "empty-widget",
+        style = "draggable_space_header"
+    }
+
+    pusher.style.vertically_stretchable = true
+    pusher.style.horizontally_stretchable = true
+    pusher.drag_target = main_flow
+
+    info_titlebar.add {
+        type = "sprite-button",
+        name = "qb_exchange_close",
+        sprite = "utility/close",
+        style = "frame_action_button",
+        tooltip = "Close this window"
+    }
+
+    main_flow.style.padding = 4
+    local mframe = main_flow.add {
+        type = "flow",
+        direction = "vertical"
+    }
+    mframe.style.minimal_height = 75
+    mframe.style.horizontally_squashable = false
+
+    local qbes = ""
+    if exportMode then
+        qbes = ExportQuickbar(player, false)
+    end
+    mframe.add {
+        type = "text-box",
+        name = "quickbar_string",
+        text = qbes,
+        tooltip = "COPY: Control-A then Control-C\nPASTE: Control-A then Control-V",
+    }
+    mframe.quickbar_string.style.minimal_width = 500
+    mframe.quickbar_string.style.minimal_height = 50
+
+    local bframe = mframe.add {
+        type = "flow",
+        direction = "horizontal"
+    }
+    bframe.add {
+        type = "button",
+        caption = "Import",
+        style = "green_button",
+        name = "import_qb",
+        tooltip = "Import a new quickbar."
+    }
+    local pusher = bframe.add {
+        type = "empty-widget",
+    }
+    pusher.style.vertically_stretchable = true
+    pusher.style.horizontally_stretchable = true
+    bframe.add {
+        type = "button",
+        caption = "Export",
+        style = "red_button",
+        name = "export_qb",
+        tooltip = "Export current quickbars."
+    }
+end
+
+function QUICKBAR_Clicks(event)
+    if event and event.element and event.element.valid and event.player_index then
+        local player = game.players[event.player_index]
+
+        if player and player.valid and event.element.name then
+            if event.element.name == "qb_exchange_close" and player.gui and player.gui.screen and
+                player.gui.screen.quickbar_exchange then
+                player.gui.screen.quickbar_exchange.destroy()
+            elseif event.element.name == "qb_exchange_button" and player.gui and player.gui.screen then
+                if player.gui.screen.quickbar_exchange then
+                    player.gui.screen.quickbar_exchange.destroy()
+                else
+                    QUICKBAR_MakeExchangeWindow(player, false)
+                end
+            elseif event.element.name == "export_qb" and player.gui and player.gui.screen then
+                if player.gui.screen.quickbar_exchange then
+                    player.gui.screen.quickbar_exchange.destroy()
+                end
+                QUICKBAR_MakeExchangeWindow(player, true)
+            elseif event.element.name == "import_qb" and player.gui and player.gui.screen then
+                if storage.PData and storage.PData[player.index] and
+                storage.PData[event.player_index].qb_import_string then
+                    ImportQuickbar(player,storage.PData[event.player_index].qb_import_string )
+                    if player.gui.screen.quickbar_exchange then
+                        player.gui.screen.quickbar_exchange.destroy()
+                    end
+                end
+            end
+        end
+    end
+end
+
+
+-- Grab text from text box
+function QUICKBAR_TextChanged(event)
+    -- Automatically fix URLs, because read-only/selectable text is confusing to players --
+    if event and event.element and event.player_index and event.text and event.element.name then
+        local player = game.players[event.player_index]
+
+        if event.element.name == "quickbar_string" then
+            if storage.PData and storage.PData[event.player_index] then
+                storage.PData[event.player_index].qb_import_string = event.element.text
+            end
+        end
+    end
 end
