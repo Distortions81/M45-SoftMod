@@ -179,11 +179,11 @@ function QUICKBAR_MakeExchangeWindow(player, exportMode)
     if exportMode then
         qbes = ExportQuickbar(player, false)
     end
-    mframe.add {
+    tbox = mframe.add {
         type = "text-box",
         name = "quickbar_string",
         text = qbes,
-        tooltip = "COPY: Control-A then Control-C\nPASTE: Control-A then Control-V",
+        tooltip = "COPY: Click text then Control-C\nPASTE: Click text then Control-V",
     }
     mframe.quickbar_string.style.minimal_width = 500
     mframe.quickbar_string.style.minimal_height = 50
@@ -218,6 +218,10 @@ function QUICKBAR_Clicks(event)
         local player = game.players[event.player_index]
 
         if player and player.valid and event.element.name then
+            if event.element.name == "quickbar_string" then
+                event.element.select_all()
+            end
+
             if event.element.name == "qb_exchange_close" and player.gui and player.gui.screen and
                 player.gui.screen.quickbar_exchange then
                 QUICKBAR_ClearString(player)
