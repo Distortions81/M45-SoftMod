@@ -17,7 +17,7 @@ function ExportQuickbar(player, limit)
     for i = 1, maxExport do
         local slot = player.get_quick_bar_slot(i)
         if slot ~= nil then
-            outbuf = outbuf .. slot.name .. ","
+            outbuf = outbuf .. slot.name
         end
         outbuf = outbuf .. ","
     end
