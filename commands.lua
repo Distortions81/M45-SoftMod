@@ -702,7 +702,7 @@ script.on_load(function()
                     UTIL_SmartPrint(victim, string.format("New spawn point set: %d,%d", math.floor(newPos.x),
                         math.floor(newPos.y)))
                     UTIL_SmartPrint(victim, string.format("Force: %s", pforce.name))
-                    LOGO_DrawLogo(true)
+                    LOGO_DrawLogo(false)
                 else
                     UTIL_SmartPrint(victim, "Couldn't find force...")
                 end

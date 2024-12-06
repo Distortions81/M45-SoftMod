@@ -42,14 +42,13 @@ script.on_nth_tick(599, function(event)
     --1 min
     if storage.SM_Store.tickDiv % 6 == 0 then
         ONLINE_UpdatePlayerList() -- online.lua
-        LOGO_DrawLogo(true)       --Move spawn if blocked
     end
 
     --15 mins
     if storage.SM_Store.tickDiv >= 90 then
         storage.SM_Store.tickDiv = 0
-        UTIL_MapPin()             -- fix map pin, just in case
         UTIL_CheckAbandoned()
+        LOGO_DrawLogo(false)       --Move spawn if blocked
     end
 
 
