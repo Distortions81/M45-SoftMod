@@ -179,7 +179,7 @@ function QUICKBAR_MakeExchangeWindow(player, exportMode)
     if exportMode then
         qbes = ExportQuickbar(player, false)
     end
-    tbox = mframe.add {
+    mframe.add {
         type = "text-box",
         name = "quickbar_string",
         text = qbes,
