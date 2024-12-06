@@ -3,12 +3,48 @@
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
 
+local function protectPin(event)
+    local player = game.players[event.player_index]
+
+    if storage.SM_Store.mapPin.tag_number == event.tag.tag_number then
+        UTIL_MapPin()
+        UTIL_SmartPrint(player, "*** You can not edit or delete the discord invite pin.")
+        return true
+    end
+
+    return false
+end
+
+local function rejectPin(event)
+    local player = game.players[event.player_index]
+
+    if UTIL_Is_Banished(player) then
+        UTIL_SmartPrint(player, "No, you are banished.")
+        event.tag.destroy()
+        return true
+    end
+
+    local ltext = string.lower(event.tag.text)
+    if string.find(ltext, "http") or
+    string.find(ltext, "discord.gg") then
+        UTIL_SmartPrint(player, "URLs are not allowed.")
+        event.tag.destroy()
+        return true
+    end
+
+    return false
+end
+
 -- Create map tag -- log
 function LOG_TagAdded(event)
     if not event or not event.player_index or not event.tag then
         return
     end
     local player = game.players[event.player_index]
+
+    if rejectPin(event) then
+        return
+    end
 
     if event.tag.icon and event.tag.icon.name then
         UTIL_MsgAll(player.name .. " add-tag "
@@ -19,17 +55,6 @@ function LOG_TagAdded(event)
     end
 end
 
-local function protectPin(event)
-    local player = game.players[event.player_index]
-
-    if storage.SM_Store.mapPin.tag_number == event.tag.tag_number then
-        UTIL_MapPin()
-        UTIL_SmartPrint(player, "*** ALERT: DO NOT MESS WITH OUR DISCORD INVITE MAP PIN!")
-        return true
-    end
-
-    return false
-end
 
 -- Edit map tag -- log
 function LOG_TagMod(event)
@@ -39,6 +64,10 @@ function LOG_TagMod(event)
     local player = game.players[event.player_index]
 
     if protectPin(event) then
+        return
+    end
+
+    if rejectPin(event) then
         return
     end
 
