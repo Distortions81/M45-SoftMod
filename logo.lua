@@ -35,7 +35,7 @@ function LOGO_DrawLogo(force)
         if not force and oldPos == newPos then
             return
         end
-        
+
         -- Move map pin
         UTIL_MapPin()
 
@@ -45,6 +45,12 @@ function LOGO_DrawLogo(force)
         end
         if storage.SM_Store.spawnText then
             storage.SM_Store.spawnText.destroy()
+        end
+        if storage.SM_Store.inviteText then
+            storage.SM_Store.inviteText.destroy()
+        end
+        if storage.SM_Store.webText then
+            storage.SM_Store.webText.destroy()
         end
         if storage.SM_Store.spawnLogo then
             storage.SM_Store.spawnLogo.destroy()
@@ -61,21 +67,40 @@ function LOGO_DrawLogo(force)
         }
         storage.SM_Store.spawnLight = rendering.draw_light {
             sprite = "utility/light_medium",
-            render_layer = 148,
+            render_layer = "floor",
             target = newPos,
             scale = 8,
             surface = msurf,
-            minimum_darkness = 0.5
+            minimum_darkness = 0.1
         }
-        if not storage.SM_Store.serverName then
-            storage.SM_Store.serverName = ""
+        if storage.SM_Store.serverName then
+            storage.SM_Store.spawnText = rendering.draw_text {
+                text = "Map: "..storage.SM_Store.serverName,
+                draw_on_ground = true,
+                surface = msurf,
+                target = { newPos.x - 0.125, newPos.y - 1.0 },
+                scale = 2.0,
+                color = { 1, 1, 1 },
+                alignment = "center",
+                scale_with_zoom = false
+            }
         end
-        storage.SM_Store.spawnText = rendering.draw_text {
-            text = storage.SM_Store.serverName,
+        storage.SM_Store.inviteText = rendering.draw_text {
+            text = "discord.gg/rQANzBheVh",
             draw_on_ground = true,
             surface = msurf,
-            target = { newPos.x - 0.125, newPos.y - 2.5 },
-            scale = 3.0,
+            target = { newPos.x - 0.125, newPos.y + 1.5 },
+            scale = 2.0,
+            color = { 1, 1, 1 },
+            alignment = "center",
+            scale_with_zoom = false
+        }
+        storage.SM_Store.webText = rendering.draw_text {
+            text = "m45sci.xyz",
+            draw_on_ground = true,
+            surface = msurf,
+            target = { newPos.x - 0.125, newPos.y + 2.5 },
+            scale = 2.0,
             color = { 1, 1, 1 },
             alignment = "center",
             scale_with_zoom = false
