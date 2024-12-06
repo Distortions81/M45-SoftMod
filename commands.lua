@@ -585,17 +585,15 @@ script.on_load(function()
                     if victim and victim.valid then
                         if not storage.PData[victim.index].patreon then
                             storage.PData[victim.index].patreon = true
-                            UTIL_SmartPrint(player, "Player given patreon status.")
+                            UTIL_SmartPrint(victim, "*** Welcome back, and thank you for being a supporter "..victim.name .."!!! ***")
+                            UTIL_SmartPrint(victim, "NEWS: See the new /stash and /unstash commands!")
+                            UTIL_SmartPrint(victim, "/stash will take your currently equipped armor, weapons and ammo and 'stash' them.")
+                            UTIL_SmartPrint(victim, "When you need them again, such as on respawn /unstash them!")
                             ONLINE_UpdatePlayerList() -- online.lua
-                        else
-                            UTIL_SmartPrint(player, "Player already has patreon status.")
                         end
-
-                        return
                     end
                 end
             end
-            UTIL_SmartPrint(player, "Player not found.")
         end)
 
         -- Set player to nitro
