@@ -192,9 +192,30 @@ local function unstash_armor(player)
     return unstashed_anything, player_inventory_full
 end
 
--- Function to add the commands
+-- Helper: Move items from one inventory to another if possible, otherwise leave them
+local function move_items_to_inventory_or_leave(source_inv, target_inv)
+    if not source_inv or not target_inv then return end
+    for i = 1, #source_inv do
+        local stack = source_inv[i]
+        if stack.valid_for_read then
+            local stack_to_transfer = { name = stack.name, count = stack.count }
+            -- Check if we can fully insert into target_inv
+            if target_inv.can_insert(stack_to_transfer) then
+                local inserted = target_inv.insert(stack_to_transfer)
+                if inserted > 0 then
+                    stack.clear()
+                end
+                -- If somehow inserted < stack.count even though can_insert was true, 
+                -- that would be odd, but in theory can_insert should ensure full insertion.
+            else
+                -- Cannot insert this stack fully, leave it as is.
+            end
+        end
+    end
+end
+
 function STASH_AddStashCommands()
-    commands.add_command("stash", "Donator-only: Stash current weapon/ammo/armor (including equipment).",
+    commands.add_command("stash", "Donator-only: Stash current weapons, ammo and armor.",
         function(param)
             if not param or not param.player_index then return end
             local player = game.players[param.player_index]
@@ -214,9 +235,9 @@ function STASH_AddStashCommands()
             if not storage.PData then storage.PData = {} end
             if not storage.PData[player.index] then storage.PData[player.index] = {} end
 
-            local can_stash_guns = ensure_empty_stash(player.index, "gun_stash", 10)
-            local can_stash_ammo = ensure_empty_stash(player.index, "ammo_stash", 20)
-            local can_stash_armor = ensure_empty_stash(player.index, "armor_stash", 5)
+            local can_stash_guns = ensure_empty_stash(player.index, "gun_stash", 3)
+            local can_stash_ammo = ensure_empty_stash(player.index, "ammo_stash", 3)
+            local can_stash_armor = ensure_empty_stash(player.index, "armor_stash", 1)
 
             if not (can_stash_guns and can_stash_ammo and can_stash_armor) then
                 UTIL_SmartPrint(player, "You already have stashed equipment. Unstash before stashing again.")
@@ -234,7 +255,7 @@ function STASH_AddStashCommands()
             local stash_full = gun_stash_full or ammo_stash_full or armor_stash_full
 
             if stashed_anything then
-                UTIL_SmartPrint(player, "Your guns, ammo, and armor (including equipment) have been successfully stashed!")
+                UTIL_SmartPrint(player, "Your guns, ammo, and armor have been successfully stashed!")
                 if stash_full then
                     UTIL_SmartPrint(player, "Some items could not be stashed due to insufficient space.")
                 end
@@ -248,7 +269,7 @@ function STASH_AddStashCommands()
         end
     )
 
-    commands.add_command("unstash", "Donator-only: Unstash weapon/ammo/armor (including equipment).",
+    commands.add_command("unstash", "Donator-only: Unstash weapons, ammo and armor.",
         function(param)
             if not param or not param.player_index then return end
             local player = game.players[param.player_index]
@@ -272,9 +293,16 @@ function STASH_AddStashCommands()
             local gun_inventory = player.get_inventory(defines.inventory.character_guns)
             local ammo_inventory = player.get_inventory(defines.inventory.character_ammo)
             local armor_inventory = player.get_inventory(defines.inventory.character_armor)
+            local main_inventory = player.get_inventory(defines.inventory.character_main)
 
+            -- Attempt to clear the player's gun/ammo/armor slots by moving their current gear into main inventory if possible
+            move_items_to_inventory_or_leave(gun_inventory, main_inventory)
+            move_items_to_inventory_or_leave(ammo_inventory, main_inventory)
+            move_items_to_inventory_or_leave(armor_inventory, main_inventory)
+
+            -- Now check if empty after attempting to unequip
             if not is_inventory_empty(gun_inventory) or not is_inventory_empty(ammo_inventory) or not is_inventory_empty(armor_inventory) then
-                UTIL_SmartPrint(player, "You must clear your guns, ammo, and armor before unstashing.")
+                UTIL_SmartPrint(player, "You must remove all your current guns, ammo, and armor before unstashing.")
                 return
             end
 
@@ -300,7 +328,7 @@ function STASH_AddStashCommands()
                     UTIL_SmartPrint(player, "Some items could not be unstashed due to insufficient space.")
                 end
             else
-                UTIL_SmartPrint(player, "Your stashes were empty or could not be restored.")
+                UTIL_SmartPrint(player, "Your stash is empty!")
             end
         end
     )
