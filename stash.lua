@@ -206,8 +206,8 @@ function STASH_AddStashCommands()
                 return
             end
 
-            if not UTIL_Is_Patreon(player) and not player.admin then
-                UTIL_SmartPrint(player, "This command is only for donors.")
+            if not UTIL_Is_Supporter(player) and not player.admin then
+                UTIL_SmartPrint(player, "This command is only for supporters.")
                 return
             end
 
@@ -260,8 +260,8 @@ function STASH_AddStashCommands()
                 return
             end
 
-            if not UTIL_Is_Patreon(player) and not player.admin then
-                UTIL_SmartPrint(player, "This command is only for donors.")
+            if not UTIL_Is_Supporter(player) and not player.admin then
+                UTIL_SmartPrint(player, "This command is only for supporters.")
                 return
             end
 

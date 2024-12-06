@@ -67,7 +67,7 @@ function ONLINE_UpdatePlayerList()
             utag = "Moderator"
         end
 
-        if UTIL_Is_Patreon(victim) then
+        if UTIL_Is_Supporter(victim) then
             utag = utag .. " (SUPPORTER)"
         end
         if UTIL_Is_Nitro(victim) then
@@ -574,7 +574,7 @@ function ONLINE_Window(player)
                             g = 0,
                             b = 0
                         }
-                    elseif UTIL_Is_Patreon(victim) then
+                    elseif UTIL_Is_Supporter(victim) then
                         newcolor = {
                             r = 1.0,
                             g = 0.0,
@@ -698,7 +698,7 @@ function ONLINE_Window(player)
                         if UTIL_Is_Nitro(victim) then
                             utag = utag .. " [color=cyan](NITRO)[/color]"
                         end
-                        if UTIL_Is_Patreon(victim) then
+                        if UTIL_Is_Supporter(victim) then
                             utag = utag .. " [color=purple](SUPPORTER)[/color]"
                         end
 

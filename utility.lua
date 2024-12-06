@@ -347,7 +347,7 @@ function UTIL_Quantize(number, precision)
 end
 
 -- Check if player is flagged patreon
-function UTIL_Is_Patreon(victim)
+function UTIL_Is_Supporter(victim)
     if victim and storage.PData[victim.index] and storage.PData[victim.index].patreon then
         return storage.PData[victim.index].patreon
     else
