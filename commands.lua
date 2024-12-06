@@ -587,8 +587,9 @@ script.on_load(function()
                             storage.PData[victim.index].patreon = true
                             UTIL_SmartPrint(victim, "*** Welcome back, and thank you for being a supporter "..victim.name .."!!! ***")
                             UTIL_SmartPrint(victim, "NEWS: See the new /stash and /unstash commands!")
-                            UTIL_SmartPrint(victim, "/stash will take your currently equipped armor, weapons and ammo and 'stash' them.")
+                            UTIL_SmartPrint(victim, "/stash will take your currently equipped armor, weapons and ammo and 'stashes' them.")
                             UTIL_SmartPrint(victim, "When you need them again, such as on respawn /unstash them!")
+                            UTIL_SmartPrint(victim, "It is very similar to putting them in a box at spawn, but they are safe from being lost or taken.")
                             ONLINE_UpdatePlayerList() -- online.lua
                         end
                     end
