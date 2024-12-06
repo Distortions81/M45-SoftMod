@@ -219,7 +219,7 @@ function STASH_AddStashCommands()
             local can_stash_armor = ensure_empty_stash(player.index, "armor_stash", 5)
 
             if not (can_stash_guns and can_stash_ammo and can_stash_armor) then
-                UTIL_SmartPrint(player, "You already have stashed equipment. Unstash or clear before stashing again.")
+                UTIL_SmartPrint(player, "You already have stashed equipment. Unstash before stashing again.")
                 return
             end
 
@@ -295,9 +295,9 @@ function STASH_AddStashCommands()
             local player_inventory_full = guns_full or ammo_full or armor_full
 
             if unstashed_anything then
-                UTIL_SmartPrint(player, "Your stashed guns, ammo, and armor (with equipment) have been successfully restored!")
+                UTIL_SmartPrint(player, "Your stashed guns, ammo, and armor have been successfully unstashed!")
                 if player_inventory_full then
-                    UTIL_SmartPrint(player, "Some items could not be restored due to insufficient space.")
+                    UTIL_SmartPrint(player, "Some items could not be unstashed due to insufficient space.")
                 end
             else
                 UTIL_SmartPrint(player, "Your stashes were empty or could not be restored.")
