@@ -53,6 +53,7 @@ script.on_load(function()
     -- Only add if no commands yet
     if (not commands.commands.server_interface) then
         BANISH_AddBanishCommands()
+        STASH_AddStashCommands()
 
         -- Reset interval message
         commands.add_command("resetdur", "System use only.", function(param)

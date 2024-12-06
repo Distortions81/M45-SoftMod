@@ -15,9 +15,10 @@ require "storage"  -- Global variable init
 require "todo"     -- To-Do-list
 require "utility"  -- Widely used general utility
 require "quickbar" -- Save or Restore Quickbar
+require "stash" -- Save or Restore Weapon/Ammo/Armor
 
 function RunSetup()
-    storage.SM_Version = "629-12.03.2024-1008p"
+    storage.SM_Version = "630-12.05.2024-0815p"
 
     storage.SM_OldVersion = storage.SM_Version
 
