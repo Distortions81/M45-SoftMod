@@ -19,12 +19,29 @@ function LOG_TagAdded(event)
     end
 end
 
+local function protectPin(event)
+    local player = game.players[event.player_index]
+
+    if storage.SM_Store.mapPin.tag_number == event.tag.tag_number then
+        UTIL_MapPin()
+        UTIL_SmartPrint(player, "*** ALERT: DO NOT MESS WITH OUR DISCORD INVITE MAP PIN!")
+        return true
+    end
+
+    return false
+end
+
 -- Edit map tag -- log
 function LOG_TagMod(event)
     if not event or not event.player_index or not event.tag then
         return
     end
     local player = game.players[event.player_index]
+
+    if protectPin(event) then
+        return
+    end
+
     if event.tag.icon and event.tag.icon.name then
         UTIL_MsgAll(player.name .. " edit-tag "
             .. UTIL_GPSObj(event.tag) .. " : " .. event.tag.icon.name .. " " .. event.tag.text)
@@ -40,6 +57,10 @@ function LOG_TagDel(event)
         return
     end
     local player = game.players[event.player_index]
+
+    if protectPin(event) then
+        return
+    end
 
     if event.tag.icon and event.tag.icon.name then
         UTIL_MsgAll(player.name .. " delete-tag "
