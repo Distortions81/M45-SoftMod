@@ -18,16 +18,10 @@ end
 local function rejectPin(event)
     local player = game.players[event.player_index]
 
-    if UTIL_Is_Banished(player) then
-        UTIL_SmartPrint(player, "No, you are banished.")
-        event.tag.destroy()
-        return true
-    end
-
     local ltext = string.lower(event.tag.text)
     if string.find(ltext, "http") or
     string.find(ltext, "discord.gg") then
-        UTIL_SmartPrint(player, "URLs are not allowed.")
+        UTIL_SmartPrint(player, "URLs are not allowed in map pins.")
         event.tag.destroy()
         return true
     end
