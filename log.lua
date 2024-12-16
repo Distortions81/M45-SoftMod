@@ -159,10 +159,6 @@ function LOG_TrainSchedule(event)
     end
     local player = game.players[event.player_index]
 
-    if not UTIL_Is_New(player) and not UTIL_Is_Member(player) then
-        return
-    end
-
     local tObj = event.train.front_stock
     if tObj then
         local msg = player.name ..
@@ -388,10 +384,6 @@ function LOG_PlayerDrive(event)
         local player = game.players[event.player_index]
 
         if player then
-            if not UTIL_Is_New(player) and not UTIL_Is_Member(player) then
-                return
-            end
-
             local msg = ""
             if player.vehicle then
                 msg = "[ACT] " ..
