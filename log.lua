@@ -20,7 +20,7 @@ local function rejectPin(event)
 
     local ltext = string.lower(event.tag.text)
     if string.find(ltext, "http") or
-    string.find(ltext, "discord.gg") then
+        string.find(ltext, "discord.gg") then
         UTIL_SmartPrint(player, "URLs are not allowed in map pins.")
         event.tag.destroy()
         return true
@@ -48,7 +48,6 @@ function LOG_TagAdded(event)
             .. UTIL_GPSObj(event.tag) .. " : " .. event.tag.text)
     end
 end
-
 
 -- Edit map tag -- log
 function LOG_TagMod(event)
@@ -120,6 +119,10 @@ function LOG_Redo(event)
     end
     local player = game.players[event.player_index]
 
+    if not UTIL_Is_New(player) and not UTIL_Is_Member(player) then
+        return
+    end
+
     local buf = ""
     for _, act in pairs(event.actions) do
         if buf ~= "" then
@@ -136,6 +139,10 @@ function LOG_Undo(event)
     end
     local player = game.players[event.player_index]
 
+    if not UTIL_Is_New(player) and not UTIL_Is_Member(player) then
+        return
+    end
+
     local buf = ""
     for _, act in pairs(event.actions) do
         if buf ~= "" then
@@ -151,6 +158,10 @@ function LOG_TrainSchedule(event)
         return
     end
     local player = game.players[event.player_index]
+
+    if not UTIL_Is_New(player) and not UTIL_Is_Member(player) then
+        return
+    end
 
     local tObj = event.train.front_stock
     if tObj then
@@ -177,6 +188,10 @@ end
 function LOG_PickedItem(event)
     if event and event.player_index and event.item_stack then
         local player = game.players[event.player_index]
+
+        if not UTIL_Is_New(player) and not UTIL_Is_Member(player) then
+            return
+        end
 
         local buf = ""
         for _, item in pairs(event.item_stack) do
@@ -319,6 +334,10 @@ function LOG_CancelDecon(event)
         local player = game.players[event.player_index]
         local obj = event.entity
 
+        if not UTIL_Is_New(player) and not UTIL_Is_Member(player) then
+            return
+        end
+
         if player then
             local msg = "[ACT] " .. player.name .. " cancelled deconstruction " .. obj.name
 
@@ -369,6 +388,10 @@ function LOG_PlayerDrive(event)
         local player = game.players[event.player_index]
 
         if player then
+            if not UTIL_Is_New(player) and not UTIL_Is_Member(player) then
+                return
+            end
+
             local msg = ""
             if player.vehicle then
                 msg = "[ACT] " ..
@@ -411,6 +434,10 @@ function LOG_FastTransfered(event)
         local player = game.players[event.player_index]
         local obj = event.entity
 
+        if not UTIL_Is_New(player) and not UTIL_Is_Member(player) then
+            return
+        end
+
         if player and obj then
             if event.from_player then
                 UTIL_ConsolePrint("[ACT] " ..
@@ -426,6 +453,10 @@ end
 function LOG_InvChanged(event)
     if event and event.player_index then
         local player = game.players[event.player_index]
+
+        if not UTIL_Is_New(player) and not UTIL_Is_Member(player) then
+            return
+        end
 
         if player then
             UTIL_ConsolePrint("[ACT] " .. player.name .. " transfered some items at " .. player.character.gps_tag)
