@@ -18,7 +18,7 @@ require "quickbar" -- Save or Restore Quickbar
 require "stash" -- Save or Restore Weapon/Ammo/Armor
 
 function RunSetup()
-    storage.SM_Version = "630-12.05.2024-1128p"
+    storage.SM_Version = "631-12.15.2024-0702p"
 
     storage.SM_OldVersion = storage.SM_Version
 
