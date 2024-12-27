@@ -100,7 +100,7 @@ function ONELIFE_MakeButton(player)
         player.gui.top.spec_button.destroy()
     end
 
-    if not storage.SM_Store.oneLifeMode then
+    if storage.SM_Store.oneLifeMode and storage.SM_Store.oneLifeMode == false then
         if player.controller_type == defines.controllers.spectator then
             player.set_controller {
                 type = defines.controllers.character,
