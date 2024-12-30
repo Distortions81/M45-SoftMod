@@ -119,6 +119,10 @@ function LOG_Redo(event)
     end
     local player = game.players[event.player_index]
 
+    if not player or not player.character then
+        return
+    end
+
     if not UTIL_Is_New(player) and not UTIL_Is_Member(player) then
         return
     end
@@ -138,6 +142,10 @@ function LOG_Undo(event)
         return
     end
     local player = game.players[event.player_index]
+
+    if not player or not player.character then
+        return
+    end
 
     if not UTIL_Is_New(player) and not UTIL_Is_Member(player) then
         return
@@ -185,6 +193,10 @@ function LOG_PickedItem(event)
     if event and event.player_index and event.item_stack then
         local player = game.players[event.player_index]
 
+        if not player or not player.character then
+            return
+        end
+
         if not UTIL_Is_New(player) and not UTIL_Is_Member(player) then
             return
         end
@@ -208,6 +220,9 @@ end
 function LOG_DroppedItem(event)
     if event and event.player_index and event.entity then
         local player = game.players[event.player_index]
+        if not player or not player.character then
+            return
+        end
 
         UTIL_ConsolePrint("[ACT] " ..
             player.name .. " dropped " .. event.entity.name .. " at " .. player.character.gps_tag)
@@ -220,7 +235,13 @@ function LOG_Decon(event)
         local player = game.players[event.player_index]
         local area = event.area
 
+
+        if not player or not player.character then
+            return
+        end
+        
         if player and area and area.left_top then
+
             local decon_size = UTIL_Distance(area.left_top, area.right_bottom)
 
             -- Don't bother if selection is zero.
@@ -445,6 +466,10 @@ end
 function LOG_InvChanged(event)
     if event and event.player_index then
         local player = game.players[event.player_index]
+
+        if not player or not player.character then
+            return
+        end
 
         if not UTIL_Is_New(player) and not UTIL_Is_Member(player) then
             return
