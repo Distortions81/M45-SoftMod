@@ -1130,5 +1130,46 @@ script.on_load(function()
                 end
                 UTIL_SmartPrint(player, "Teleport them to where? Syntax: rtp <player> <x,y or surface>")
             end)
+
+        -- List surfaces
+        commands.add_command("surfaces", "Moderators only, list game surfaces and players on them.",
+            function(param)
+                local player
+
+                if CMD_ModsOnly(param) then
+                    return
+                end
+
+                if param and param.player_index then
+                    player = game.players[param.player_index]
+                end
+
+                UTIL_SmartPrint(player, "Surfaces and players: ")
+
+                local buf = ""
+                for _, surface in pairs(game.surfaces) do
+                    if buf ~= "" then
+                        buf = buf .. "\n"
+                    end
+
+                    buf = buf .. surface.name .. ": "
+
+                    local pbuf = ""
+                    for _, victim in pairs(game.players) do
+                        if victim.physical_surface == surface then
+                            if pbuf ~= "" then
+                                pbuf = pbuf .. ", "
+                            end
+                            pbuf = pbuf .. player.name
+                        end
+                    end
+                    if pbuf == "" then
+                        pbuf = "(None)"
+                    end
+                    buf = buf .. pbuf
+                end
+
+                UTIL_SmartPrint(player, buf)
+            end)
     end
 end)
