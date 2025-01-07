@@ -656,7 +656,7 @@ function INFO_InfoWin(player)
             }
             tab3_main_frame.add {
                 type = "label",
-                caption = "[font=default-large-bold]3: [item=blueprint-book] Read the Weclome, Rules and Membership tabs before asking for help.[/font]"
+                caption = "[font=default-large-bold]3: [item=blueprint-book] Read the Welcome, Rules and Membership tabs before asking for help.[/font]"
             }
             tab3_main_frame.add {
                 type = "label",
