@@ -236,7 +236,8 @@ function BANISH_DoJail(victim)
 
     storage.PData[victim.index].playScore = 0
     UTIL_DumpInv(victim, true)
-    UTIL_MsgAllSys(victim.name .. "'s inventory has been dumped at "..UTIL_GPSObj(UTIL_GetDefaultSpawn()).." so the items can be recovered.")
+    UTIL_MsgAllSys(victim.name ..
+        "'s inventory has been dumped at " .. UTIL_GPSObj(UTIL_GetDefaultSpawn()) .. " so the items can be recovered.")
 
     local newpos = game.surfaces["jail"].find_non_colliding_position("character", { x = 0, y = 0 }, 1024, 1, false)
     table.insert(storage.SM_Store.sendToSurface, {
@@ -277,7 +278,13 @@ function BANISH_MakeJail()
         }
         game.create_surface("jail", my_map_gen_settings)
         game.surfaces["jail"].show_clouds = false
-        game.surfaces["jail"].request_to_generate_chunks({x=0,y=0},1)
+        game.surfaces["jail"].request_to_generate_chunks({ x = 0, y = 0 }, 1)
+    end
+
+    local pforce = game.forces["player"]
+    if pforce then
+        pforce.set_surface_hidden("jail", true)
+        pforce.clear_chart("jail")
     end
 end
 
@@ -460,7 +467,7 @@ function BANISH_AddBanishCommands()
                 UTIL_SmartPrint(player, "Who do you want to jail?")
             end
         end)
-        commands.add_command("unjail", "<player>",
+    commands.add_command("unjail", "<player>",
         function(param)
             local player
             if param and param.player_index then
@@ -746,4 +753,3 @@ function BANISH_AddBanishCommands()
         end
     end)
 end
-
