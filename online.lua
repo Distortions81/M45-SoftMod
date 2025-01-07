@@ -519,10 +519,7 @@ function ONLINE_Window(player)
                             direction = "horizontal"
                         }
                     else
-                        pframe = online_main.add {
-                            type = "flow",
-                            direction = "horizontal"
-                        }
+                        pframe = online_main
                     end
 
                     if not storage.PData[player.index].onlineBrief then
