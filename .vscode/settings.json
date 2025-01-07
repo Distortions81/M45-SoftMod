@@ -24,6 +24,8 @@
         "event",
         "defines",
         "rendering",
-        "rcon"
+        "rcon",
+        "helpers",
+        "prototypes"
     ]
 }
