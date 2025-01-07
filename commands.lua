@@ -1043,33 +1043,43 @@ script.on_load(function()
         commands.add_command("rtp", "Moderators only: <player> <x,y> -- teleport player to <x,y> or <surface>",
             function(param)
                 local player
+                local args
+                local victim
+                local surface
+
+                if CMD_ModsOnly(param) then
+                    return
+                end
+
                 if param and param.player_index then
                     player = game.players[param.player_index]
                 end
 
-                local args = UTIL_SplitStr(param.parameter, " ")
-
-                local victim
-                if args[0] then
-                    victim = game.players[args[0]]
-                    if CMD_NoSys(param) or CMD_ModsOnly(param) then
-                        return
-                    end
+                if param.parameter then
+                    args = UTIL_SplitStr(param.parameter, " ")
                 else
                     UTIL_SmartPrint(player, "Teleport who to where? Syntax: rtp <player> <x,y or surface>")
                     return
                 end
 
-                local surface = victim.physical_surface
+                if args ~= {} and args[1] then
+                    victim = game.players[args[1]]
+                end
+
+                if victim then
+                    surface = victim.physical_surface
+                end
+
+                UTIL_SmartPrint(player, args)
 
                 -- Argument required
-                if args[0] then
-                    local str = args[0]
+                if args ~= {} and args[1] and args[2] then
+                    local str = args[2]
                     local xpos = "0.0"
                     local ypos = "0.0"
 
                     -- Find surface from argument
-                    local n = game.surfaces[args[0]]
+                    local n = game.surfaces[args[2]]
                     if n then
                         surface = n
                         local position = {
@@ -1083,6 +1093,7 @@ script.on_load(function()
                         else
                             victim.teleport(position, surface)
                             UTIL_ConsolePrint("[ERROR] tp: unable to find non_colliding_position.")
+                            return
                         end
                     end
 
@@ -1103,6 +1114,7 @@ script.on_load(function()
                                 if (newpos) then
                                     victim.teleport(newpos, surface)
                                     UTIL_SmartPrint(player, "*Poof!*")
+                                    UTIL_SmartPrint(victim, "You have been teleported!")
                                 else
                                     UTIL_SmartPrint(player, "Area appears to be full.")
                                     UTIL_ConsolePrint("[ERROR] tp: unable to find non_colliding_position.")
