@@ -1160,7 +1160,7 @@ script.on_load(function()
                             if pbuf ~= "" then
                                 pbuf = pbuf .. ", "
                             end
-                            pbuf = pbuf .. player.name
+                            pbuf = pbuf .. victim.name
                         end
                     end
                     if pbuf == "" then
