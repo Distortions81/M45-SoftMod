@@ -425,6 +425,7 @@ function ONLINE_Window(player)
 
             online_close_button.style.horizontal_align = "right"
             online_close_button.style.horizontally_stretchable = true
+            online_close_button.style.horizontally_squashable = true
             online_close_button.add {
                 type = "sprite-button",
                 name = "m45_online_close_button",
