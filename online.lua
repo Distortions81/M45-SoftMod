@@ -358,6 +358,7 @@ function ONLINE_Window(player)
                 direction = "horizontal"
             }
             online_titlebar.style.horizontal_align = "center"
+            online_titlebar.style.horizontally_squashable = true
             online_titlebar.style.horizontally_stretchable = true
 
             local bcheckstate = false
@@ -404,7 +405,7 @@ function ONLINE_Window(player)
                 storage.PData[player.index].onlineShowOffline = false
             end
 
-            if not storage.PData[player.index].brief then
+            if not storage.PData[player.index].onlineBrief then
                 local show_offline = online_close_button.add {
                     type = "checkbox",
                     caption = "Show offline  ",
