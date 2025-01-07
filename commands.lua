@@ -1038,5 +1038,85 @@ script.on_load(function()
                 end
             end
         end)
+
+        -- Teleport victim to x,y
+        commands.add_command("rtp", "Moderators only: <player> <x,y> -- teleport player to <x,y> or <surface>",
+            function(param)
+                local player
+                if param and param.player_index then
+                    player = game.players[param.player_index]
+                end
+
+                local args = UTIL_SplitStr(param.parameter, " ")
+
+                local victim
+                if args[0] then
+                    victim = game.players[args[0]]
+                    if CMD_NoSys(param) or CMD_ModsOnly(param) then
+                        return
+                    end
+                else
+                    UTIL_SmartPrint(player, "Teleport who to where? Syntax: rtp <player> <x,y or surface>")
+                    return
+                end
+
+                local surface = victim.physical_surface
+
+                -- Argument required
+                if args[0] then
+                    local str = args[0]
+                    local xpos = "0.0"
+                    local ypos = "0.0"
+
+                    -- Find surface from argument
+                    local n = game.surfaces[args[0]]
+                    if n then
+                        surface = n
+                        local position = {
+                            x = xpos,
+                            y = ypos
+                        }
+                        local newpos = surface.find_non_colliding_position("character", position, 1024, 1, false)
+                        if newpos then
+                            victim.teleport(newpos, surface)
+                            return
+                        else
+                            victim.teleport(position, surface)
+                            UTIL_ConsolePrint("[ERROR] tp: unable to find non_colliding_position.")
+                        end
+                    end
+
+                    -- Find x/y from argument
+                    -- Matches two potentially negative numbers separated by a comma, gps compatible
+                    -- str could be "-353.5,19.3" or "[gps=80,-20]" or "[gps=5,3,jail]"
+                    xpos, ypos = str:match("(%-?%d+)%.?%d*,%s*(%-?%d+)")
+                    if tonumber(xpos) and tonumber(ypos) then
+                        local position = {
+                            x = xpos,
+                            y = ypos
+                        }
+
+                        if position then
+                            if position.x and position.y then
+                                local newpos = surface.find_non_colliding_position("character", position, 1024, 1,
+                                    false)
+                                if (newpos) then
+                                    victim.teleport(newpos, surface)
+                                    UTIL_SmartPrint(player, "*Poof!*")
+                                else
+                                    UTIL_SmartPrint(player, "Area appears to be full.")
+                                    UTIL_ConsolePrint("[ERROR] tp: unable to find non_colliding_position.")
+                                end
+                            else
+                                UTIL_SmartPrint(player, "Invalid location.")
+                            end
+                        end
+                        return
+                    else
+                        UTIL_SmartPrint(player, "Numbers only.")
+                    end
+                end
+                UTIL_SmartPrint(player, "Teleport them to where? Syntax: rtp <player> <x,y or surface>")
+            end)
     end
 end)
