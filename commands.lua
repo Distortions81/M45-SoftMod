@@ -920,6 +920,11 @@ script.on_load(function()
             if param.parameter then
                 local victim = game.players[param.parameter]
 
+                if victim.player_index == player.player_index then
+                    UTIL_SmartPrint(player, "You can't goto yourself, are you having an identity crisis?")
+                    return
+                end
+
                 if (victim and victim.valid) then
                     local newpos = victim.physical_surface.find_non_colliding_position("character", victim.position, 1024,
                         1, false)
@@ -1020,6 +1025,10 @@ script.on_load(function()
                 local victim = game.players[param.parameter]
                 if UTIL_Is_Banished(victim) then
                     UTIL_SmartPrint(player, "They are in jail, use /unjail <name>")
+                    return
+                end
+                if victim.player_index == player.player_index then
+                    UTIL_SmartPrint(player, "You can't summon yourself, are you having an identity crisis?")
                     return
                 end
 
