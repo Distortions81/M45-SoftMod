@@ -450,51 +450,32 @@ function ONLINE_Window(player)
                     caption = "MENU"
                 }
                 submenu.style.width = 45
-
-                pframe.add {
-                    type = "label",
-                    caption = "  "
-                }
-                pframe.add {
-                    type = "line",
-                    direction = "vertical"
-                }
+                
                 local name_label = pframe.add {
                     type = "label",
                     caption = "  Name:"
                 }
                 name_label.style.width = 200
-                pframe.add {
-                    type = "line",
-                    direction = "vertical"
-                }
                 local time_label = pframe.add {
                     type = "label",
                     caption = " Time:"
                 }
                 time_label.style.width = 100
-                pframe.add {
-                    type = "line",
-                    direction = "vertical"
-                }
-                local time_label = pframe.add {
+                local score_label = pframe.add {
                     type = "label",
                     caption = " Score:"
                 }
-                time_label.style.width = 100
-                pframe.add {
-                    type = "line",
-                    direction = "vertical"
-                }
-                local score_label = pframe.add {
+                score_label.style.width = 100
+                local level_label = pframe.add {
                     type = "label",
                     caption = "  Level:"
                 }
-                score_label.style.width = 200
-                local score_label = pframe.add {
+                level_label.style.width = 200
+                local afk_label = pframe.add {
                     type = "label",
                     caption = "  (AFK)"
                 }
+                afk_label.style.width = 50
             end
 
             for i, target in pairs(storage.SM_Store.playerList) do
@@ -520,7 +501,10 @@ function ONLINE_Window(player)
                             direction = "horizontal"
                         }
                     else
-                        pframe = online_main
+                        pframe = online_main.add {
+                            type = "flow",
+                            direction = "horizontal"
+                        }
                     end
 
                     if not storage.PData[player.index].onlineBrief then
@@ -546,21 +530,15 @@ function ONLINE_Window(player)
                         local gps_spacer = pframe.add {
                             type = "empty-widget"
                         }
-                        gps_spacer.style.width = 16
+                        gps_spacer.style.width = 21
 
-                        pframe.add {
-                            type = "label",
-                            caption = "  "
-                        }
-                        pframe.add {
-                            type = "line",
-                            direction = "vertical"
-                        }
                     end
+                    local pname = string.gsub(victim.name, '%s+', '')
+
                     local name_label
                     name_label = pframe.add {
                         type = "label",
-                        caption = "  " .. victim.name
+                        caption = pname
                     }
                     local newcolor = {
                         r = 1,
@@ -614,6 +592,8 @@ function ONLINE_Window(player)
                     if not storage.PData[player.index].onlineBrief then
                         name_label.style.font = "default-bold"
                         name_label.style.width = 200
+                    else
+                        name_label.style.width = 0
                     end
 
                     -- Darker if offline
@@ -629,10 +609,6 @@ function ONLINE_Window(player)
                     name_label.style.font_color = newcolor
 
                     if not storage.PData[player.index].onlineBrief then
-                        local name_label = pframe.add {
-                            type = "line",
-                            direction = "vertical"
-                        }
                         local time = victim.online_time / 60
                         local tmsg = ""
                         local months = math.floor(time / 60 / 60 / 24 / 30)
@@ -656,24 +632,16 @@ function ONLINE_Window(player)
 
                         local time_label = pframe.add {
                             type = "label",
-                            caption = " " .. tmsg,
+                            caption = tmsg,
                             tooltip = "Total time player has been connected on this map."
                         }
                         time_label.style.width = 100
-                        local name_label = pframe.add {
-                            type = "line",
-                            direction = "vertical"
-                        }
                         local time_label = pframe.add {
                             type = "label",
-                            caption = " " .. math.floor(target.score / 60.0 / 60.0),
+                            caption = math.floor(target.score / 60.0 / 60.0),
                             tooltip = "Player activity score."
                         }
                         time_label.style.width = 100
-                        local name_label = pframe.add {
-                            type = "line",
-                            direction = "vertical"
-                        }
                         local utag = ""
                         if UTIL_Is_New(victim) then
                             utag = "[color=white]NEW[/color]"
@@ -707,7 +675,7 @@ function ONLINE_Window(player)
 
                         local score_label = pframe.add {
                             type = "label",
-                            caption = "  " .. utag,
+                            caption = utag,
                             tooltip = "Current level, see membership tab for more info."
                         }
                         score_label.style.width = 200
@@ -717,6 +685,7 @@ function ONLINE_Window(player)
                             caption = target.afk,
                             tooltip = "Time AFK or offline (map time)"
                         }
+                        afk_label.style.width = 50
                     end
                 end
             end
