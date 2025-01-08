@@ -920,7 +920,7 @@ script.on_load(function()
             if param.parameter then
                 local victim = game.players[param.parameter]
 
-                if victim.player_index == player.player_index then
+                if victim == player then
                     UTIL_SmartPrint(player, "You can't goto yourself, are you having an identity crisis?")
                     return
                 end
@@ -930,7 +930,12 @@ script.on_load(function()
                         1, false)
                     if (newpos) then
                         player.teleport(newpos, victim.physical_surface)
-                        UTIL_SmartPrint(player, "You goto " .. victim.name)
+                        if victim and victim.name then
+                            UTIL_SmartPrint(player, "You goto " .. victim.name)
+                        end
+                        if player and player.name then
+                            UTIL_SmartPrint(victim, player.name .. " suddenly appears.")
+                        end
                     else
                         UTIL_SmartPrint(player, "Area appears to be full.")
                         UTIL_ConsolePrint("[ERROR] goto: unable to find non_colliding_position.")
@@ -993,7 +998,7 @@ script.on_load(function()
                                 false)
                             if (newpos) then
                                 player.teleport(newpos, surface)
-                                UTIL_SmartPrint(player, "You teleport to ".. str)
+                                UTIL_SmartPrint(player, "You teleport to " .. str)
                             else
                                 UTIL_SmartPrint(player, "Area appears to be full.")
                                 UTIL_ConsolePrint("[ERROR] tp: unable to find non_colliding_position.")
@@ -1027,7 +1032,7 @@ script.on_load(function()
                     UTIL_SmartPrint(player, "They are in jail, use /unjail <name>")
                     return
                 end
-                if victim.player_index == player.player_index then
+                if victim == player then
                     UTIL_SmartPrint(player, "You can't summon yourself, are you having an identity crisis?")
                     return
                 end
@@ -1037,7 +1042,12 @@ script.on_load(function()
                         1, false)
                     if (newpos) then
                         victim.teleport(newpos, player.physical_surface)
-                        UTIL_SmartPrint(player, victim.name .. " suddenly appears before you.")
+                        if victim and victim.name then
+                            UTIL_SmartPrint(player, victim.name .. " suddenly appears before you.")
+                        end
+                        if player and player.name then
+                            UTIL_SmartPrint(victim, player.name .. " has summoned you.")
+                        end
                     else
                         UTIL_SmartPrint(player, "Area appears to be full.")
                         UTIL_ConsolePrint("[ERROR] summon: unable to find non_colliding_position.")
@@ -1122,7 +1132,12 @@ script.on_load(function()
                                     false)
                                 if (newpos) then
                                     victim.teleport(newpos, surface)
-                                    UTIL_SmartPrint(player, "You transport ".. victim.name .. " to " .. args[2])
+                                    if victim and victim.name then
+                                        UTIL_SmartPrint(player, "You transport " .. victim.name .. " to " .. args[2])
+                                    end
+                                    if player and player.name then
+                                        UTIL_SmartPrint(victim, player.name .. " has transported you.")
+                                    end
                                 else
                                     UTIL_SmartPrint(player, "Area appears to be full.")
                                     UTIL_ConsolePrint("[ERROR] transport: unable to find non_colliding_position.")
@@ -1167,6 +1182,8 @@ script.on_load(function()
                         if victim.physical_surface == surface then
                             if pbuf ~= "" then
                                 pbuf = pbuf .. ", "
+                            else
+                                pbuf = "Players: "
                             end
                             pbuf = pbuf .. victim.name
                         end
