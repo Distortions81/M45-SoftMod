@@ -79,7 +79,7 @@ function ONLINE_UpdatePlayerList()
         end
 
         -- Show last online in minutes
-        local isafk = "   "
+        local isafk = ""
 
         if storage.PData and storage.PData[victim.index].lastOnline then
             local time = ((game.tick - storage.PData[victim.index].lastOnline) / 60)
@@ -347,10 +347,6 @@ function ONLINE_Window(player)
             }
             main_flow.style.horizontal_align = "left"
             main_flow.style.vertical_align = "top"
-            main_flow.style.vertically_squashable = true
-            main_flow.style.vertically_stretchable = true
-            main_flow.style.horizontally_squashable = true
-            main_flow.style.horizontally_stretchable = true
 
             -- Online Title Bar--
             local online_titlebar = main_flow.add {
@@ -358,8 +354,6 @@ function ONLINE_Window(player)
                 direction = "horizontal"
             }
             online_titlebar.style.horizontal_align = "center"
-            online_titlebar.style.horizontally_squashable = true
-            online_titlebar.style.horizontally_stretchable = true
 
             local bcheckstate = false
             if storage.PData[player.index].onlineBrief then
@@ -424,8 +418,6 @@ function ONLINE_Window(player)
             }
 
             online_close_button.style.horizontal_align = "right"
-            online_close_button.style.horizontally_stretchable = true
-            online_close_button.style.horizontally_squashable = true
             online_close_button.add {
                 type = "sprite-button",
                 name = "m45_online_close_button",
