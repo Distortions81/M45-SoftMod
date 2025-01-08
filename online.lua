@@ -373,6 +373,10 @@ function ONLINE_Window(player)
                     style = "frame_title",
                     caption = "Players Online: " .. storage.SM_Store.pcount .. ", Total: " .. storage.SM_Store.tcount
                 }
+                local title_spacer = online_titlebar.add {
+                    type = "empty-widget"
+                }
+                title_spacer.style.horizontally_stretchable = true
             else
                 online_titlebar.add {
                     type = "label",
@@ -519,10 +523,10 @@ function ONLINE_Window(player)
                         end
                         submenu.style.size = { 24, 24 }
 
-                        local gps_spacer = pframe.add {
+                        local spacer = pframe.add {
                             type = "empty-widget"
                         }
-                        gps_spacer.style.width = 21
+                        spacer.style.width = 21
 
                     end
                     local pname = string.gsub(victim.name, '%s+', '')
