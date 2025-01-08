@@ -47,8 +47,8 @@ script.on_nth_tick(599, function(event)
     --15 mins
     if storage.SM_Store.tickDiv >= 90 then
         storage.SM_Store.tickDiv = 0
-        UTIL_CheckAbandoned()
         LOGO_DrawLogo(false)       --Move spawn if blocked
+        UTIL_CheckAbandoned()
     end
 
 
