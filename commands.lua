@@ -906,7 +906,7 @@ script.on_load(function()
             end)
 
         -- Teleport to
-        commands.add_command("tto", "Moderators only: <player> -- teleport to <player>", function(param)
+        commands.add_command("goto", "Moderators only: goto <player>", function(param)
             local player
 
             if param and param.player_index then
@@ -928,16 +928,16 @@ script.on_load(function()
                         UTIL_SmartPrint(player, "*Poof!*")
                     else
                         UTIL_SmartPrint(player, "Area appears to be full.")
-                        UTIL_ConsolePrint("[ERROR] tto: unable to find non_colliding_position.")
+                        UTIL_ConsolePrint("[ERROR] goto: unable to find non_colliding_position.")
                     end
                     return
                 end
             end
-            UTIL_SmartPrint(player, "Teleport to who?")
+            UTIL_SmartPrint(player, "Goto to who?")
         end)
 
         -- Teleport x,y
-        commands.add_command("tp", "Moderators only: <x,y> -- teleport to <x,y> or <surface>", function(param)
+        commands.add_command("tp", "Moderators only: teleport to <x,y> or <surface>", function(param)
             local player
             if param and param.player_index then
                 player = game.players[param.player_index]
@@ -1002,11 +1002,11 @@ script.on_load(function()
                     UTIL_SmartPrint(player, "Numbers only.")
                 end
             end
-            UTIL_SmartPrint(player, "Teleport where? x,y or surface name")
+            UTIL_SmartPrint(player, "Teleport where?")
         end)
 
         -- Teleport player to me
-        commands.add_command("tfrom", "Moderators only: <player> -- teleport <player> to me", function(param)
+        commands.add_command("summon", "Moderators only: summon <player> to me", function(param)
             local player
             if param and param.player_index then
                 player = game.players[param.player_index]
@@ -1031,16 +1031,16 @@ script.on_load(function()
                         UTIL_SmartPrint(player, "*Poof!*")
                     else
                         UTIL_SmartPrint(player, "Area appears to be full.")
-                        UTIL_ConsolePrint("[ERROR] tfrom: unable to find non_colliding_position.")
+                        UTIL_ConsolePrint("[ERROR] summon: unable to find non_colliding_position.")
                     end
                 else
-                    UTIL_SmartPrint(player, "Who do you want to teleport to you?")
+                    UTIL_SmartPrint(player, "Who do you want to summon to you?")
                 end
             end
         end)
 
         -- Teleport victim to x,y
-        commands.add_command("rtp", "Moderators only: <player> <x,y> -- teleport player to <x,y> or <surface>",
+        commands.add_command("transport", "Moderators only: transport <player> <x,y> or <surface>",
             function(param)
                 local player
                 local args
@@ -1058,7 +1058,7 @@ script.on_load(function()
                 if param.parameter then
                     args = UTIL_SplitStr(param.parameter, " ")
                 else
-                    UTIL_SmartPrint(player, "Teleport who to where? Syntax: rtp <player> <x,y or surface>")
+                    UTIL_SmartPrint(player, "Transport who to where?")
                     return
                 end
 
@@ -1092,7 +1092,7 @@ script.on_load(function()
                             return
                         else
                             victim.teleport(position, surface)
-                            UTIL_ConsolePrint("[ERROR] tp: unable to find non_colliding_position.")
+                            UTIL_ConsolePrint("[ERROR] transport: unable to find non_colliding_position.")
                             return
                         end
                     end
@@ -1114,10 +1114,9 @@ script.on_load(function()
                                 if (newpos) then
                                     victim.teleport(newpos, surface)
                                     UTIL_SmartPrint(player, "*Poof!*")
-                                    UTIL_SmartPrint(victim, "You have been teleported!")
                                 else
                                     UTIL_SmartPrint(player, "Area appears to be full.")
-                                    UTIL_ConsolePrint("[ERROR] tp: unable to find non_colliding_position.")
+                                    UTIL_ConsolePrint("[ERROR] transport: unable to find non_colliding_position.")
                                 end
                             else
                                 UTIL_SmartPrint(player, "Invalid location.")
@@ -1128,7 +1127,7 @@ script.on_load(function()
                         UTIL_SmartPrint(player, "Numbers only.")
                     end
                 end
-                UTIL_SmartPrint(player, "Teleport them to where? Syntax: rtp <player> <x,y or surface>")
+                UTIL_SmartPrint(player, "Transport them to where?")
             end)
 
         -- List surfaces
