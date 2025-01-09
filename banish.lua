@@ -496,7 +496,12 @@ function BANISH_AddBanishCommands()
                                 end
                             end
                         end
-                        UTIL_SmartPrint(player, "Unjailed player.")
+                        if not victim.character then
+                            UTIL_SmartPrint(player, "They are OFFLINE right now, but will be unjailed on login.")
+                        else
+                            UTIL_SmartPrint(player, "Unjailed player.")
+                        end
+
                         unbanishPlayer(victim)
                     else
                         UTIL_SmartPrint(player, "They aren't in jail.")
