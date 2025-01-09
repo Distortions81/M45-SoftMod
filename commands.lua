@@ -1088,6 +1088,9 @@ script.on_load(function()
                     if not victim then
                         UTIL_SmartPrint(player, "There isn't a player with that name.")
                         return
+                    elseif UTIL_Is_Banished(victim) then
+                        UTIL_SmartPrint(player, "They are in jail, use /unjail <name>")
+                        return
                     end
                 end
 
