@@ -1037,7 +1037,7 @@ script.on_load(function()
                     return
                 end
 
-                if (victim and victim.valid) then
+                if (victim) then
                     local newpos = player.physical_surface.find_non_colliding_position("character", player.position, 1024,
                         1, false)
                     if (newpos) then
@@ -1051,7 +1051,7 @@ script.on_load(function()
                         UTIL_ConsolePrint("[ERROR] summon: unable to find non_colliding_position.")
                     end
                 else
-                    UTIL_SmartPrint(player, "Who do you want to summon to you?")
+                    UTIL_SmartPrint(player, "There isn't a player with that name.")
                 end
             end
         end)
@@ -1081,13 +1081,12 @@ script.on_load(function()
 
                 if args ~= {} and args[1] then
                     victim = game.players[args[1]]
-                end
 
-                if victim then
-                    surface = victim.physical_surface
+                    if not victim then
+                        UTIL_SmartPrint(player, "There isn't a player with that name.")
+                        return
+                    end
                 end
-
-                UTIL_SmartPrint(player, args)
 
                 -- Argument required
                 if args ~= {} and args[1] and args[2] then
@@ -1132,6 +1131,7 @@ script.on_load(function()
                                 local newpos = surface.find_non_colliding_position("character", position, 1024, 1,
                                     false)
                                 if (newpos) then
+                                    surface = victim.physical_surface
                                     victim.teleport(newpos, surface)
                                     if player and victim then
                                         UTIL_SmartPrint(player, "You transport " .. victim.name .. " to " .. args[2])
