@@ -930,10 +930,8 @@ script.on_load(function()
                         1, false)
                     if (newpos) then
                         player.teleport(newpos, victim.physical_surface)
-                        if victim and victim.name then
+                        if player and victim then
                             UTIL_SmartPrint(player, "You goto " .. victim.name)
-                        end
-                        if player and player.name then
                             UTIL_SmartPrint(victim, player.name .. " suddenly appears.")
                         end
                     else
@@ -975,11 +973,13 @@ script.on_load(function()
                     local newpos = surface.find_non_colliding_position("character", position, 1024, 1, false)
                     if newpos then
                         player.teleport(newpos, surface)
-                        return
                     else
                         player.teleport(position, surface)
                         UTIL_ConsolePrint("[ERROR] tp: unable to find non_colliding_position.")
                     end
+                    UTIL_SmartPrint(player, "You teleport to " .. str)
+
+                    return
                 end
 
                 -- Find x/y from argument
@@ -1042,10 +1042,8 @@ script.on_load(function()
                         1, false)
                     if (newpos) then
                         victim.teleport(newpos, player.physical_surface)
-                        if victim and victim.name then
+                        if player and victim then
                             UTIL_SmartPrint(player, victim.name .. " suddenly appears before you.")
-                        end
-                        if player and player.name then
                             UTIL_SmartPrint(victim, player.name .. " has summoned you.")
                         end
                     else
@@ -1108,12 +1106,15 @@ script.on_load(function()
                         local newpos = surface.find_non_colliding_position("character", position, 1024, 1, false)
                         if newpos then
                             victim.teleport(newpos, surface)
-                            return
                         else
                             victim.teleport(position, surface)
                             UTIL_ConsolePrint("[ERROR] transport: unable to find non_colliding_position.")
-                            return
                         end
+                        if player and victim then
+                            UTIL_SmartPrint(player, "You transport " .. victim.name .. " to " .. args[2])
+                            UTIL_SmartPrint(victim, player.name .. " has transported you.")
+                        end
+                        return
                     end
 
                     -- Find x/y from argument
@@ -1132,10 +1133,8 @@ script.on_load(function()
                                     false)
                                 if (newpos) then
                                     victim.teleport(newpos, surface)
-                                    if victim and victim.name then
+                                    if player and victim then
                                         UTIL_SmartPrint(player, "You transport " .. victim.name .. " to " .. args[2])
-                                    end
-                                    if player and player.name then
                                         UTIL_SmartPrint(victim, player.name .. " has transported you.")
                                     end
                                 else
