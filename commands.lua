@@ -925,7 +925,7 @@ script.on_load(function()
                     return
                 end
 
-                if (victim and victim.valid) then
+                if (victim) then
                     local newpos = victim.physical_surface.find_non_colliding_position("character", victim.position, 1024,
                         1, false)
                     if (newpos) then
@@ -939,9 +939,12 @@ script.on_load(function()
                         UTIL_ConsolePrint("[ERROR] goto: unable to find non_colliding_position.")
                     end
                     return
+                else
+                    UTIL_SmartPrint(player, "There isn't a player with that name.")
                 end
+            else
+                UTIL_SmartPrint(player, "Goto to who?")
             end
-            UTIL_SmartPrint(player, "Goto to who?")
         end)
 
         -- Teleport x,y
