@@ -1102,7 +1102,7 @@ script.on_load(function()
 
                     -- Find surface from argument
                     local n = game.surfaces[args[2]]
-                    if n then
+                    if n ~= nil and n.valid then
                         surface = n
                         local position = {
                             x = xpos,
@@ -1133,9 +1133,8 @@ script.on_load(function()
                         }
 
                         if position then
-                            if position.x and position.y then
-                                local newpos = surface.find_non_colliding_position("character", position, 1024, 1,
-                                    false)
+                            if position.x and position.y and surface and surface.valid then
+                                local newpos = surface.find_non_colliding_position("character", position, 1024, 1, false)
                                 if (newpos) then
                                     surface = victim.physical_surface
                                     victim.teleport(newpos, surface)
@@ -1152,8 +1151,6 @@ script.on_load(function()
                             end
                         end
                         return
-                    else
-                        UTIL_SmartPrint(player, "Numbers only.")
                     end
                 end
                 UTIL_SmartPrint(player, "Transport them to where?")
