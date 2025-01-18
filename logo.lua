@@ -22,7 +22,7 @@ function LOGO_DrawLogo(force)
         local newPos = UTIL_GetDefaultSpawn()
         newPos.x = newPos.x + 20
         newPos.y = newPos.y - 20
-        local cpos = msurf.find_non_colliding_position("crash-site-spaceship", newPos, 4096, 4, true)
+        local cpos = msurf.find_non_colliding_position("crash-site-spaceship", newPos, 4096, 1, true)
         if not cpos then
             cpos = { x = 0, y = 0 }
         end
