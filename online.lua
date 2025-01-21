@@ -81,7 +81,7 @@ function ONLINE_UpdatePlayerList()
         -- Show last online in minutes
         local isafk = ""
 
-        if storage.PData and storage.PData[victim.index].lastOnline then
+        if storage.PData and storage.PData[victim.index] and storage.PData[victim.index].lastOnline then
             local time = ((game.tick - storage.PData[victim.index].lastOnline) / 60)
             local days = math.floor(time / 60 / 60 / 24)
             local hours = math.floor(time / 60 / 60)
