@@ -98,7 +98,9 @@ function LOG_PlayerLeft(event)
     if not event or not event.player_index or not storage.PData or not storage.PData[event.player_index] then
         return
     end
-    storage.PData[event.player_index].lastOnline = game.tick
+    if storage.PData[event.player_index].lastOnline then
+        storage.PData[event.player_index].lastOnline = game.tick
+    end
     local player = game.players[event.player_index]
 
     if event.reason then
@@ -239,9 +241,8 @@ function LOG_Decon(event)
         if not player or not player.character then
             return
         end
-        
-        if player and area and area.left_top then
 
+        if player and area and area.left_top then
             local decon_size = UTIL_Distance(area.left_top, area.right_bottom)
 
             -- Don't bother if selection is zero.
