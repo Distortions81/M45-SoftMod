@@ -95,7 +95,7 @@ function ONLINE_UpdatePlayerList()
             end
         end
 
-        if storage.PData[victim.index].score then
+        if storage.PData and storage.PData[victim.index] and storage.PData[victim.index].score then
             table.insert(results, {
                 victim = victim,
                 score = storage.PData[victim.index].score,
