@@ -8,7 +8,7 @@ require "event"    -- Event/tick handler
 require "info"     -- Welcome/Info window
 require "log"      -- Action logging
 require "logo"     -- Spawn logo
-require "onelife"  -- Time until map reset
+require "onelife"  -- Hardcore / one life to live mode
 require "online"   -- Players online window
 require "perms"    -- Permissions system
 require "storage"  -- Global variable init
@@ -18,7 +18,7 @@ require "quickbar" -- Save or Restore Quickbar
 require "stash" -- Save or Restore Weapon/Ammo/Armor
 
 function RunSetup()
-    storage.SM_Version = "637-01.21.2025-1101"
+    storage.SM_Version = "637-01.23.2025-0836p"
 
     storage.SM_OldVersion = storage.SM_Version
 
