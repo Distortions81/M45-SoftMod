@@ -111,13 +111,15 @@ function ONELIFE_MakeButton(player)
         end
         return
     end
-    if not player.gui.top.spec_button then
-        local m45_32 = player.gui.top.add {
-            type = "sprite-button",
-            name = "spec_button",
-            sprite = "file/img/buttons/spectate.png",
-            tooltip = "Kills you forever to become spectator (NO UNDO)"
-        }
-        m45_32.style.size = { 64, 64 }
+    if storage.SM_Store.oneLifeMode and storage.SM_Store.oneLifeMode == true then
+        if not player.gui.top.spec_button then
+            local m45_32 = player.gui.top.add {
+                type = "sprite-button",
+                name = "spec_button",
+                sprite = "file/img/buttons/spectate.png",
+                tooltip = "Kills you forever to become spectator (NO UNDO)"
+            }
+            m45_32.style.size = { 64, 64 }
+        end
     end
 end
