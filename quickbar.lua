@@ -65,11 +65,11 @@ function ImportQuickbar(player, data)
     local header = UTIL_SplitStr(decoded, "=")
 
     if not header or not header[1] then
-        UTIL_SmartPrint(player, "That isn't a valid M45 quickbar exchange string!")
+        UTIL_SmartPrint(player, "That isn't a valid M45 quickbar exchange string! (No Header)")
         return false
     end
     if header[1] ~= "M45-QB1" then
-        UTIL_SmartPrint(player, "That isn't a valid M45 quickbar exchange string!")
+        UTIL_SmartPrint(player, "That isn't a valid M45 quickbar exchange string! (Invalid Header)")
         return false
     end
 
