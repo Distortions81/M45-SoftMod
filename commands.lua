@@ -50,7 +50,6 @@ end
 
 script.on_configuration_changed(function()
     storage.SM_OldVersion = "OldVersion"
-    RunSetup()
 end)
 
 -- Custom commands
