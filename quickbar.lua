@@ -25,6 +25,15 @@ function ExportQuickbar(player, limit)
     return helpers.encode_string("M45-QB1=" .. outbuf)
 end
 
+
+function split(str, delimiter)
+    local result = {}
+    for match in (str..delimiter):gmatch("(.-)"..delimiter) do
+        table.insert(result, match)
+    end
+    return result
+end
+
 function ImportQuickbar(player, data)
     if not player or not player.valid then
         return false
@@ -35,20 +44,24 @@ function ImportQuickbar(player, data)
 
     --Limit compressed size
     if string.len(data) > 10240 then
-        return
+        UTIL_SmartPrint(player, "String too long.")
+        return false
     end
 
     local decoded = helpers.decode_string(data)
-    if decoded == "" then
+    if decoded == nil or decoded == "" then
+        UTIL_SmartPrint(player, "Could not decode that string.")
         return false
     end
 
     --Limit decompressed size
     if string.len(decoded) > 10240 then
-        return
+        UTIL_SmartPrint(player, "String too long.")
+        return false
     end
 
     local header = UTIL_SplitStr(decoded, "=")
+
     if not header or not header[1] then
         UTIL_SmartPrint(player, "That isn't a valid M45 quickbar exchange string!")
         return false
@@ -64,7 +77,7 @@ function ImportQuickbar(player, data)
     end
 
     --Restore from string
-    local items = UTIL_SplitStr(header[2], ",")
+    local items = split(header[2], ",")
 
     local error_list = ""
     for i, item in ipairs(items) do
@@ -87,20 +100,6 @@ function ImportQuickbar(player, data)
     end
 
     return true
-end
-
-function SaveQuickbar(player)
-    if not player or not player.valid then
-        return
-    end
-    print("[QBSAVE] " .. ExportQuickbar(player, true))
-end
-
-function LoadQuickbar(player)
-    if not player or not player.valid or not player.name then
-        return
-    end
-    print("[QBLOAD] " .. player.name)
 end
 
 function QUICKBAR_MakeExchangeButton(player)
