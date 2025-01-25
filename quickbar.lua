@@ -22,11 +22,13 @@ function ExportQuickbar(player, limit)
         outbuf = outbuf .. ","
     end
 
+    UTIL_SmartPrint(player,"Quickbar Exported!")
     return helpers.encode_string("M45-QB1=" .. outbuf)
 end
 
 
-function split(str, delimiter)
+--Split with empty strings
+function SplitStr(str, delimiter)
     local result = {}
     for match in (str..delimiter):gmatch("(.-)"..delimiter) do
         table.insert(result, match)
@@ -77,7 +79,7 @@ function ImportQuickbar(player, data)
     end
 
     --Restore from string
-    local items = split(header[2], ",")
+    local items = SplitStr(header[2], ",")
 
     local error_list = ""
     for i, item in ipairs(items) do
@@ -97,6 +99,8 @@ function ImportQuickbar(player, data)
     end
     if error_list ~= "" then
         UTIL_SmartPrint(player, "Quickbar Import: Invalid items skipped: " .. error_list)
+    else
+        UTIL_SmartPrint(player,"Quickbar imported!")
     end
 
     return true
