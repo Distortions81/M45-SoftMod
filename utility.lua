@@ -376,6 +376,16 @@ function UTIL_Is_Veteran(victim)
         end
     end
 
+    --Workaround for mods that screw with permisison groups
+    if not UTIL_Is_Banished(victim) then
+        if storage and storage.PData[victim.index] then
+            local level = storage.PData[victim.index].level
+            if level == 3 then
+                return true
+            end
+        end
+    end
+
     return false
 end
 
@@ -386,6 +396,16 @@ function UTIL_Is_Regular(victim)
         -- If in group
         if victim.permission_group and storage.SM_Store.regGroup then
             if victim.permission_group.name == storage.SM_Store.regGroup.name then
+                return true
+            end
+        end
+    end
+
+    --Workaround for mods that screw with permisison groups
+    if not UTIL_Is_Banished(victim) then
+        if storage and storage.PData[victim.index] then
+            local level = storage.PData[victim.index].level
+            if level == 2 then
                 return true
             end
         end
@@ -405,6 +425,16 @@ function UTIL_Is_Member(victim)
         end
     end
 
+    --Workaround for mods that screw with permisison groups
+    if not UTIL_Is_Banished(victim) then
+        if storage and storage.PData[victim.index] then
+            local level = storage.PData[victim.index].level
+            if level == 1 then
+                return true
+            end
+        end
+    end
+
     return false
 end
 
@@ -413,6 +443,14 @@ function UTIL_Is_New(victim)
     if victim and victim.valid and not victim.admin then
         if not UTIL_Is_Member(victim) and not UTIL_Is_Regular(victim) and not UTIL_Is_Veteran(victim) then
             return true
+        end
+    end
+    if not UTIL_Is_Banished(victim) then
+        if storage and storage.PData[victim.index] then
+            local level = storage.PData[victim.index].level
+            if level == 0 then
+                return true
+            end
         end
     end
 
@@ -427,13 +465,38 @@ end
 
 -- Check if player should be considered banished
 function UTIL_Is_Banished(victim)
+    --Not Invalid
     if not victim then
         return false
-    elseif victim.admin then
+    end
+
+    --Not admin
+    if victim.admin then
         return false
-    elseif victim.physical_surface and victim.physical_surface.name == "jail" then
+    end
+
+    --Physically in jail
+    if victim.physical_surface and victim.physical_surface.name == "jail" then
         return true
-    elseif storage.PData and storage.PData[victim.index] and storage.PData[victim.index].banished and storage.PData[victim.index].banished > 0 then
+    end
+
+    --In jailed group
+    if victim.permission_group and storage.SM_Store.jailGroup then
+        if victim.permission_group.name == storage.SM_Store.jailGroup.name then
+            return true
+        end
+    end
+
+    local pointsNeeded = 1
+    if UTIL_Is_Regular(victim) then
+        pointsNeeded = 2
+    end
+    if UTIL_Is_Veteran(victim) then
+        pointsNeeded = 4
+    end
+    
+    --Has enough votes against them
+    if storage.PData and storage.PData[victim.index] and storage.PData[victim.index].banished and storage.PData[victim.index].banished > pointsNeeded then
         return true
     else
         return false
