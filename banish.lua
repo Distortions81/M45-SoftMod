@@ -23,6 +23,7 @@ local function unbanishPlayer(victim)
     end
 
     BANISH_SendToSurface(victim)
+    PERMS_PromotePlayer(victim)
     ONLINE_UpdatePlayerList()
 end
 
@@ -97,14 +98,26 @@ function BANISH_UpdateVotes()
             newstate = banishedtemp[victim.index]
         end
 
+        
+        local pointsNeeded = 1
+        if UTIL_Is_Regular(victim) then
+            pointsNeeded = 2
+        end
+        if UTIL_Is_Veteran(victim) then
+            pointsNeeded = 4
+        end
+        if victim.admin then
+            pointsNeeded = 99999
+        end
+
         -- Was banished, but not anymore
-        if newstate == 0 and prevstate > 0 then
+        if newstate < pointsNeeded and prevstate >= pointsNeeded then
             local msg = victim.name .. " is no longer banished."
             print("[REPORT] SYSTEM " .. msg)
             UTIL_MsgAllSys(msg)
 
             unbanishPlayer(victim)
-        elseif newstate > 0 and prevstate == 0 then
+        elseif newstate >= pointsNeeded and prevstate < pointsNeeded then
             -- Was not banished, but is now.
             local msg = victim.name .. " has been banished."
             UTIL_MsgAllSys(msg)
