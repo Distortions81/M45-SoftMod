@@ -486,11 +486,13 @@ function PERMS_PromotePlayer(player)
         if UTIL_Is_Banished(player) then
             if player.permission_group.name ~= storage.SM_Store.jailGroup.name then
                 storage.SM_Store.jailGroup.add_player(player)
-                UTIL_MsgAll(player.name .. " moved to jailed group.")              
+                UTIL_MsgAll(player.name .. " moved to jailed group.")       
+                ONLINE_UpdatePlayerList()
             end
         elseif (player.admin and player.permission_group.name ~= storage.SM_Store.modGroup.name) then
             storage.SM_Store.modGroup.add_player(player)
             UTIL_MsgAll(player.name .. " moved to moderators group")
+            ONLINE_UpdatePlayerList()
             if storage.PData and storage.PData[player.index] then
                 storage.PData[player.index].level = 255
             end
@@ -501,6 +503,7 @@ function PERMS_PromotePlayer(player)
                     player.permission_group.name ~= storage.SM_Store.vetGroup.name) then
                 storage.SM_Store.regGroup.add_player(player)
                 UTIL_MsgAll(player.name .. " is now a regular!")
+                ONLINE_UpdatePlayerList()
                 PERMS_WelcomeMember(player)
                 if storage.PData and storage.PData[player.index] then
                     storage.PData[player.index].level = 2
@@ -512,6 +515,7 @@ function PERMS_PromotePlayer(player)
             if not UTIL_Is_Veteran(player) and not UTIL_Is_Regular(player) and not UTIL_Is_Member(player) and UTIL_Is_New(player) then
                 storage.SM_Store.memGroup.add_player(player)
                 UTIL_MsgAll(player.name .. " is now a member!")
+                ONLINE_UpdatePlayerList()
                 if storage.PData and storage.PData[player.index] then
                     storage.PData[player.index].level = 1
                 end
