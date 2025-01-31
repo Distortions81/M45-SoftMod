@@ -487,20 +487,27 @@ function UTIL_Is_Banished(victim)
         end
     end
 
-    local pointsNeeded = 1
-    if UTIL_Is_Regular(victim) then
-        pointsNeeded = 2
-    end
-    if UTIL_Is_Veteran(victim) then
-        pointsNeeded = 4
-    end
     
-    --Has enough votes against them
-    if storage.PData and storage.PData[victim.index] and storage.PData[victim.index].banished and storage.PData[victim.index].banished > pointsNeeded then
-        return true
-    else
-        return false
+    if storage and storage.PData[victim.index] then
+        local pointsNeeded = 1
+        local level = storage.PData[victim.index].level
+
+        if level == 2 then
+            pointsNeeded = 2
+        end
+        if level == 3  then
+            pointsNeeded = 4
+        end
+    
+        --Has enough votes against them
+        if storage.PData and storage.PData[victim.index] and storage.PData[victim.index].banished and storage.PData[victim.index].banished > pointsNeeded then
+           return true
+        else
+            return false
+        end
     end
+
+    return false
 end
 
 function UTIL_SendToDefaultSpawn(victim)
