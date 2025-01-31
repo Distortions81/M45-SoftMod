@@ -440,7 +440,7 @@ end
 
 -- Check if player should be considered new
 function UTIL_Is_New(victim)
-    if victim and victim.valid and not victim.admin then
+    if victim and not victim.admin then
         if not UTIL_Is_Member(victim) and not UTIL_Is_Regular(victim) and not UTIL_Is_Veteran(victim) then
             return true
         end
