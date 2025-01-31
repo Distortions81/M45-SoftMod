@@ -475,18 +475,7 @@ script.on_load(function()
             -- Argument needed
             if param.parameter then
                 local victim = game.players[param.parameter]
-
-                if victim and victim.valid then
-                    storage.PData[victim.index].playScore = 0
-                    if victim and victim.valid and storage.SM_Store.defGroup then
-                        storage.SM_Store.defGroup.add_player(victim)
-                    end
-                    if player then
-                        UTIL_SmartPrint(player, "Player set to 0.")
-                        UTIL_MsgAll(victim.name .. " is now reset!")
-                    end
-                    return
-                end
+                PERMS_MakeNew(player, victim)
             end
             UTIL_SmartPrint(player, "Player not found.")
         end)
@@ -506,17 +495,7 @@ script.on_load(function()
             if param.parameter then
                 local victim = game.players[param.parameter]
 
-                if victim then
-                    if victim and victim.valid and storage.SM_Store.memGroup then
-                        if player then
-                            UTIL_SmartPrint(player, "Player given members status.")
-                            UTIL_MsgAll(victim.name .. " is now a member!")
-                        end
-                        storage.SM_Store.memGroup.add_player(victim)
-                        ONLINE_UpdatePlayerList() -- online.lua
-                        return
-                    end
-                end
+                PERMS_MakeMember(player, victim)
             end
             UTIL_SmartPrint(player, "Player not found.")
         end)
@@ -532,18 +511,7 @@ script.on_load(function()
             -- Argument required
             if param.parameter then
                 local victim = game.players[param.parameter]
-
-                if (victim) then
-                    if victim and victim.valid and storage.SM_Store.vetGroup then
-                        if player then
-                            UTIL_SmartPrint(player, "Player given veterans status.")
-                            UTIL_MsgAll(victim.name .. " is now a veteran!")
-                        end
-                        storage.SM_Store.vetGroup.add_player(victim)
-                        ONLINE_UpdatePlayerList() -- online.lua
-                        return
-                    end
-                end
+                PERMS_MakeVeteran(player, victim)
             end
             UTIL_SmartPrint(player, "Player not found.")
         end)
@@ -558,18 +526,7 @@ script.on_load(function()
             -- Argument required
             if param.parameter then
                 local victim = game.players[param.parameter]
-
-                if (victim) then
-                    if victim and victim.valid and storage.SM_Store.regGroup then
-                        if player then
-                            UTIL_SmartPrint(player, "Player given regulars status.")
-                            UTIL_MsgAll(victim.name .. " is now a regular!")
-                        end
-                        storage.SM_Store.regGroup.add_player(victim)
-                        ONLINE_UpdatePlayerList() -- online.lua
-                        return
-                    end
-                end
+                PERMS_MakeRegular(player, victim)
             end
             UTIL_SmartPrint(player, "Player not found.")
         end)
