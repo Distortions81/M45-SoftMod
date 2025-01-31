@@ -13,9 +13,9 @@ local function unbanishPlayer(victim)
     storage.PData[victim.index].banished = 0
 
     if victim and victim.permission_group.name ~= storage.SM_Store.defGroup.name then
+        storage.SM_Store.defGroup.add_player(victim)
         UTIL_MsgAll(victim.name .. " moved out of jailed group.")
     end
-    storage.SM_Store.defGroup.add_player(victim)
 
     --Close banished window
     if victim and victim.gui and victim.gui.screen and victim.gui.screen.banished_inform then
@@ -23,8 +23,6 @@ local function unbanishPlayer(victim)
     end
 
     BANISH_SendToSurface(victim)
-    PERMS_PromotePlayer(victim)
-    ONLINE_UpdatePlayerList()
 end
 
 function BANISH_DoReport(player, report)
@@ -115,7 +113,7 @@ function BANISH_UpdateVotes()
             local msg = victim.name .. " is no longer banished."
             print("[REPORT] SYSTEM " .. msg)
             UTIL_MsgAllSys(msg)
-
+            
             unbanishPlayer(victim)
         elseif newstate >= pointsNeeded and prevstate < pointsNeeded then
             -- Was not banished, but is now.
@@ -425,6 +423,8 @@ function BANISH_SendToSurface(player)
                                 UTIL_ConsolePrint(
                                     "[ERROR] send_to_surface(respawn): unable to find non_colliding_position.")
                             end
+                            ONLINE_UpdatePlayerList()
+
                             index = i
                             break
                         else
@@ -432,6 +432,7 @@ function BANISH_SendToSurface(player)
                             UTIL_ConsolePrint(
                                 "[ERROR] send_to_surface(respawn): invalid position!")
                             index = i
+                            ONLINE_UpdatePlayerList()
                             break
                         end
                     end
