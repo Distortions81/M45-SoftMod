@@ -3,6 +3,67 @@
 -- GitHub: https://github.com/M45-Science/SoftMod
 -- License: MPL 2.0
 
+function PERMS_MakeNew(player, victim)
+    if victim and victim.valid then
+            UTIL_SmartPrint(player, "Player set to new.")
+            UTIL_MsgAll(victim.name .. " is now reset!")
+            if storage.PData and storage.PData[victim.index] then
+                storage.PData[victim.index].level = 0
+                storage.PData[victim.index].playScore = 0
+            end
+            if victim and victim.valid and storage.SM_Store.defGroup then
+                storage.SM_Store.defGroup.add_player(victim)
+            end
+        return
+    end
+end
+
+function PERMS_MakeMember(player, victim)
+    if victim then
+        if victim and victim.valid and storage.SM_Store.memGroup then
+            UTIL_SmartPrint(player, "Player given members status.")
+            UTIL_MsgAll(victim.name .. " is now a member!")
+            if storage.PData and storage.PData[victim.index] then
+                storage.PData[victim.index].level = 1
+            end
+            storage.SM_Store.memGroup.add_player(victim)
+            ONLINE_UpdatePlayerList() -- online.lua
+            return
+        end
+    end
+end
+
+function PERMS_MakeRegular(player, victim)
+    if (victim) then
+        if victim and victim.valid and storage.SM_Store.regGroup then
+            UTIL_SmartPrint(player, "Player given regulars status.")
+            UTIL_MsgAll(victim.name .. " is now a regular!")
+
+            if storage.PData and storage.PData[victim.index] then
+                storage.PData[victim.index].level = 2
+            end
+            storage.SM_Store.regGroup.add_player(victim)
+            ONLINE_UpdatePlayerList() -- online.lua
+            return
+        end
+    end
+end
+
+function PERMS_MakeVeteran(player, victim)
+    if (victim) then
+        if victim and victim.valid and storage.SM_Store.vetGroup then
+            UTIL_SmartPrint(player, "Player given veterans status.")
+            UTIL_MsgAll(victim.name .. " is now a veteran!")
+            if storage.PData and storage.PData[victim.index] then
+                storage.PData[victim.index].level = 3
+            end
+            storage.SM_Store.vetGroup.add_player(victim)
+            ONLINE_UpdatePlayerList() -- online.lua
+            return
+        end
+    end
+end
+
 -- Create player groups if they don't exist, and create storage links to them
 function PERMS_MakeUserGroups()
     storage.SM_Store.jailGroup = game.permissions.get_group("Jailed")
@@ -418,14 +479,21 @@ function PERMS_PromotePlayer(player)
 
     -- Check if groups are valid
     if player.permission_group then
+        --Workaround for sandbox mod
+        if string.match(player.permission_group.name, "^" .. "bpsb-perms-") then
+            return
+        end
         if UTIL_Is_Banished(player) then
             if player.permission_group.name ~= storage.SM_Store.jailGroup.name then
                 storage.SM_Store.jailGroup.add_player(player)
-                UTIL_MsgAll(player.name .. " moved to jailed group.")
+                UTIL_MsgAll(player.name .. " moved to jailed group.")              
             end
         elseif (player.admin and player.permission_group.name ~= storage.SM_Store.modGroup.name) then
             storage.SM_Store.modGroup.add_player(player)
             UTIL_MsgAll(player.name .. " moved to moderators group")
+            if storage.PData and storage.PData[player.index] then
+                storage.PData[player.index].level = 255
+            end
         elseif (storage.PData[player.index].score and
                 storage.PData[player.index].score > (4 * 60 * 60 * 60) and not player.admin) then
             -- Check if player has hours for regulars status, but isn't a in regulars group.
@@ -434,6 +502,9 @@ function PERMS_PromotePlayer(player)
                 storage.SM_Store.regGroup.add_player(player)
                 UTIL_MsgAll(player.name .. " is now a regular!")
                 PERMS_WelcomeMember(player)
+                if storage.PData and storage.PData[player.index] then
+                    storage.PData[player.index].level = 2
+                end
             end
         elseif (storage.PData[player.index].score and
                 storage.PData[player.index].score > (30 * 60 * 60) and not player.admin) then
@@ -441,6 +512,9 @@ function PERMS_PromotePlayer(player)
             if not UTIL_Is_Veteran(player) and not UTIL_Is_Regular(player) and not UTIL_Is_Member(player) and UTIL_Is_New(player) then
                 storage.SM_Store.memGroup.add_player(player)
                 UTIL_MsgAll(player.name .. " is now a member!")
+                if storage.PData and storage.PData[player.index] then
+                    storage.PData[player.index].level = 1
+                end
                 PERMS_WelcomeMember(player)
             end
         end
