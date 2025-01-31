@@ -48,10 +48,6 @@ function CMD_NoSys(param)
     return false
 end
 
-script.on_configuration_changed(function()
-    storage.SM_OldVersion = "OldVersion"
-end)
-
 -- Custom commands
 script.on_load(function()
     -- Only add if no commands yet
