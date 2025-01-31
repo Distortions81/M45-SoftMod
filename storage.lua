@@ -111,7 +111,6 @@ function STORAGE_MakePlayerStorage(player)
         storage.PData[player.index].hideClock = false
     end
 
-
     --state
     if not storage.PData[player.index].cleaned then
         storage.PData[player.index].cleaned = false
@@ -143,5 +142,9 @@ function STORAGE_MakePlayerStorage(player)
     end
     if not storage.PData[player.index].onlineShowOffline then
         storage.PData[player.index].online_show_offline = false
+    end
+
+    if not storage.PData[player.index].level then
+        storage.PData[player.index].level = 0
     end
 end
