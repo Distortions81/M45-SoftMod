@@ -4,14 +4,14 @@
 -- License: MPL 2.0
 
 function PERMS_MakeNew(player, victim)
-    if victim and victim.valid then
+    if victim  then
             UTIL_SmartPrint(player, "Player set to new.")
             UTIL_MsgAll(victim.name .. " is now reset!")
             if storage.PData and storage.PData[victim.index] then
                 storage.PData[victim.index].level = 0
                 storage.PData[victim.index].playScore = 0
             end
-            if victim and victim.valid and storage.SM_Store.defGroup then
+            if victim and storage.SM_Store.defGroup then
                 storage.SM_Store.defGroup.add_player(victim)
             end
         return
@@ -20,7 +20,7 @@ end
 
 function PERMS_MakeMember(player, victim)
     if victim then
-        if victim and victim.valid and storage.SM_Store.memGroup then
+        if victim and storage.SM_Store.memGroup then
             UTIL_SmartPrint(player, "Player given members status.")
             UTIL_MsgAll(victim.name .. " is now a member!")
             if storage.PData and storage.PData[victim.index] then
@@ -35,7 +35,7 @@ end
 
 function PERMS_MakeRegular(player, victim)
     if (victim) then
-        if victim and victim.valid and storage.SM_Store.regGroup then
+        if victim  and storage.SM_Store.regGroup then
             UTIL_SmartPrint(player, "Player given regulars status.")
             UTIL_MsgAll(victim.name .. " is now a regular!")
 
@@ -51,7 +51,7 @@ end
 
 function PERMS_MakeVeteran(player, victim)
     if (victim) then
-        if victim and victim.valid and storage.SM_Store.vetGroup then
+        if victim and storage.SM_Store.vetGroup then
             UTIL_SmartPrint(player, "Player given veterans status.")
             UTIL_MsgAll(victim.name .. " is now a veteran!")
             if storage.PData and storage.PData[victim.index] then

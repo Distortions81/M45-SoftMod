@@ -377,7 +377,7 @@ function EVENT_Loot(event)
             local player = game.players[event.player_index]
             local victim = game.players[ent.character_corpse_player_index]
 
-            if victim and victim.valid and player and player.valid then
+            if victim and player and player.valid then
                 local buf = player.name ..
                     " looted the body of " .. victim.name .. " at " .. UTIL_GPSObj(ent)
                 if victim.index ~= player.index then

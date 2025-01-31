@@ -22,9 +22,6 @@ function UTIL_DumpInv(player, force)
     if not player then
         return false
     end
-    if not player.valid then
-        return false
-    end
 
     if not force then
         if storage.PData[player.index].cleaned then
@@ -367,7 +364,7 @@ end
 -- permissions system
 -- Check if player should be considered a veteran
 function UTIL_Is_Veteran(victim)
-    if victim and victim.valid and not victim.admin then
+    if victim and not victim.admin then
         -- If in group
         if victim.permission_group and storage.SM_Store.vetGroup then
             if victim.permission_group.name == storage.SM_Store.vetGroup.name then
@@ -392,7 +389,7 @@ end
 -- permissions system
 -- Check if player should be considered a regular
 function UTIL_Is_Regular(victim)
-    if victim and victim.valid and not victim.admin then
+    if victim and not victim.admin then
         -- If in group
         if victim.permission_group and storage.SM_Store.regGroup then
             if victim.permission_group.name == storage.SM_Store.regGroup.name then
@@ -416,7 +413,7 @@ end
 
 -- Check if player should be considered a member
 function UTIL_Is_Member(victim)
-    if victim and victim.valid and not victim.admin then
+    if victim and not victim.admin then
         -- If in group
         if victim.permission_group and storage.SM_Store.memGroup then
             if victim.permission_group.name == storage.SM_Store.memGroup.name then
@@ -511,7 +508,7 @@ function UTIL_Is_Banished(victim)
 end
 
 function UTIL_SendToDefaultSpawn(victim)
-    if victim and victim.valid and victim.character then
+    if victim and victim.character then
         local nsurf = game.surfaces[1] -- Find default surface
 
         if nsurf then
@@ -537,7 +534,7 @@ function UTIL_SendToDefaultSpawn(victim)
 end
 
 function UTIL_SendToSpawn(victim)
-    if victim and victim.valid and victim.character then
+    if victim and victim.character then
         local nsurf = victim.physical_surface
         if nsurf then
             local pforce = victim.force

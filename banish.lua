@@ -55,7 +55,7 @@ function BANISH_UpdateVotes()
         -- only if everything seems to exist
         if vote and vote.voter and vote.victim then
             -- only if data exists
-            if vote.voter.valid and vote.victim.valid then
+            if vote.voter.valid then
                 -- valid defendant
                 if not vote.victim.admin then
                     -- valid voter
@@ -323,7 +323,7 @@ function BANISH_DoBanish(player, victim, reason)
                     return
                 else
                     -- Must have valid victim
-                    if victim and victim.valid then
+                    if victim then
                         -- Victim can not be an moderator
                         if not victim.admin then
                             -- Check if we already voted against them
@@ -555,10 +555,10 @@ function BANISH_AddBanishCommands()
                     local victim = game.players[args[1]]
 
                     -- If victim found
-                    if victim and victim.valid then
+                    if victim then
                         local count = 0
                         for _, vote in pairs(storage.SM_Store.votes) do
-                            if vote and vote.victim and vote.victim.valid then
+                            if vote and vote.victim then
                                 if vote.victim == victim and not vote.overruled then
                                     vote.overruled = true
                                     count = count + 1
@@ -569,7 +569,7 @@ function BANISH_AddBanishCommands()
                             UTIL_SmartPrint(player, "Overruled " .. count .. " votes against " .. victim.name)
                         else
                             for _, vote in pairs(storage.SM_Store.votes) do
-                                if vote and vote.victim and vote.victim.valid then
+                                if vote and vote.victim then
                                     if vote.victim == victim and vote.overruled then
                                         vote.overruled = false
                                         count = count + 1
@@ -607,7 +607,7 @@ function BANISH_AddBanishCommands()
                 -- Print votes
                 local pcount = 0
                 for _, vote in pairs(storage.SM_Store.votes) do
-                    if vote and vote.voter and vote.voter.valid and vote.victim and vote.victim.valid then
+                    if vote and vote.voter and vote.voter.valid and vote.victim then
                         local notes = ""
                         if vote.withdrawn then
                             notes = "(WITHDRAWN) "
@@ -682,7 +682,7 @@ function BANISH_AddBanishCommands()
                         local victim = game.players[args[1]]
 
                         -- Must have valid victim
-                        if victim and victim.valid and victim.character and victim.character.valid then
+                        if victim and victim.character and victim.character.valid then
                             -- Check if we voted against them
                             if storage.SM_Store.votes and storage.SM_Store.votes ~= {} then
                                 for _, vote in pairs(storage.SM_Store.votes) do

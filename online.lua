@@ -728,7 +728,7 @@ function ONLINE_Clicks(event)
                     player.gui.screen.m45_online_submenu.main and
                     player.gui.screen.m45_online_submenu.main.whisper_frame and
                     player.gui.screen.m45_online_submenu.main.whisper_frame.whisper_textbox then
-                    if victim and victim.valid then
+                    if victim  then
                         local text = player.gui.screen.m45_online_submenu.main.whisper_frame.whisper_textbox.text
                         if text and string.len(text) > 0 then
                             -- Remove newlines if there are any
@@ -755,7 +755,7 @@ function ONLINE_Clicks(event)
                 if player.gui and player.gui.screen and player.gui.screen.m45_online_submenu and
                     player.gui.screen.m45_online_submenu.main and player.gui.screen.m45_online_submenu.main.banish_frame and
                     player.gui.screen.m45_online_submenu.main.banish_frame.banish_textbox then
-                    if victim and victim.valid then
+                    if victim then
                         local reason = player.gui.screen.m45_online_submenu.main.banish_frame.banish_textbox.text
                         if reason and string.len(reason) > 0 then
                             -- Remove newlines if there are any
@@ -778,7 +778,7 @@ function ONLINE_Clicks(event)
                 if player.gui and player.gui.screen and player.gui.screen.m45_online_submenu and
                     player.gui.screen.m45_online_submenu.main and player.gui.screen.m45_online_submenu.main.report_frame and
                     player.gui.screen.m45_online_submenu.main.report_frame.report_textbox then
-                    if victim and victim.valid then
+                    if victim then
                         local reason = player.gui.screen.m45_online_submenu.main.report_frame.report_textbox.text
                         if reason and string.len(reason) > 0 then
                             -- Remove newlines if there are any
@@ -798,7 +798,7 @@ function ONLINE_Clicks(event)
                 if CMD_NoBanished(player) then
                     return
                 end
-                if victim and victim.valid then
+                if victim then
                     player.set_controller { type = defines.controllers.remote, position = victim.position }
                 else
                     UTIL_SmartPrint(player, "Invalid target.")

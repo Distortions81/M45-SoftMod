@@ -83,7 +83,7 @@ script.on_load(function()
             if storage.SM_Store.resetDuration ~= input then
                 storage.SM_Store.resetDuration = input
                 for _, victim in pairs(game.connected_players) do
-                    if victim and victim.valid and victim.gui and victim.gui.screen and
+                    if victim and victim.gui and victim.gui.screen and
                         victim.gui.screen.m45_info_window then
                         INFO_InfoWin(victim)
                     end
@@ -300,7 +300,7 @@ script.on_load(function()
                     victim = game.players[param.parameter]
                 end
 
-                if victim and victim.valid then
+                if victim then
                     target = victim
                 end
 
@@ -549,7 +549,7 @@ script.on_load(function()
                 local victim = game.players[param.parameter]
 
                 if (victim) then
-                    if victim and victim.valid then
+                    if victim then
                         if not storage.PData[victim.index].patreon then
                             storage.PData[victim.index].patreon = true
                             UTIL_SmartPrint(victim,
@@ -580,7 +580,7 @@ script.on_load(function()
                 local victim = game.players[param.parameter]
 
                 if (victim) then
-                    if victim and victim.valid then
+                    if victim then
                         if not storage.PData[victim.index].nitro then
                             storage.PData[victim.index].nitro = true
                             UTIL_SmartPrint(player, "Player given nitro status.")
@@ -642,7 +642,7 @@ script.on_load(function()
                 local pforce = game.forces["player"]
 
                 -- use mods's force and position if available.
-                if victim and victim.valid then
+                if victim then
                     pforce = victim.force
 
                     new_pos_x = victim.position.x
@@ -693,7 +693,7 @@ script.on_load(function()
                 local pforce = game.forces["player"]
 
                 -- Use mods's surface and force if possible
-                if victim and victim.valid then
+                if victim then
                     psurface = victim.physical_surface
                     pforce = victim.force
                 end
@@ -753,7 +753,7 @@ script.on_load(function()
             local pforce = game.forces["player"]
 
             -- Use admin's force
-            if victim and victim.valid then
+            if victim then
                 pforce = victim.force
             end
 
