@@ -476,6 +476,7 @@ script.on_load(function()
             if param.parameter then
                 local victim = game.players[param.parameter]
                 PERMS_MakeNew(player, victim)
+                return
             end
             UTIL_SmartPrint(player, "Player not found.")
         end)
@@ -495,9 +496,12 @@ script.on_load(function()
             if param.parameter then
                 local victim = game.players[param.parameter]
 
+                if not victim then
+                    UTIL_SmartPrint(player, "Player not found.")
+                    return
+                end
                 PERMS_MakeMember(player, victim)
             end
-            UTIL_SmartPrint(player, "Player not found.")
         end)
 
         -- Set player to veteran
@@ -511,9 +515,12 @@ script.on_load(function()
             -- Argument required
             if param.parameter then
                 local victim = game.players[param.parameter]
+                if not victim then
+                    UTIL_SmartPrint(player, "Player not found.")
+                    return
+                end
                 PERMS_MakeVeteran(player, victim)
             end
-            UTIL_SmartPrint(player, "Player not found.")
         end)
 
         -- Set player to regular
@@ -526,9 +533,12 @@ script.on_load(function()
             -- Argument required
             if param.parameter then
                 local victim = game.players[param.parameter]
+                if not victim then
+                    UTIL_SmartPrint(player, "Player not found.")
+                    return
+                end
                 PERMS_MakeRegular(player, victim)
             end
-            UTIL_SmartPrint(player, "Player not found.")
         end)
 
         -- Set player to patreon
