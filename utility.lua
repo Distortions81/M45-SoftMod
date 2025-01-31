@@ -442,14 +442,6 @@ function UTIL_Is_New(victim)
             return true
         end
     end
-    if not UTIL_Is_Banished(victim) then
-        if storage and storage.PData[victim.index] then
-            local level = storage.PData[victim.index].level
-            if level == 0 then
-                return true
-            end
-        end
-    end
 
     return false
 end
